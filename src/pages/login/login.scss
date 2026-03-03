@@ -1,13 +1,402 @@
+/* 🧪 Y2K科技实验室 - 登录页 */
+
 .login-page {
-    padding: 32rpx;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    padding: 48rpx;
+    box-sizing: border-box;
+    // 冷光白背景
+    background: linear-gradient(135deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+    position: relative;
+    overflow: hidden;
 
-    .page-title {
+    // 矩阵雨背景效果
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(ellipse at 20% 30%, rgba(30, 144, 255, 0.05) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 70%, rgba(57, 255, 20, 0.03) 0%, transparent 50%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    // 条码装饰
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80rpx;
+        background: repeating-linear-gradient(90deg,
+                rgba(30, 144, 255, 0.1) 0px,
+                rgba(30, 144, 255, 0.1) 2px,
+                transparent 2px,
+                transparent 6px);
+        opacity: 0.3;
+    }
+}
+
+/* 登录容器 */
+.login-container {
+    width: 100%;
+    max-width: 560rpx;
+    position: relative;
+    z-index: 1;
+}
+
+/* 头部 */
+.login-header {
+    text-align: center;
+    margin-bottom: 48rpx;
+
+    .logo-wrapper {
+        width: 140rpx;
+        height: 140rpx;
+        margin: 0 auto 32rpx;
+        // 科技蓝圆形 - 实验室徽章
+        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // 全息发光效果
+        box-shadow:
+            0 8rpx 32rpx rgba(30, 144, 255, 0.4),
+            0 0 0 4rpx rgba(30, 144, 255, 0.1),
+            inset 0 0 20rpx rgba(255, 255, 255, 0.3);
+        border: 3rpx solid rgba(30, 144, 255, 0.3);
+        position: relative;
+        animation: hologram 3s ease-in-out infinite;
+
+        @keyframes hologram {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+                box-shadow:
+                    0 8rpx 32rpx rgba(30, 144, 255, 0.4),
+                    0 0 0 4rpx rgba(30, 144, 255, 0.1);
+            }
+
+            50% {
+                transform: translateY(-6rpx) scale(1.02);
+                box-shadow:
+                    0 12rpx 40rpx rgba(30, 144, 255, 0.5),
+                    0 0 0 6rpx rgba(30, 144, 255, 0.2);
+            }
+        }
+
+        // 实验室图标
+        &::before {
+            content: '🧪';
+            font-size: 56rpx;
+        }
+    }
+
+    .logo-text {
+        font-size: 28rpx;
+        font-weight: 700;
+        // 科技蓝
+        color: #f8f8f8;
+        position: relative;
+        z-index: 1;
+        letter-spacing: 2rpx;
+    }
+
+    .app-name {
+        display: block;
+        font-size: 52rpx;
+        font-weight: 900;
+        // 白色标题
+        color: #000000;
+        margin-bottom: 16rpx;
+        letter-spacing: 4rpx;
+        text-transform: uppercase;
+        // 白色发光效果
+        text-shadow:
+            0 0 20rpx rgba(255, 255, 255, 0.4),
+            0 4rpx 8rpx rgba(30, 144, 255, 0.3);
+    }
+
+    .app-subtitle {
+        display: block;
+        font-size: 24rpx;
+        // 深空灰
+        color: #2F4F4F;
+        font-weight: 600;
+        letter-spacing: 3rpx;
+        text-transform: uppercase;
+    }
+}
+
+/* 表单 */
+.login-form {
+    .form-group {
+        margin-bottom: 36rpx;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 26rpx;
+        // 深空灰
+        color: #2F4F4F;
+        margin-bottom: 16rpx;
+        font-weight: 700;
+        letter-spacing: 1rpx;
+        text-transform: uppercase;
+    }
+
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        // 全息玻璃输入框
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20rpx);
+        border: 2rpx solid rgba(30, 144, 255, 0.3);
+        border-radius: 12rpx;
+        padding: 24rpx 20rpx;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow:
+            0 4rpx 16rpx rgba(30, 144, 255, 0.1),
+            inset 0 0 20rpx rgba(255, 255, 255, 0.5);
+
+        &.input-focused {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #1E90FF;
+            box-shadow:
+                0 8rpx 24rpx rgba(30, 144, 255, 0.2),
+                0 0 0 4rpx rgba(30, 144, 255, 0.1),
+                inset 0 0 20rpx rgba(255, 255, 255, 0.8);
+
+            .input-icon {
+                color: #1E90FF;
+                transform: scale(1.1);
+            }
+        }
+
+        &.input-error {
+            border-color: #FF5F1F;
+            animation: shake 0.3s ease;
+
+            @keyframes shake {
+
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+
+                25% {
+                    transform: translateX(-10rpx);
+                }
+
+                75% {
+                    transform: translateX(10rpx);
+                }
+            }
+        }
+    }
+
+    .input-icon {
         font-size: 32rpx;
-        color: #333;
+        margin-right: 16rpx;
+        color: #1E90FF;
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+
+    .form-input {
+        flex: 1;
+        font-size: 28rpx;
+        color: #2F4F4F;
+        background: transparent;
+        height: 40rpx;
+        line-height: 40rpx;
+        font-weight: 500;
+
+        &::placeholder {
+            color: rgba(47, 79, 79, 0.4);
+            font-weight: 400;
+        }
+    }
+
+    .toggle-icon {
+        font-size: 32rpx;
+        padding: 8rpx;
+        margin-left: 8rpx;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        color: #1E90FF;
+
+        &:active {
+            opacity: 1;
+        }
+    }
+
+    .error-text {
+        display: block;
+        font-size: 22rpx;
+        // 霓虹橙
+        color: #FF5F1F;
+        margin-top: 12rpx;
+        font-weight: 600;
+        letter-spacing: 0.5rpx;
+    }
+}
+
+/* 登录按钮 - 实验室科技风格 */
+.login-btn {
+    width: 100%;
+    height: 96rpx;
+    // 科技蓝渐变
+    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+    border: none;
+    border-radius: 12rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32rpx;
+    font-weight: 700;
+    color: #ffffff;
+    margin-top: 48rpx;
+    margin-bottom: 24rpx;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3rpx;
+    // 全息按钮阴影
+    box-shadow:
+        0 8rpx 24rpx rgba(30, 144, 255, 0.3),
+        0 0 0 1rpx rgba(30, 144, 255, 0.2) inset;
+    position: relative;
+    overflow: hidden;
+
+    // 扫描光效
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+        transition: left 0.6s ease;
+    }
+
+    &:active {
+        transform: translateY(2rpx);
+        box-shadow:
+            0 4rpx 12rpx rgba(30, 144, 255, 0.3);
+
+        &::before {
+            left: 100%;
+        }
+    }
+
+    &.btn-disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+
+        &:active {
+            transform: none;
+            box-shadow:
+                0 8rpx 24rpx rgba(30, 144, 255, 0.3);
+        }
+    }
+
+    &.btn-loading {
+        opacity: 0.9;
+        cursor: wait;
+    }
+}
+
+.loading-spinner {
+    width: 40rpx;
+    height: 40rpx;
+    border: 3rpx solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 底部链接 */
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 32rpx;
+
+    .link-text {
+        font-size: 26rpx;
+        color: #1E90FF;
+        padding: 8rpx 16rpx;
+        transition: all 0.2s;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1rpx;
+
+        &:active {
+            color: #00BFFF;
+        }
+    }
+
+    .divider {
+        font-size: 24rpx;
+        color: #2F4F4F;
+        margin: 0 12rpx;
+        font-weight: 600;
+    }
+}
+
+/* 装饰线条 - 科技实验室风格 */
+.decoration-line {
+    width: 120rpx;
+    height: 4rpx;
+    background: linear-gradient(90deg, transparent 0%, #1E90FF 50%, transparent 100%);
+    margin: 48rpx auto 0;
+    border-radius: 2rpx;
+}
+
+/* 底部 */
+.footer {
+    position: absolute;
+    bottom: 40rpx;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 1;
+
+    .footer-text {
+        font-size: 22rpx;
+        color: #2F4F4F;
+        letter-spacing: 2rpx;
+        font-weight: 500;
     }
 }

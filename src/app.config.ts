@@ -1,8 +1,8 @@
 export default defineAppConfig({
-  pages: [
-    'pages/inventory/inventory',
+    pages: [
     'pages/profile/profile',
     'pages/login/login',
+    'pages/inventory/inventory',
     'pages/index/index',
     'pages/setting/setting',
     'pages/register/register',
@@ -10,39 +10,39 @@ export default defineAppConfig({
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#fff',
+    navigationBarBackgroundColor: '#F0F5FA',
     navigationBarTitleText: 'WeChat',
     navigationBarTextStyle: 'black'
   },
   tabBar: {
-    color: '#999',
-    selectedColor: '#506cf6',
-    backgroundColor: '#fff',
-    borderStyle: 'black',
+    color: '#2F4F4F',
+    selectedColor: '#1E90FF',
+    backgroundColor: '#F0F5FA',
+    borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/index/index',
         text: '首页',
-        iconPath: '/assets/icons/home.png',
-        selectedIconPath: '/assets/icons/home-active.png'
+        iconPath: './assets/icons/home.png',
+        selectedIconPath: './assets/icons/home-active.png'
       },
       {
         pagePath: 'pages/inventory/inventory',
         text: '库存',
-        iconPath: '/assets/icons/inventory.png',
-        selectedIconPath: '/assets/icons/inventory-active.png'
+        iconPath: './assets/icons/inventory.png',
+        selectedIconPath: './assets/icons/inventory-active.png'
       },
       {
         pagePath: 'pages/collaboration/collaboration',
         text: '协作',
-        iconPath: '/assets/icons/collaboration.png',
-        selectedIconPath: '/assets/icons/collaboration-active.png'
+        iconPath: './assets/icons/collaboration.png',
+        selectedIconPath: './assets/icons/collaboration-active.png'
       },
       {
         pagePath: 'pages/profile/profile',
         text: '我的',
-        iconPath: '/assets/icons/profile.png',
-        selectedIconPath: '/assets/icons/profile-active.png'
+        iconPath: './assets/icons/profile.png',
+        selectedIconPath: './assets/icons/profile-active.png'
       }
     ]
   }

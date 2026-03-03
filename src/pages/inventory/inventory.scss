@@ -9,5 +9,24 @@
     .page-title {
         font-size: 32rpx;
         color: #333;
+        text-align: center;
+        margin-bottom: 40rpx;
+    }
+
+    .icon-demo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 32rpx;
+        margin-bottom: 40rpx;
+
+        .icon {
+            width: 64rpx;
+            height: 64rpx;
+        }
+
+        .unicode-icon {
+            font-size: 64rpx;
+        }
     }
 }
