@@ -52,7 +52,6 @@
     "@tarojs/runtime": "4.1.11",
     "@tarojs/shared": "4.1.11",
     "@tarojs/taro": "4.1.11",
-    "lucide-vue-next": "^0.576.0",
     "vue": "^3.0.0"
   },
   "devDependencies": {
