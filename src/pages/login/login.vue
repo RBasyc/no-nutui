@@ -16,11 +16,17 @@
                 <!-- 昵称输入 -->
                 <view class="form-group">
                     <text class="form-label">昵称</text>
-                    <view class="input-wrapper" :class="{ 'input-error': errors.nickname, 'input-focused': focused.nickname }">
+                    <view
+                        class="input-wrapper"
+                        :class="{
+                            'input-error': errors.nickname,
+                            'input-focused': focused.nickname
+                        }"
+                    >
                         <text class="input-icon">👤</text>
                         <input
                             v-model="formData.nickname"
-                            type="text"
+                            type="nickname"
                             placeholder="请输入昵称"
                             class="form-input"
                             :disabled="loading"
@@ -28,13 +34,21 @@
                             @blur="handleNicknameBlur"
                         />
                     </view>
-                    <text v-if="errors.nickname" class="error-text">{{ errors.nickname }}</text>
+                    <text v-if="errors.nickname" class="error-text">{{
+                        errors.nickname
+                    }}</text>
                 </view>
 
                 <!-- 密码输入 -->
                 <view class="form-group">
                     <text class="form-label">密码</text>
-                    <view class="input-wrapper" :class="{ 'input-error': errors.password, 'input-focused': focused.password }">
+                    <view
+                        class="input-wrapper"
+                        :class="{
+                            'input-error': errors.password,
+                            'input-focused': focused.password
+                        }"
+                    >
                         <text class="input-icon">🔒</text>
                         <input
                             v-model="formData.password"
@@ -49,13 +63,18 @@
                             {{ showPassword ? '👁️' : '👁️‍🗨️' }}
                         </text>
                     </view>
-                    <text v-if="errors.password" class="error-text">{{ errors.password }}</text>
+                    <text v-if="errors.password" class="error-text">{{
+                        errors.password
+                    }}</text>
                 </view>
 
                 <!-- 登录按钮 -->
                 <view
                     class="login-btn"
-                    :class="{ 'btn-loading': loading, 'btn-disabled': !isFormValid }"
+                    :class="{
+                        'btn-loading': loading,
+                        'btn-disabled': !isFormValid
+                    }"
                     @tap="handleLogin"
                 >
                     <text v-if="!loading">登录</text>
@@ -64,9 +83,13 @@
 
                 <!-- 底部链接 -->
                 <view class="form-footer">
-                    <text class="link-text" @tap="handleRegister">注册账号</text>
+                    <text class="link-text" @tap="handleRegister"
+                        >注册账号</text
+                    >
                     <text class="divider">|</text>
-                    <text class="link-text" @tap="handleForgotPassword">忘记密码</text>
+                    <text class="link-text" @tap="handleForgotPassword"
+                        >忘记密码</text
+                    >
                 </view>
             </view>
 
@@ -142,10 +165,12 @@ const handlePasswordBlur = () => {
 
 // 表单是否有效
 const isFormValid = computed(() => {
-    return formData.value.nickname &&
-           formData.value.password &&
-           !errors.value.nickname &&
-           !errors.value.password
+    return (
+        formData.value.nickname &&
+        formData.value.password &&
+        !errors.value.nickname &&
+        !errors.value.password
+    )
 })
 
 // 切换密码显示
@@ -181,7 +206,7 @@ const handleLogin = async () => {
             url: userApi.login,
             method: 'POST',
             data: {
-                nickName: formData.value.nickname,  // 注意：使用 nickName (驼峰命名)
+                nickName: formData.value.nickname, // 注意：使用 nickName (驼峰命名)
                 password: formData.value.password
             },
             header: {
@@ -231,7 +256,8 @@ const handleLogin = async () => {
             }
         } else {
             // HTTP 状态码非 200
-            const errorMsg = res.data?.message || res.data?.errorInfo || `登录失败(未知错误)`
+            const errorMsg =
+                res.data?.message || res.data?.errorInfo || `登录失败(未知错误)`
             Taro.showToast({
                 title: errorMsg,
                 icon: 'none',

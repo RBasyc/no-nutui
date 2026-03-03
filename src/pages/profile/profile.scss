@@ -51,7 +51,7 @@
 .profile-header {
     position: relative;
     // 科技蓝背景
-    background: linear-gradient(135deg, #0079c4 0%, #006485 100%);
+    background: linear-gradient(135deg, #009dff 0%, #62b9f9 100%);
     border-radius: 20rpx;
     padding: 40rpx 32rpx;
     display: flex;
@@ -174,15 +174,15 @@
             backdrop-filter: blur(10rpx);
 
             &.tag-primary {
-                background: rgba(121, 188, 255, 0.12);
-                color: #a6d2ff;
-                border-color: rgba(30, 144, 255, 0.4);
+                background: rgba(255, 255, 25, 0.342);
+                color: #fbfdff;
+                border-color: rgba(255, 251, 33, 0.4);
             }
 
             &.tag-success {
-                background: rgba(57, 255, 20, 0.12);
-                color: #32CD32;
-                border-color: rgba(50, 205, 50, 0.4);
+                background: rgba(55, 255, 20, 0.443);
+                color: #006b00;
+                border-color: rgba(0, 255, 0, 0.4);
             }
         }
     }

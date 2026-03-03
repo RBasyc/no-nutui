@@ -3,6 +3,8 @@ export default defineAppConfig({
     'pages/profile/profile',
     'pages/login/login',
     'pages/inventory/inventory',
+    'pages/inventory-edit/inventory-edit',
+    'pages/inventory-record/inventory-record',
     'pages/index/index',
     'pages/setting/setting',
     'pages/register/register',

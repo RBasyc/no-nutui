@@ -84,6 +84,30 @@
                     <text v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</text>
                 </view>
 
+                <!-- 实验室名称输入 -->
+                <view class="form-group">
+                    <text class="form-label">所属实验室</text>
+                    <view
+                        class="input-wrapper"
+                        :class="{
+                            'input-error': errors.labName,
+                            'input-focused': focused.labName
+                        }"
+                    >
+                        <text class="input-icon">🔬</text>
+                        <input
+                            v-model="formData.labName"
+                            type="text"
+                            placeholder="请输入实验室名称"
+                            class="form-input"
+                            :disabled="loading"
+                            @focus="focused.labName = true"
+                            @blur="handleLabNameBlur"
+                        />
+                    </view>
+                    <text v-if="errors.labName" class="error-text">{{ errors.labName }}</text>
+                </view>
+
                 <!-- 注册按钮 -->
                 <view
                     class="register-btn"
@@ -121,21 +145,24 @@ import './register.scss'
 const formData = ref({
     nickname: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    labName: ''
 })
 
 // 错误信息
 const errors = ref({
     nickname: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    labName: ''
 })
 
 // 焦点状态
 const focused = ref({
     nickname: false,
     password: false,
-    confirmPassword: false
+    confirmPassword: false,
+    labName: false
 })
 
 // 其他状态
@@ -256,14 +283,29 @@ const handleConfirmPasswordBlur = () => {
     return true
 }
 
+const handleLabNameBlur = () => {
+    focused.value.labName = false
+    const labName = formData.value.labName.trim()
+
+    if (!labName) {
+        errors.value.labName = '请输入实验室名称'
+        return false
+    }
+
+    errors.value.labName = ''
+    return true
+}
+
 // 表单是否有效
 const isFormValid = computed(() => {
     return formData.value.nickname &&
            formData.value.password &&
            formData.value.confirmPassword &&
+           formData.value.labName &&
            !errors.value.nickname &&
            !errors.value.password &&
            !errors.value.confirmPassword &&
+           !errors.value.labName &&
            nicknameValid.value
 })
 
@@ -279,7 +321,7 @@ const toggleConfirmPassword = () => {
 // 注册处理
 const handleRegister = async () => {
     // 触发所有验证
-    if (!handleNicknameBlur() || !handlePasswordBlur() || !handleConfirmPasswordBlur()) {
+    if (!handleNicknameBlur() || !handlePasswordBlur() || !handleConfirmPasswordBlur() || !handleLabNameBlur()) {
         return
     }
 
@@ -294,7 +336,8 @@ const handleRegister = async () => {
             method: 'POST',
             data: {
                 nickName: formData.value.nickname,
-                password: formData.value.password
+                password: formData.value.password,
+                labName: formData.value.labName.trim()
             },
             header: {
                 'Content-Type': 'application/json'
