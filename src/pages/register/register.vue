@@ -242,7 +242,14 @@ const handleNicknameInput = () => {
 // 表单验证
 const handleNicknameBlur = () => {
     focused.value.nickname = false
+    // 如果昵称已经验证通过，不需要重新验证
+    if (nicknameValid.value) {
+        return true
+    }
+    // 否则触发输入验证
     handleNicknameInput()
+    // 返回验证结果
+    return nicknameValid.value && !errors.value.nickname
 }
 
 const handlePasswordBlur = () => {
@@ -320,17 +327,51 @@ const toggleConfirmPassword = () => {
 
 // 注册处理
 const handleRegister = async () => {
+    console.log('开始注册流程')
+    console.log('表单数据:', formData.value)
+    console.log('错误信息:', errors.value)
+    console.log('昵称验证状态:', nicknameValid.value)
+
+    // 清除所有之前的错误提示
+    errors.value.nickname = ''
+    errors.value.password = ''
+    errors.value.confirmPassword = ''
+    errors.value.labName = ''
+
     // 触发所有验证
-    if (!handleNicknameBlur() || !handlePasswordBlur() || !handleConfirmPasswordBlur() || !handleLabNameBlur()) {
+    const isNicknameValid = handleNicknameBlur()
+    const isPasswordValid = handlePasswordBlur()
+    const isConfirmPasswordValid = handleConfirmPasswordBlur()
+    const isLabNameValid = handleLabNameBlur()
+
+    console.log('验证结果:', { isNicknameValid, isPasswordValid, isConfirmPasswordValid, isLabNameValid })
+
+    if (!isNicknameValid || !isPasswordValid || !isConfirmPasswordValid || !isLabNameValid) {
+        console.log('验证失败，退出注册流程')
+        console.log('当前错误:', errors.value)
+        // 显示第一个错误提示
+        if (errors.value.nickname) {
+            Taro.showToast({ title: errors.value.nickname, icon: 'none' })
+        } else if (errors.value.password) {
+            Taro.showToast({ title: errors.value.password, icon: 'none' })
+        } else if (errors.value.confirmPassword) {
+            Taro.showToast({ title: errors.value.confirmPassword, icon: 'none' })
+        } else if (errors.value.labName) {
+            Taro.showToast({ title: errors.value.labName, icon: 'none' })
+        }
         return
     }
 
-    if (loading.value) return
+    if (loading.value) {
+        console.log('正在加载中，退出注册流程')
+        return
+    }
 
     loading.value = true
     loadingText.value = '注册中...'
 
     try {
+        console.log('发送注册请求到:', userApi.register)
         const res = await Taro.request({
             url: userApi.register,
             method: 'POST',

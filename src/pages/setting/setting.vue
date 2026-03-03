@@ -168,15 +168,18 @@ const formatDate = (date) => {
 const handleFieldBlur = (field) => {
     const value = formData[field]
 
+    // 确保值是字符串类型
+    const stringValue = value != null ? String(value) : ''
+
     switch (field) {
         case 'realName':
-            if (!value || !value.trim()) {
+            if (!stringValue || !stringValue.trim()) {
                 errors.realName = '请输入真实姓名'
                 errorMessage.value = '请输入真实姓名'
-            } else if (value.length < 2) {
+            } else if (stringValue.length < 2) {
                 errors.realName = '真实姓名至少2个字符'
                 errorMessage.value = '真实姓名至少2个字符'
-            } else if (value.length > 50) {
+            } else if (stringValue.length > 50) {
                 errors.realName = '真实姓名最多50个字符'
                 errorMessage.value = '真实姓名最多50个字符'
             } else {
@@ -186,10 +189,10 @@ const handleFieldBlur = (field) => {
             break
 
         case 'phone':
-            if (!value || !value.trim()) {
+            if (!stringValue || !stringValue.trim()) {
                 errors.phone = '请输入手机号'
                 errorMessage.value = '请输入手机号'
-            } else if (!/^1[3-9]\d{9}$/.test(value)) {
+            } else if (!/^1[3-9]\d{9}$/.test(stringValue)) {
                 errors.phone = '手机号格式不正确'
                 errorMessage.value = '手机号格式不正确'
             } else {
@@ -199,10 +202,10 @@ const handleFieldBlur = (field) => {
             break
 
         case 'email':
-            if (!value || !value.trim()) {
+            if (!stringValue || !stringValue.trim()) {
                 errors.email = '请输入邮箱'
                 errorMessage.value = '请输入邮箱'
-            } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) {
+            } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(stringValue)) {
                 errors.email = '邮箱格式不正确'
                 errorMessage.value = '邮箱格式不正确'
             } else {
