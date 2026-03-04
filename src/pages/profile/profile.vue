@@ -15,9 +15,13 @@
                         class="avatar-image"
                         mode="aspectFill"
                     />
-                    <text v-else class="avatar-placeholder">{{ firstChar }}</text>
+                    <text v-else class="avatar-placeholder">{{
+                        firstChar
+                    }}</text>
                 </view>
-                <text class="nickname">{{ userInfo.nickName || '未登录' }}</text>
+                <text class="nickname">{{
+                    userInfo.nickName || '未登录'
+                }}</text>
 
                 <!-- 标签 -->
                 <view class="tags" v-if="isLoggedIn">
@@ -46,37 +50,25 @@
 
             <!-- 功能菜单 -->
             <view class="menu-section" v-if="isLoggedIn">
-                <view
-                    class="menu-item"
-                    @tap="handleMenuClick('settings')"
-                >
+                <view class="menu-item" @tap="handleMenuClick('settings')">
                     <text class="menu-icon">⚙️</text>
-                    <text class="menu-label">设置</text>
+                    <text class="menu-label">个人信息</text>
                     <text class="menu-arrow">›</text>
                 </view>
                 <view class="menu-divider"></view>
-                <view
-                    class="menu-item"
-                    @tap="handleMenuClick('feedback')"
-                >
+                <view class="menu-item" @tap="handleMenuClick('laboratory')">
                     <text class="menu-icon">💬</text>
-                    <text class="menu-label">反馈</text>
+                    <text class="menu-label">实验室</text>
                     <text class="menu-arrow">›</text>
                 </view>
                 <view class="menu-divider"></view>
-                <view
-                    class="menu-item"
-                    @tap="handleMenuClick('help')"
-                >
+                <view class="menu-item" @tap="handleMenuClick('help')">
                     <text class="menu-icon">❓</text>
                     <text class="menu-label">帮助</text>
                     <text class="menu-arrow">›</text>
                 </view>
                 <view class="menu-divider"></view>
-                <view
-                    class="menu-item"
-                    @tap="handleMenuClick('about')"
-                >
+                <view class="menu-item" @tap="handleMenuClick('about')">
                     <text class="menu-icon">ℹ️</text>
                     <text class="menu-label">关于</text>
                     <text class="menu-arrow">›</text>
@@ -92,11 +84,7 @@
             </view>
 
             <!-- 退出登录按钮 -->
-            <view
-                class="logout-btn"
-                v-if="isLoggedIn"
-                @tap="handleLogout"
-            >
+            <view class="logout-btn" v-if="isLoggedIn" @tap="handleLogout">
                 <text>退出登录</text>
             </view>
         </view>
@@ -172,10 +160,22 @@ const handleLogin = () => {
 const handleMenuClick = (type) => {
     console.log('点击菜单:', type)
 
-    // 目前所有菜单都跳转到设置页
-    Taro.navigateTo({
-        url: '/pages/setting/setting'
-    })
+    switch (type) {
+        case 'settings':
+            Taro.navigateTo({
+                url: '/pages/setting/setting'
+            })
+            break
+        case 'laboratory':
+            Taro.navigateTo({
+                url: '/pages/laboratory/laboratory?from=profile'
+            })
+            break
+        default:
+            Taro.navigateTo({
+                url: '/pages/setting/setting'
+            })
+    }
 }
 
 // 退出登录

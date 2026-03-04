@@ -35,17 +35,36 @@
                             @blur="handleNicknameBlur"
                             @input="handleNicknameInput"
                         />
-                        <text v-if="nicknameValid && !checkingNickname" class="success-icon">✓</text>
-                        <view v-if="checkingNickname" class="checking-icon"></view>
+                        <text
+                            v-if="nicknameValid && !checkingNickname"
+                            class="success-icon"
+                            >✓</text
+                        >
+                        <view
+                            v-if="checkingNickname"
+                            class="checking-icon"
+                        ></view>
                     </view>
-                    <text v-if="errors.nickname" class="error-text">{{ errors.nickname }}</text>
-                    <text v-if="nicknameValid && !checkingNickname" class="success-text">昵称可用</text>
+                    <text v-if="errors.nickname" class="error-text">{{
+                        errors.nickname
+                    }}</text>
+                    <text
+                        v-if="nicknameValid && !checkingNickname"
+                        class="success-text"
+                        >昵称可用</text
+                    >
                 </view>
 
                 <!-- 密码输入 -->
                 <view class="form-group">
                     <text class="form-label">密码</text>
-                    <view class="input-wrapper" :class="{ 'input-error': errors.password, 'input-focused': focused.password }">
+                    <view
+                        class="input-wrapper"
+                        :class="{
+                            'input-error': errors.password,
+                            'input-focused': focused.password
+                        }"
+                    >
                         <text class="input-icon">🔒</text>
                         <input
                             v-model="formData.password"
@@ -60,13 +79,21 @@
                             {{ showPassword ? '👁️' : '👁️‍🗨️' }}
                         </text>
                     </view>
-                    <text v-if="errors.password" class="error-text">{{ errors.password }}</text>
+                    <text v-if="errors.password" class="error-text">{{
+                        errors.password
+                    }}</text>
                 </view>
 
                 <!-- 确认密码输入 -->
                 <view class="form-group">
                     <text class="form-label">确认密码</text>
-                    <view class="input-wrapper" :class="{ 'input-error': errors.confirmPassword, 'input-focused': focused.confirmPassword }">
+                    <view
+                        class="input-wrapper"
+                        :class="{
+                            'input-error': errors.confirmPassword,
+                            'input-focused': focused.confirmPassword
+                        }"
+                    >
                         <text class="input-icon">🔒</text>
                         <input
                             v-model="formData.confirmPassword"
@@ -81,11 +108,16 @@
                             {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
                         </text>
                     </view>
-                    <text v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</text>
+                    <text v-if="errors.confirmPassword" class="error-text">{{
+                        errors.confirmPassword
+                    }}</text>
                 </view>
 
-                <!-- 实验室名称输入 -->
-                <view class="form-group">
+                <!-- 实验室选择 - 下拉选择 -->
+                <view
+                    class="form-group lab-selector-wrapper"
+                    :class="{ 'selector-error': errors.labName }"
+                >
                     <text class="form-label">所属实验室</text>
                     <view
                         class="input-wrapper"
@@ -93,25 +125,109 @@
                             'input-error': errors.labName,
                             'input-focused': focused.labName
                         }"
+                        @tap="toggleLabDropdown"
                     >
                         <text class="input-icon">🔬</text>
-                        <input
-                            v-model="formData.labName"
-                            type="text"
-                            placeholder="请输入实验室名称"
+                        <text
                             class="form-input"
-                            :disabled="loading"
-                            @focus="focused.labName = true"
-                            @blur="handleLabNameBlur"
-                        />
+                            :class="{ 'input-placeholder': !selectedLab }"
+                        >
+                            {{
+                                selectedLab
+                                    ? selectedLab.labName
+                                    : '请选择实验室'
+                            }}
+                        </text>
+                        <text class="toggle-icon">
+                            {{ showLabDropdown ? '▲' : '▼' }}
+                        </text>
                     </view>
-                    <text v-if="errors.labName" class="error-text">{{ errors.labName }}</text>
+                    <text v-if="errors.labName" class="error-text">{{
+                        errors.labName
+                    }}</text>
+
+                    <!-- 已选实验室提示 -->
+                    <view
+                        v-if="selectedLab && !showLabDropdown"
+                        class="lab-info-bar"
+                    >
+                        <text class="lab-info-icon">✓</text>
+                        <view class="lab-info-content">
+                            <text class="lab-info-name">{{
+                                selectedLab.labName
+                            }}</text>
+                            <text
+                                v-if="selectedLab.university"
+                                class="lab-info-university"
+                                >{{ selectedLab.university }}</text
+                            >
+                        </view>
+                    </view>
+
+                    <!-- 实验室下拉列表 -->
+                    <view v-if="showLabDropdown" class="lab-dropdown">
+                        <!-- 头部：在 scroll-view 外面 -->
+                        <view
+                            v-if="!loadingLabs && labList.length > 0"
+                            class="lab-list-header"
+                        >
+                            <text class="lab-count-text"
+                                >共 {{ labList.length }} 个实验室</text
+                            >
+                        </view>
+
+                        <!-- 可滚动列表区域 -->
+                        <scroll-view
+                            v-if="loadingLabs"
+                            scrollY="true"
+                            class="lab-list-scroll"
+                        >
+                            <view class="lab-item lab-loading">
+                                <text class="loading-text">加载中...</text>
+                            </view>
+                        </scroll-view>
+                        <scroll-view
+                            v-else-if="labList.length > 0"
+                            scrollY="true"
+                            class="lab-list-scroll"
+                        >
+                            <view
+                                v-for="lab in labList"
+                                :key="lab.labName"
+                                class="lab-item"
+                                @tap="selectLab(lab)"
+                            >
+                                <view class="lab-info">
+                                    <text class="lab-name">{{
+                                        lab.labName
+                                    }}</text>
+                                    <text class="lab-university">{{
+                                        lab.university
+                                    }}</text>
+                                </view>
+                            </view>
+                        </scroll-view>
+                        <view v-else class="lab-no-result">
+                            <text class="no-result-text">暂无实验室</text>
+                        </view>
+
+                        <!-- 创建实验室入口：固定在底部 -->
+                        <view class="lab-create-link" @tap="goToCreateLab">
+                            <text class="create-icon">➕</text>
+                            <text class="create-text"
+                                >没有您的实验室？点我去创建</text
+                            >
+                        </view>
+                    </view>
                 </view>
 
                 <!-- 注册按钮 -->
                 <view
                     class="register-btn"
-                    :class="{ 'btn-loading': loading, 'btn-disabled': !isFormValid }"
+                    :class="{
+                        'btn-loading': loading,
+                        'btn-disabled': !isFormValid
+                    }"
                     @tap="handleRegister"
                 >
                     <text v-if="!loading">{{ loadingText }}</text>
@@ -136,9 +252,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import Taro from '@tarojs/taro'
+import { ref, computed, onMounted } from 'vue'
+import Taro, { useDidShow } from '@tarojs/taro'
 import userApi from '../../api/userapi'
+import labApi from '../../api/labapi'
 import './register.scss'
 
 // 表单数据
@@ -172,6 +289,12 @@ const showConfirmPassword = ref(false)
 const checkingNickname = ref(false)
 const nicknameValid = ref(false)
 const loadingText = ref('注册')
+
+// 实验室选择相关状态
+const labList = ref([])
+const selectedLab = ref(null)
+const showLabDropdown = ref(false)
+const loadingLabs = ref(false)
 
 // 昵称检查定时器
 let checkTimer = null
@@ -292,28 +415,23 @@ const handleConfirmPasswordBlur = () => {
 
 const handleLabNameBlur = () => {
     focused.value.labName = false
-    const labName = formData.value.labName.trim()
-
-    if (!labName) {
-        errors.value.labName = '请输入实验室名称'
-        return false
-    }
-
-    errors.value.labName = ''
-    return true
+    // 新的实验室选择通过下拉框处理
+    return !!formData.value.labName
 }
 
 // 表单是否有效
 const isFormValid = computed(() => {
-    return formData.value.nickname &&
-           formData.value.password &&
-           formData.value.confirmPassword &&
-           formData.value.labName &&
-           !errors.value.nickname &&
-           !errors.value.password &&
-           !errors.value.confirmPassword &&
-           !errors.value.labName &&
-           nicknameValid.value
+    return (
+        formData.value.nickname &&
+        formData.value.password &&
+        formData.value.confirmPassword &&
+        formData.value.labName &&
+        !errors.value.nickname &&
+        !errors.value.password &&
+        !errors.value.confirmPassword &&
+        !errors.value.labName &&
+        nicknameValid.value
+    )
 })
 
 // 切换密码显示
@@ -344,9 +462,19 @@ const handleRegister = async () => {
     const isConfirmPasswordValid = handleConfirmPasswordBlur()
     const isLabNameValid = handleLabNameBlur()
 
-    console.log('验证结果:', { isNicknameValid, isPasswordValid, isConfirmPasswordValid, isLabNameValid })
+    console.log('验证结果:', {
+        isNicknameValid,
+        isPasswordValid,
+        isConfirmPasswordValid,
+        isLabNameValid
+    })
 
-    if (!isNicknameValid || !isPasswordValid || !isConfirmPasswordValid || !isLabNameValid) {
+    if (
+        !isNicknameValid ||
+        !isPasswordValid ||
+        !isConfirmPasswordValid ||
+        !isLabNameValid
+    ) {
         console.log('验证失败，退出注册流程')
         console.log('当前错误:', errors.value)
         // 显示第一个错误提示
@@ -355,7 +483,10 @@ const handleRegister = async () => {
         } else if (errors.value.password) {
             Taro.showToast({ title: errors.value.password, icon: 'none' })
         } else if (errors.value.confirmPassword) {
-            Taro.showToast({ title: errors.value.confirmPassword, icon: 'none' })
+            Taro.showToast({
+                title: errors.value.confirmPassword,
+                icon: 'none'
+            })
         } else if (errors.value.labName) {
             Taro.showToast({ title: errors.value.labName, icon: 'none' })
         }
@@ -445,4 +576,115 @@ const handleLogin = () => {
         url: '/pages/login/login'
     })
 }
+
+// ============ 实验室选择相关方法 ============
+
+// 获取所有实验室列表
+const loadLabList = async () => {
+    if (loadingLabs.value) return
+
+    loadingLabs.value = true
+
+    try {
+        const res = await Taro.request({
+            url: labApi.list,
+            method: 'GET'
+        })
+
+        if (res.statusCode === 200 && res.data && res.data.errCode === '0') {
+            labList.value = res.data.data || []
+        } else {
+            labList.value = []
+        }
+    } catch (error) {
+        console.error('获取实验室列表失败:', error)
+        labList.value = []
+    } finally {
+        loadingLabs.value = false
+    }
+}
+
+// 切换下拉框显示
+const toggleLabDropdown = () => {
+    showLabDropdown.value = !showLabDropdown.value
+    if (showLabDropdown.value && labList.value.length === 0) {
+        loadLabList()
+    }
+    focused.value.labName = showLabDropdown.value
+}
+
+// 选择实验室
+const selectLab = (lab) => {
+    selectedLab.value = lab
+    formData.value.labName = lab.labName
+    showLabDropdown.value = false
+    focused.value.labName = false
+    errors.value.labName = ''
+}
+
+// 跳转到创建实验室页面
+const goToCreateLab = () => {
+    showLabDropdown.value = false
+    Taro.navigateTo({
+        url: '/pages/create-lab/create-lab?from=register'
+    })
+}
+
+// 页面加载时检查是否从实验室创建页面返回
+onMounted(() => {
+    const instance = Taro.getCurrentInstance()
+    const params = instance.router?.params
+
+    // 如果是从实验室创建页面返回，检查是否创建了新实验室
+    if (params?.from === 'laboratory' || params?.created === 'true') {
+        const newLabName = Taro.getStorageSync('newlyCreatedLab')
+        if (newLabName) {
+            // 自动填充新创建的实验室
+            selectedLab.value = {
+                labName: newLabName,
+                university:
+                    Taro.getStorageSync('newlyCreatedLabUniversity') || ''
+            }
+            formData.value.labName = newLabName
+            // 清除临时存储
+            Taro.removeStorageSync('newlyCreatedLab')
+            Taro.removeStorageSync('newlyCreatedLabUniversity')
+        }
+    }
+})
+
+// 页面显示时检查是否有新创建的实验室
+useDidShow(() => {
+    const newLabName = Taro.getStorageSync('newlyCreatedLab')
+    if (newLabName) {
+        const newUniversity = Taro.getStorageSync('newlyCreatedLabUniversity') || ''
+
+        // 重新加载实验室列表
+        loadLabList().then(() => {
+            // 查找新创建的实验室在列表中的位置
+            const newLab = labList.value.find(
+                lab => lab.labName === newLabName
+            )
+
+            if (newLab) {
+                // 自动选择新创建的实验室
+                selectedLab.value = newLab
+                formData.value.labName = newLabName
+            } else {
+                // 如果列表中没有，手动添加
+                const labToAdd = {
+                    labName: newLabName,
+                    university: newUniversity
+                }
+                labList.value.unshift(labToAdd)
+                selectedLab.value = labToAdd
+                formData.value.labName = newLabName
+            }
+
+            // 清除临时存储
+            Taro.removeStorageSync('newlyCreatedLab')
+            Taro.removeStorageSync('newlyCreatedLabUniversity')
+        })
+    }
+})
 </script>

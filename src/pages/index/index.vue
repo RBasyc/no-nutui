@@ -48,14 +48,17 @@
                 <view class="reminder-header" @tap="toggleReminder">
                     <text class="ai-badge">🤖 AI 建议</text>
                     <text class="reminder-tag">基于实验计划</text>
-                    <text class="expand-icon">{{ aiReminderExpanded ? '▲' : '▼' }}</text>
+                    <text class="expand-icon">{{
+                        aiReminderExpanded ? '▲' : '▼'
+                    }}</text>
                 </view>
                 <view
                     class="reminder-content"
                     :class="{ expanded: aiReminderExpanded }"
                 >
                     "计划做3次Western Blot，每次用1块胶，20μL蛋白上样" →
-                    建议优先使用即将过期的 RIPA 裂解液（库存5瓶，剩余21天），并补充 BCA 试剂盒。
+                    建议优先使用即将过期的 RIPA
+                    裂解液（库存5瓶，剩余21天），并补充 BCA 试剂盒。
                 </view>
                 <view class="reminder-meta" v-if="aiReminderExpanded">
                     <text class="meta-time">⏳ 来自 张莹 实验室</text>
@@ -84,7 +87,9 @@
                             <text>库存: {{ item.stock }}瓶</text>
                         </view>
                     </view>
-                    <text v-if="item.days" class="item-expire">{{ item.days }}天</text>
+                    <text v-if="item.days" class="item-expire"
+                        >{{ item.days }}天</text
+                    >
                     <text v-else class="item-tag">{{ item.status }}</text>
                 </view>
             </view>
@@ -94,7 +99,9 @@
         <view class="list-section">
             <view class="list-header">
                 <text class="list-title">待处理采购清单</text>
-                <text class="list-more" @tap="handleActionClick('导出Excel')">导出Excel</text>
+                <text class="list-more" @tap="handleActionClick('导出Excel')"
+                    >导出Excel</text
+                >
             </view>
             <view class="consumable-list">
                 <view
@@ -153,7 +160,7 @@ const statsData = ref({
 
 // 快捷操作
 const quickActions = ref([
-    { icon: '📱', label: '扫码登记' },
+    { icon: '📱', label: '快捷扫码' },
     { icon: '✏️', label: '手动登记' },
     { icon: '📋', label: '采购清单' },
     { icon: '📊', label: '统计分析' }
@@ -207,11 +214,66 @@ const handleStatClick = (type) => {
 }
 
 // 快捷操作点击
-const handleActionClick = (label) => {
-    Taro.showToast({
-        title: `${label}功能开发中`,
-        icon: 'none'
-    })
+const handleActionClick = async (label) => {
+    switch (label) {
+        case '快捷扫码':
+            try {
+                const scanRes = await Taro.scanCode({
+                    onlyFromCamera: false,
+                    scanType: ['barCode', 'qrCode']
+                })
+
+                const scannedText = scanRes.result
+                console.log('扫码结果:', scannedText)
+
+                // 判断是否为 MongoDB ObjectId（24位十六进制）
+                const isObjectId = /^[0-9a-fA-F]{24}$/.test(scannedText)
+
+                if (isObjectId) {
+                    // 如果是 ObjectId，跳转到借用与归还界面
+                    Taro.navigateTo({
+                        url: `/pages/inventory-record/inventory-record?id=${scannedText}`
+                    })
+                    Taro.showToast({
+                        title: '跳转到借用归还',
+                        icon: 'success'
+                    })
+                } else {
+                    // 如果是货号编码，跳转到新建货物界面，传递货物码
+                    Taro.navigateTo({
+                        url: `/pages/inventory-edit/inventory-edit?code=${encodeURIComponent(
+                            scannedText
+                        )}`
+                    })
+                    Taro.showToast({
+                        title: '跳转到新建货物',
+                        icon: 'success'
+                    })
+                }
+            } catch (err) {
+                console.error('扫码失败:', err)
+                Taro.showToast({
+                    title: '扫码失败',
+                    icon: 'none'
+                })
+            }
+            break
+        case '手动登记':
+            Taro.navigateTo({
+                url: '/pages/inventory-edit/inventory-edit'
+            })
+            break
+        case '采购清单':
+            Taro.navigateTo({
+                url: '/pages/purchase/purchase'
+            })
+            break
+        case '统计分析':
+            Taro.navigateTo({
+                url: '/pages/inventory/inventory'
+            })
+            break
+    }
 }
 
 // 切换AI提醒展开状态

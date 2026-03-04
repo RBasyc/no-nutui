@@ -5,13 +5,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 48rpx;
+    padding: 48rpx 48rpx 120rpx; // 增加底部内边距，确保内容不被遮挡
     box-sizing: border-box;
     // 冷光白背景
     background: linear-gradient(135deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
     position: relative;
-    overflow: hidden;
+    overflow-y: auto; // 允许垂直滚动
+    -webkit-overflow-scrolling: touch; // iOS 平滑滚动
 
     // 矩阵雨背景效果
     &::before {
@@ -28,8 +28,15 @@
     }
 
     @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
     }
 
     // 二维码装饰
@@ -81,9 +88,12 @@
         animation: hologram 3s ease-in-out infinite;
 
         @keyframes hologram {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0) scale(1);
             }
+
             50% {
                 transform: translateY(-6rpx) scale(1.02);
             }
@@ -164,6 +174,11 @@
             0 4rpx 16rpx rgba(30, 144, 255, 0.1),
             inset 0 0 20rpx rgba(255, 255, 255, 0.5);
 
+        // 下拉选择框可点击
+        &.lab-selector-wrapper .input-wrapper {
+            cursor: pointer;
+        }
+
         &.input-focused {
             background: rgba(255, 255, 255, 0.95);
             border-color: #1E90FF;
@@ -183,9 +198,19 @@
             animation: shake 0.3s ease;
 
             @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-10rpx); }
-                75% { transform: translateX(10rpx); }
+
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+
+                25% {
+                    transform: translateX(-10rpx);
+                }
+
+                75% {
+                    transform: translateX(10rpx);
+                }
             }
         }
 
@@ -212,6 +237,11 @@
         font-weight: 500;
 
         &::placeholder {
+            color: rgba(47, 79, 79, 0.4);
+            font-weight: 400;
+        }
+
+        &.input-placeholder {
             color: rgba(47, 79, 79, 0.4);
             font-weight: 400;
         }
@@ -271,6 +301,213 @@
         font-weight: 600;
         letter-spacing: 0.5rpx;
     }
+}
+
+/* 实验室选择器 */
+.lab-selector-wrapper {
+    position: relative;
+    z-index: 100; // 确保下拉菜单显示在其他元素之上
+
+    &.selector-error {
+        .input-wrapper {
+            border-color: #FF5F1F;
+            // 使用 input-wrapper 中定义的 shake 动画
+            animation: shake 0.3s ease;
+        }
+    }
+}
+
+/* 实验室下拉列表 */
+.lab-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 600rpx;
+    background: rgba(255, 255, 255, 0.249);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.3);
+    border-radius: 12rpx;
+    box-shadow:
+        0 8rpx 32rpx rgba(30, 144, 255, 0.15),
+        inset 0 0 20rpx rgba(255, 255, 255, 0.8);
+    z-index: 200;
+    animation: dropdown-appear 0.2s ease;
+
+    @keyframes dropdown-appear {
+        from {
+            opacity: 0;
+            transform: translateY(-10rpx);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* 实验室列表 scroll-view - 小程序兼容 */
+.lab-list-scroll {
+    /* 小程序必须设置固定高度才能滚动 */
+    height: 320rpx;
+    /* 确保高度生效 */
+    min-height: 320rpx;
+    max-height: 320rpx;
+    overflow-y: scroll;
+}
+
+/* 已选实验室提示栏 */
+.lab-info-bar {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    padding: 16rpx 20rpx;
+    margin-top: 12rpx;
+    background: rgba(30, 144, 255, 0.08);
+    border: 1rpx solid rgba(30, 144, 255, 0.2);
+    border-radius: 8rpx;
+    animation: info-appear 0.3s ease;
+
+    @keyframes info-appear {
+        from {
+            opacity: 0;
+            transform: translateY(-8rpx);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+.lab-info-icon {
+    font-size: 28rpx;
+    color: #1E90FF;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.lab-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4rpx;
+    flex: 1;
+}
+
+.lab-info-name {
+    font-size: 26rpx;
+    color: #2F4F4F;
+    font-weight: 600;
+}
+
+.lab-info-university {
+    font-size: 22rpx;
+    color: rgba(47, 79, 79, 0.6);
+    font-weight: 400;
+}
+
+/* 实验室列表头部 */
+.lab-list-header {
+    flex-shrink: 0;
+    padding: 16rpx 20rpx 8rpx;
+    border-bottom: 1rpx solid rgba(30, 144, 255, 0.1);
+    background: rgba(30, 144, 255, 0.03);
+}
+
+.lab-count-text {
+    font-size: 22rpx;
+    color: rgba(47, 79, 79, 0.6);
+    font-weight: 500;
+}
+
+.lab-item {
+    padding: 24rpx 20rpx;
+    border-bottom: 1rpx solid rgba(30, 144, 255, 0.1);
+    transition: background 0.2s;
+    cursor: pointer;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:active {
+        background: rgba(30, 144, 255, 0.08);
+    }
+
+    &.lab-loading {
+        pointer-events: none;
+    }
+}
+
+.lab-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8rpx;
+}
+
+.lab-name {
+    font-size: 28rpx;
+    color: #2F4F4F;
+    font-weight: 600;
+}
+
+.lab-university {
+    font-size: 22rpx;
+    color: rgba(47, 79, 79, 0.6);
+    font-weight: 400;
+}
+
+.loading-text {
+    font-size: 24rpx;
+    color: #1E90FF;
+    font-weight: 500;
+    text-align: center;
+    display: block;
+}
+
+/* 无结果提示 */
+.lab-no-result {
+    padding: 32rpx 20rpx;
+    text-align: center;
+}
+
+.no-result-text {
+    font-size: 24rpx;
+    color: rgba(47, 79, 79, 0.5);
+    font-weight: 400;
+}
+
+/* 创建实验室入口 */
+.lab-create-link {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 8rpx;
+    padding: 24rpx 20rpx;
+    border-top: 1rpx solid rgba(30, 144, 255, 0.1);
+    background: rgba(30, 144, 255, 0.05);
+    transition: background 0.2s;
+    cursor: pointer;
+
+    &:active {
+        background: rgba(30, 144, 255, 0.1);
+    }
+}
+
+.create-icon {
+    font-size: 32rpx;
+    color: #1E90FF;
+    font-weight: 600;
+}
+
+.create-text {
+    font-size: 24rpx;
+    color: #1E90FF;
+    font-weight: 600;
+    letter-spacing: 0.5rpx;
 }
 
 /* 注册按钮 - 实验室科技风格 */
@@ -393,7 +630,6 @@
     left: 0;
     right: 0;
     text-align: center;
-    z-index: 1;
 
     .footer-text {
         font-size: 22rpx;

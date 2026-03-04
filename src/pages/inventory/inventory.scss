@@ -483,21 +483,22 @@
 }
 
 .qrcode-display {
-    width: 400rpx;
-    height: 400rpx;
+    width: 200px;
+    height: 200px;
     margin: 0 auto 32rpx;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #fff;
     border-radius: 24rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2rpx solid #e8e8e8;
+    overflow: hidden;
 }
 
-.qrcode-placeholder {
-    font-size: 48rpx;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 4rpx;
+.qrcode-canvas {
+    width: 200px;
+    height: 200px;
+    display: block;
 }
 
 .qrcode-info {

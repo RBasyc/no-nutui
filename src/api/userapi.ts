@@ -1,12 +1,11 @@
-const baseURL = 'http://localhost:3000'
-// const baseURL = 'http://192.168.67.48:3000'
+import { API_BASE_URL } from './config'
 
 const userApi = {
-    login: baseURL + '/user/login',
-    register: baseURL + '/user/register',
-    checkNickname: baseURL + '/user/check-nickname',
-    upload: baseURL + '/upload/image',
-    updateProfile: baseURL + '/user/update-profile'
+    login: API_BASE_URL + '/user/login',
+    register: API_BASE_URL + '/user/register',
+    checkNickname: API_BASE_URL + '/user/check-nickname',
+    updateProfile: API_BASE_URL + '/user/update-profile',
+    upload: API_BASE_URL + '/upload/image',
 }
 
 export default userApi

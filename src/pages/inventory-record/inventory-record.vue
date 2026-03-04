@@ -173,6 +173,105 @@ const loadItemDetail = async () => {
     }
 }
 
+// 判断是否为 MongoDB ObjectId
+const isObjectId = (id) => {
+    // MongoDB ObjectId 是 24 字符的十六进制字符串
+    return /^[0-9a-fA-F]{24}$/.test(id)
+}
+
+// 扫码切换耗材
+const handleScanCode = async () => {
+    try {
+        const scanRes = await Taro.scanCode({
+            onlyFromCamera: false,
+            scanType: ['barCode', 'qrCode']
+        })
+
+        const scannedText = scanRes.result
+        Taro.showLoading({ title: '查询中...' })
+
+        let item = null
+        let newItemId = null
+
+        // 判断扫描结果是否为 MongoDB ObjectId
+        if (isObjectId(scannedText)) {
+            // 如果是 ObjectId，直接调用 detail 接口
+            const res = await Taro.request({
+                url: inventoryApi.detail(scannedText),
+                method: 'GET',
+                header: {
+                    Authorization: Taro.getStorageSync('token')
+                }
+            })
+
+            if (res.data.errCode && res.data.errCode !== '0') {
+                Taro.hideLoading()
+                Taro.showToast({
+                    title: res.data.errorInfo || '未找到该耗材',
+                    icon: 'none'
+                })
+                return
+            }
+
+            item = res.data.data
+            newItemId = scannedText
+        } else {
+            // 如果是普通编号，调用 getByCode 接口
+            const res = await Taro.request({
+                url: inventoryApi.getByCode,
+                method: 'GET',
+                data: { code: scannedText },
+                header: {
+                    Authorization: Taro.getStorageSync('token')
+                }
+            })
+
+            if (res.data.errCode && res.data.errCode !== '0') {
+                Taro.hideLoading()
+                Taro.showToast({
+                    title: res.data.errorInfo || '未找到该耗材',
+                    icon: 'none'
+                })
+                return
+            }
+
+            item = res.data.data
+            newItemId = item._id || item.id
+        }
+
+        Taro.hideLoading()
+
+        if (item) {
+            Taro.showModal({
+                title: '发现耗材',
+                content: `发现耗材：${item.name}\n当前库存：${item.quantity} ${item.unit}\n\n是否切换到该耗材进行记录？`,
+                success: (modalRes) => {
+                    if (modalRes.confirm) {
+                        // 切换到该耗材
+                        itemId.value = newItemId
+                        // 重置数量和备注
+                        quantity.value = 1
+                        remarks.value = ''
+                        // 重新加载耗材详情
+                        loadItemDetail()
+                        Taro.showToast({
+                            title: '已切换耗材',
+                            icon: 'success'
+                        })
+                    }
+                }
+            })
+        }
+    } catch (err) {
+        Taro.hideLoading()
+        console.error('扫码失败:', err)
+        Taro.showToast({
+            title: '扫码失败',
+            icon: 'none'
+        })
+    }
+}
+
 // 提交记录
 const handleSubmit = async () => {
     if (!itemData.value) return

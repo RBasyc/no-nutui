@@ -194,7 +194,11 @@
         </view>
 
         <!-- 二维码弹窗 -->
-        <view v-show="showQRModal" class="qrcode-modal" @tap="showQRModal = false">
+        <view
+            v-show="showQRModal"
+            class="qrcode-modal"
+            @tap="showQRModal = false"
+        >
             <view class="qrcode-content" @tap.stop>
                 <view class="qrcode-header">
                     <text class="qrcode-title">耗材二维码</text>
@@ -202,7 +206,11 @@
                 </view>
                 <view class="qrcode-body">
                     <view class="qrcode-display">
-                        <view class="qrcode-placeholder">{{ currentItem?.code }}</view>
+                        <canvas
+                            type="2d"
+                            id="qrcodeCanvas"
+                            class="qrcode-canvas"
+                        />
                     </view>
                     <view class="qrcode-info">
                         <text class="info-name">{{ currentItem?.name }}</text>
@@ -210,8 +218,12 @@
                     </view>
                 </view>
                 <view class="qrcode-footer">
-                    <view class="btn-secondary" @tap="showQRModal = false">关闭</view>
-                    <view class="btn-primary" @tap="handleSaveQRCode">保存图片</view>
+                    <view class="btn-secondary" @tap="showQRModal = false"
+                        >关闭</view
+                    >
+                    <view class="btn-primary" @tap="handleSaveQRCode"
+                        >保存图片</view
+                    >
                 </view>
             </view>
         </view>
@@ -219,9 +231,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import Taro from '@tarojs/taro'
 import { usePullDownRefresh, useReachBottom, useDidShow } from '@tarojs/taro'
+import drawQrcode from 'weapp-qrcode-canvas-2d'
 import './inventory.scss'
 import inventoryApi from '../../api/inventoryAPI'
 
@@ -280,6 +293,9 @@ const currentItem = ref(null)
 
 // 二维码弹窗状态
 const showQRModal = ref(false)
+
+// Canvas 实例
+const canvasInstance = ref(null)
 
 // 加载库存列表
 const loadInventoryList = async (refresh = false) => {
@@ -453,28 +469,194 @@ const handleEdit = (item) => {
 // 记录使用
 const handleRecord = (item) => {
     Taro.navigateTo({
-        url: `/pages/inventory-record/inventory-record?id=${item._id || item.id}`
+        url: `/pages/inventory-record/inventory-record?id=${
+            item._id || item.id
+        }`
     })
 }
 
 // 生成二维码
-const handleQRCode = (item) => {
+const handleQRCode = async (item) => {
     currentItem.value = item
     showQRModal.value = true
+
+    // 等待 DOM 更新后生成二维码
+    await nextTick()
+
+    setTimeout(() => {
+        const query = Taro.createSelectorQuery()
+        query
+            .select('#qrcodeCanvas')
+            .fields({
+                node: true,
+                size: true
+            })
+            .exec(async (res) => {
+                if (!res || !res[0]) {
+                    console.error('Canvas 节点未找到')
+                    Taro.showToast({
+                        title: 'Canvas 初始化失败',
+                        icon: 'none'
+                    })
+                    return
+                }
+
+                try {
+                    const canvas = res[0].node
+                    const ctx = canvas.getContext('2d')
+
+                    // 获取设备像素比
+                    const dpr = Taro.getSystemInfoSync().pixelRatio || 1
+
+                    // 设置 canvas 实际渲染尺寸（物理像素）
+                    const canvasSize = 200
+                    canvas.width = canvasSize * dpr
+                    canvas.height = canvasSize * dpr
+
+                    // 缩放上下文以匹配 dpr
+                    ctx.scale(dpr, dpr)
+
+                    // 保存 canvas 实例信息
+                    canvasInstance.value = {
+                        canvas,
+                        ctx,
+                        dpr,
+                        size: canvasSize
+                    }
+
+                    // 调用方法 drawQrcode 生成二维码
+                    await drawQrcode({
+                        canvas: canvas,
+                        canvasId: 'qrcodeCanvas',
+                        width: canvasSize,
+                        height: canvasSize,
+                        padding: 15,
+                        background: '#ffffff',
+                        foreground: '#000000',
+                        text: item._id || item.id || '',
+                        typeNumber: -1,
+                        correctLevel: 3
+                    })
+
+                    Taro.showToast({
+                        title: '二维码生成成功',
+                        icon: 'success',
+                        duration: 1000
+                    })
+                } catch (err) {
+                    console.error('生成二维码失败:', err)
+                    Taro.showToast({
+                        title: '生成二维码失败',
+                        icon: 'none'
+                    })
+                }
+            })
+    }, 300)
 }
 
 // 保存二维码
-const handleSaveQRCode = () => {
-    Taro.showToast({
-        title: '保存功能开发中',
-        icon: 'none'
-    })
+const handleSaveQRCode = async () => {
+    if (!currentItem.value) {
+        Taro.showToast({
+            title: '请先生成二维码',
+            icon: 'none'
+        })
+        return
+    }
+
+    Taro.showLoading({ title: '保存中...' })
+
+    try {
+        const canvasId = 'qrcodeCanvas'
+
+        // 关键：重新获取 canvas 节点，而不是使用之前保存的引用
+        const query = Taro.createSelectorQuery()
+
+        const canvasNode = await new Promise((resolve, reject) => {
+            query
+                .select(`#${canvasId}`)
+                .node((res) => {
+                    if (res && res.node) {
+                        resolve(res.node)
+                    } else {
+                        reject(new Error('获取 canvas 节点失败'))
+                    }
+                })
+                .exec()
+        })
+
+        // 获取 canvas 尺寸
+        const { width, height } = canvasNode
+        console.log('canvas 尺寸：', { width, height })
+
+        if (!width || !height) {
+            throw new Error('canvas 尺寸无效')
+        }
+
+        // 生成临时文件路径
+        const tempRes = await new Promise((resolve, reject) => {
+            Taro.canvasToTempFilePath({
+                canvasId: canvasId,
+                canvas: canvasNode,
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+                destWidth: width * 2,
+                destHeight: height * 2,
+                fileType: 'png',
+                quality: 1,
+                success: resolve,
+                fail: reject
+            })
+        })
+
+        console.log('临时文件路径：', tempRes.tempFilePath)
+
+        // 保存到相册
+        await Taro.saveImageToPhotosAlbum({
+            filePath: tempRes.tempFilePath
+        })
+
+        Taro.hideLoading()
+        Taro.showToast({
+            title: '已保存到相册',
+            icon: 'success'
+        })
+
+    } catch (err) {
+        console.error('保存失败：', err)
+        Taro.hideLoading()
+
+        // 错误处理
+        if (err.errMsg && err.errMsg.includes('auth')) {
+            Taro.showModal({
+                title: '需要授权',
+                content: '需要授权访问相册才能保存图片',
+                confirmText: '去设置',
+                success: (modalRes) => {
+                    if (modalRes.confirm) {
+                        Taro.openSetting()
+                    }
+                }
+            })
+        } else {
+            Taro.showToast({
+                title: err.message || '保存失败',
+                icon: 'none'
+            })
+        }
+    }
 }
 
 // 点击卡片
 const handleItemClick = (item) => {
-    console.log('点击耗材:', item)
-    // 显示耗材详情
+    // 将耗材数据存储到临时存储中，避免重复请求
+    Taro.setStorageSync('tempItemData', item)
+    const itemId = item._id || item.id
+    Taro.navigateTo({
+        url: `/pages/inventory-detail/inventory-detail?id=${itemId}`
+    })
 }
 
 // 下拉刷新

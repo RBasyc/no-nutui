@@ -3,7 +3,9 @@
         <view class="edit-container">
             <!-- 页面标题 -->
             <view class="page-header">
-                <text class="page-title">{{ isEdit ? '编辑耗材' : '添加耗材' }}</text>
+                <text class="page-title">{{
+                    isEdit ? '编辑耗材' : '添加耗材'
+                }}</text>
             </view>
 
             <!-- 表单内容 -->
@@ -13,7 +15,9 @@
                     <view class="section-title">基本信息</view>
 
                     <view class="form-group">
-                        <text class="form-label">耗材名称 <text class="required">*</text></text>
+                        <text class="form-label"
+                            >耗材名称 <text class="required">*</text></text
+                        >
                         <view
                             class="input-wrapper"
                             :class="{
@@ -31,11 +35,15 @@
                                 @blur="handleFieldBlur('name')"
                             />
                         </view>
-                        <text v-if="errors.name" class="error-text">{{ errors.name }}</text>
+                        <text v-if="errors.name" class="error-text">{{
+                            errors.name
+                        }}</text>
                     </view>
 
                     <view class="form-group">
-                        <text class="form-label">耗材编号 <text class="required">*</text></text>
+                        <text class="form-label"
+                            >耗材编号 <text class="required">*</text></text
+                        >
                         <view
                             class="input-wrapper"
                             :class="{
@@ -46,31 +54,48 @@
                             <text class="input-icon">🏷️</text>
                             <input
                                 v-model="formData.code"
-                                placeholder="请输入耗材编号（唯一）"
+                                placeholder="请输入或扫码录入耗材编号"
                                 class="form-input"
                                 :disabled="loading || isEdit"
                                 @focus="focused.code = true"
                                 @blur="handleFieldBlur('code')"
                             />
+                            <view
+                                v-if="!isEdit"
+                                class="scan-btn"
+                                @tap="handleScanCode"
+                            >
+                                📷
+                            </view>
                         </view>
-                        <text v-if="errors.code" class="error-text">{{ errors.code }}</text>
+                        <text v-if="errors.code" class="error-text">{{
+                            errors.code
+                        }}</text>
                     </view>
 
                     <view class="form-group">
-                        <text class="form-label">分类 <text class="required">*</text></text>
+                        <text class="form-label"
+                            >分类 <text class="required">*</text></text
+                        >
                         <view class="category-options">
                             <view
                                 v-for="cat in categories"
                                 :key="cat.value"
                                 class="category-option"
-                                :class="{ active: formData.category === cat.value }"
+                                :class="{
+                                    active: formData.category === cat.value
+                                }"
                                 @tap="formData.category = cat.value"
                             >
                                 <text class="option-icon">{{ cat.icon }}</text>
-                                <text class="option-label">{{ cat.label }}</text>
+                                <text class="option-label">{{
+                                    cat.label
+                                }}</text>
                             </view>
                         </view>
-                        <text v-if="errors.category" class="error-text">{{ errors.category }}</text>
+                        <text v-if="errors.category" class="error-text">{{
+                            errors.category
+                        }}</text>
                     </view>
 
                     <view class="form-group">
@@ -97,7 +122,9 @@
                     <view class="section-title">库存信息</view>
 
                     <view class="form-group">
-                        <text class="form-label">单位 <text class="required">*</text></text>
+                        <text class="form-label"
+                            >单位 <text class="required">*</text></text
+                        >
                         <view
                             class="input-wrapper"
                             :class="{
@@ -115,7 +142,9 @@
                                 @blur="handleFieldBlur('unit')"
                             />
                         </view>
-                        <text v-if="errors.unit" class="error-text">{{ errors.unit }}</text>
+                        <text v-if="errors.unit" class="error-text">{{
+                            errors.unit
+                        }}</text>
                     </view>
 
                     <view class="form-group">
@@ -199,7 +228,9 @@
                     <view class="section-title">采购信息</view>
 
                     <view class="form-group">
-                        <text class="form-label">单价 <text class="required">*</text></text>
+                        <text class="form-label"
+                            >单价 <text class="required">*</text></text
+                        >
                         <view
                             class="input-wrapper"
                             :class="{
@@ -218,7 +249,9 @@
                                 @blur="handleFieldBlur('price')"
                             />
                         </view>
-                        <text v-if="errors.price" class="error-text">{{ errors.price }}</text>
+                        <text v-if="errors.price" class="error-text">{{
+                            errors.price
+                        }}</text>
                     </view>
 
                     <view class="form-group">
@@ -380,8 +413,10 @@ const loading = ref(false)
 // 表单验证
 const isFormValid = computed(() => {
     const required = ['name', 'code', 'category', 'unit', 'price']
-    return required.every(field => formData.value[field]) &&
-           Object.values(errors.value).every(error => !error)
+    return (
+        required.every((field) => formData.value[field]) &&
+        Object.values(errors.value).every((error) => !error)
+    )
 })
 
 // 字段失焦验证
@@ -486,7 +521,9 @@ const handleSubmit = async () => {
             ...formData.value,
             quantity: Number(formData.value.quantity) || 0,
             minQuantity: Number(formData.value.minQuantity) || 10,
-            maxQuantity: formData.value.maxQuantity ? Number(formData.value.maxQuantity) : undefined,
+            maxQuantity: formData.value.maxQuantity
+                ? Number(formData.value.maxQuantity)
+                : undefined,
             price: Number(formData.value.price)
         }
 
@@ -499,7 +536,7 @@ const handleSubmit = async () => {
                 data: submitData,
                 header: {
                     'Content-Type': 'application/json',
-                    'Authorization': Taro.getStorageSync('token')
+                    Authorization: Taro.getStorageSync('token')
                 }
             })
         } else {
@@ -510,14 +547,16 @@ const handleSubmit = async () => {
                 data: submitData,
                 header: {
                     'Content-Type': 'application/json',
-                    'Authorization': Taro.getStorageSync('token')
+                    Authorization: Taro.getStorageSync('token')
                 }
             })
         }
 
         if (res.data.errCode && res.data.errCode !== '0') {
             Taro.showToast({
-                title: res.data.errorInfo || (isEdit.value ? '修改失败' : '添加失败'),
+                title:
+                    res.data.errorInfo ||
+                    (isEdit.value ? '修改失败' : '添加失败'),
                 icon: 'none'
             })
             return
@@ -543,20 +582,182 @@ const handleSubmit = async () => {
     }
 }
 
+// 判断是否为 MongoDB ObjectId
+const isObjectId = (id) => {
+    // MongoDB ObjectId 是 24 字符的十六进制字符串
+    return /^[0-9a-fA-F]{24}$/.test(id)
+}
+
+// 通过货物码查询并自动填充表单（公共函数）
+const queryAndFillByCode = async (code) => {
+    try {
+        Taro.showLoading({ title: '查询中...' })
+
+        const res = await Taro.request({
+            url: inventoryApi.getByCode,
+            method: 'GET',
+            data: { code },
+            header: {
+                Authorization: Taro.getStorageSync('token')
+            }
+        })
+
+        Taro.hideLoading()
+
+        if (res.data.errCode && res.data.errCode !== '0') {
+            Taro.showToast({
+                title: res.data.errorInfo || '查询失败',
+                icon: 'none'
+            })
+            return
+        }
+
+        // 如果找到该编号的耗材，自动填充表单
+        if (res.data.data) {
+            const item = res.data.data
+            Taro.showModal({
+                title: '发现已有耗材',
+                content: `发现耗材：${item.name}\n\n是否自动填充表单？`,
+                success: (modalRes) => {
+                    if (modalRes.confirm) {
+                        // 自动填充表单
+                        formData.value.name = item.name || ''
+                        formData.value.category = item.category || '试剂'
+                        formData.value.specification = item.specification || ''
+                        formData.value.unit = item.unit || ''
+                        formData.value.price = item.price?.toString() || ''
+                        formData.value.minQuantity = item.minQuantity?.toString() || '10'
+                        formData.value.maxQuantity = item.maxQuantity?.toString() || ''
+                        formData.value.supplier = item.supplier || ''
+                        formData.value.location = item.location || ''
+                        // 数量、日期等不需要自动填充
+
+                        Taro.showToast({
+                            title: '已自动填充表单',
+                            icon: 'success'
+                        })
+                    }
+                }
+            })
+        } else {
+            Taro.showToast({
+                title: '扫码成功，请填写表单',
+                icon: 'success'
+            })
+        }
+    } catch (err) {
+        Taro.hideLoading()
+        console.error('查询失败:', err)
+        Taro.showToast({
+            title: '查询失败',
+            icon: 'none'
+        })
+    }
+}
+
+// 扫码录入（查询数据库并自动填充表单）
+const handleScanCode = async () => {
+    try {
+        const scanRes = await Taro.scanCode({
+            onlyFromCamera: false,
+            scanType: ['barCode', 'qrCode']
+        })
+
+        const scannedText = scanRes.result
+
+        // 判断是否为 MongoDB ObjectId（扫描的是已有耗材的二维码）
+        if (isObjectId(scannedText)) {
+            Taro.showLoading({ title: '查询中...' })
+
+            const res = await Taro.request({
+                url: inventoryApi.detail(scannedText),
+                method: 'GET',
+                header: {
+                    Authorization: Taro.getStorageSync('token')
+                }
+            })
+
+            Taro.hideLoading()
+
+            if (res.data.errCode === '0' && res.data.data) {
+                const item = res.data.data
+                Taro.showModal({
+                    title: '发现已有耗材',
+                    content: `扫描到已有耗材：${item.name}（编号：${item.code}）\n\n如需编辑请前往库存列表，是否复制信息进行新耗材录入？`,
+                    confirmText: '复制信息',
+                    cancelText: '前往列表',
+                    success: (modalRes) => {
+                        if (modalRes.confirm) {
+                            // 自动填充表单（复制信息）
+                            formData.value.code = '' // 编码不复制，需要新的
+                            formData.value.name = item.name || ''
+                            formData.value.category = item.category || '试剂'
+                            formData.value.specification =
+                                item.specification || ''
+                            formData.value.unit = item.unit || ''
+                            formData.value.price = item.price?.toString() || ''
+                            formData.value.minQuantity =
+                                item.minQuantity?.toString() || '10'
+                            formData.value.maxQuantity =
+                                item.maxQuantity?.toString() || ''
+                            formData.value.supplier = item.supplier || ''
+                            formData.value.location = item.location || ''
+                            Taro.showToast({
+                                title: '已复制耗材信息',
+                                icon: 'success'
+                            })
+                        } else {
+                            // 前往库存列表编辑该耗材
+                            Taro.navigateTo({
+                                url: `/pages/inventory-edit/inventory-edit?id=${scannedText}`
+                            })
+                        }
+                    }
+                })
+            } else {
+                Taro.showToast({
+                    title: '未找到该耗材',
+                    icon: 'none'
+                })
+            }
+            return
+        }
+
+        // 如果是普通编号，查询数据库并自动填充
+        formData.value.code = scannedText
+        await queryAndFillByCode(scannedText)
+    } catch (err) {
+        Taro.hideLoading()
+        console.error('扫码失败:', err)
+        Taro.showToast({
+            title: '扫码失败',
+            icon: 'none'
+        })
+    }
+}
+
 // 取消
 const handleCancel = () => {
     Taro.navigateBack()
 }
 
-onMounted(() => {
+onMounted(async () => {
     // 获取页面参数
     const instance = Taro.getCurrentInstance()
     const params = instance.router?.params
 
     if (params?.id) {
+        // 编辑模式
         isEdit.value = true
         itemId.value = params.id
         loadItemDetail()
+    } else if (params?.code) {
+        // 从扫码登记页面传递的货物码 - 自动查询并填充
+        const decodedCode = decodeURIComponent(params.code)
+        formData.value.code = decodedCode
+
+        // 调用公共函数查询并自动填充
+        await queryAndFillByCode(decodedCode)
     }
 })
 </script>
