@@ -232,7 +232,7 @@ const handleActionClick = async (label) => {
                 if (isObjectId) {
                     // 如果是 ObjectId，跳转到借用与归还界面
                     Taro.navigateTo({
-                        url: `/pages/inventory-record/inventory-record?id=${scannedText}`
+                        url: `/pages/inventory/inventory-record/inventory-record?id=${scannedText}`
                     })
                     Taro.showToast({
                         title: '跳转到借用归还',
@@ -241,7 +241,7 @@ const handleActionClick = async (label) => {
                 } else {
                     // 如果是货号编码，跳转到新建货物界面，传递货物码
                     Taro.navigateTo({
-                        url: `/pages/inventory-edit/inventory-edit?code=${encodeURIComponent(
+                        url: `/pages/inventory/inventory-edit/inventory-edit?code=${encodeURIComponent(
                             scannedText
                         )}`
                     })
@@ -260,7 +260,7 @@ const handleActionClick = async (label) => {
             break
         case '手动登记':
             Taro.navigateTo({
-                url: '/pages/inventory-edit/inventory-edit'
+                url: '/pages/inventory/inventory-edit/inventory-edit'
             })
             break
         case '采购清单':

@@ -544,3 +544,49 @@
         color: #fff;
     }
 }
+
+/* 返回顶部按钮 - 纯 CSS 类控制动画 */
+.back-top-btn {
+    position: fixed;
+    right: 32rpx;
+    bottom: 120rpx;
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+    box-shadow: 0 8rpx 24rpx rgba(30, 144, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    /* 默认隐藏状态 */
+    opacity: 0;
+    transform: translateY(40rpx) scale(0.8);
+    pointer-events: none;
+
+    /* 流畅的过渡动画 - 带弹跳效果 */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* 显示状态 */
+    &.back-top-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+
+    /* 点击效果 */
+    &:active {
+        transform: scale(0.9);
+        transition: transform 0.1s ease;
+    }
+}
+
+.back-top-icon {
+    font-size: 48rpx;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1;
+}
+
+

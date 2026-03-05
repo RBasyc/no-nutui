@@ -27,7 +27,7 @@
                         <text class="input-icon">👤</text>
                         <input
                             v-model="formData.nickname"
-                            type="text"
+                            type="nickname"
                             placeholder="请输入昵称（2-20个字符）"
                             class="form-input"
                             :disabled="loading"
@@ -254,8 +254,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Taro, { useDidShow } from '@tarojs/taro'
-import userApi from '../../api/userapi'
-import labApi from '../../api/labapi'
+import userApi from '../../../api/userapi'
+import labApi from '../../../api/labapi'
 import './register.scss'
 
 // 表单数据
@@ -529,7 +529,7 @@ const handleRegister = async () => {
                 })
                 setTimeout(() => {
                     Taro.navigateTo({
-                        url: '/pages/login/login'
+                        url: '/pages/profile/login/login'
                     })
                 }, 1500)
             } else {
@@ -573,7 +573,7 @@ const handleRegister = async () => {
 // 返回登录
 const handleLogin = () => {
     Taro.navigateTo({
-        url: '/pages/login/login'
+        url: '/pages/profile/login/login'
     })
 }
 
@@ -626,7 +626,7 @@ const selectLab = (lab) => {
 const goToCreateLab = () => {
     showLabDropdown.value = false
     Taro.navigateTo({
-        url: '/pages/create-lab/create-lab?from=register'
+        url: '/pages/profile/create-lab/create-lab?from=register'
     })
 }
 
@@ -657,13 +657,14 @@ onMounted(() => {
 useDidShow(() => {
     const newLabName = Taro.getStorageSync('newlyCreatedLab')
     if (newLabName) {
-        const newUniversity = Taro.getStorageSync('newlyCreatedLabUniversity') || ''
+        const newUniversity =
+            Taro.getStorageSync('newlyCreatedLabUniversity') || ''
 
         // 重新加载实验室列表
         loadLabList().then(() => {
             // 查找新创建的实验室在列表中的位置
             const newLab = labList.value.find(
-                lab => lab.labName === newLabName
+                (lab) => lab.labName === newLabName
             )
 
             if (newLab) {

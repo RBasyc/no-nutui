@@ -93,7 +93,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
-import labApi from '../../api/labapi'
+import labApi from '../../../api/labapi'
 import './create-lab.scss'
 
 // 来源页面

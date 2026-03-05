@@ -32,7 +32,7 @@
 
             <!-- 分类标签 -->
             <view class="category-tabs">
-                <scroll-view scroll-x enable-flex class="tabs-scroll">
+                <scroll-view scrollX="true" enable-flex class="tabs-scroll">
                     <view
                         v-for="(category, index) in categories"
                         :key="index"
@@ -197,9 +197,10 @@
         <view
             v-show="showQRModal"
             class="qrcode-modal"
-            @tap="showQRModal = false"
+            catchtap="showQRModal = false"
+            catchtouchmove
         >
-            <view class="qrcode-content" @tap.stop>
+            <view class="qrcode-content" catchtap catchtouchmove>
                 <view class="qrcode-header">
                     <text class="qrcode-title">耗材二维码</text>
                     <view class="close-btn" @tap="showQRModal = false">✕</view>
@@ -228,12 +229,26 @@
             </view>
         </view>
     </view>
+
+    <!-- 返回顶部按钮 - 放在最外层，不受 page-wrapper 限制 -->
+    <view
+        class="back-top-btn"
+        :class="{ 'back-top-visible': showBackTop }"
+        @tap="handleBackToTop"
+    >
+        <text class="back-top-icon">↑</text>
+    </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import Taro from '@tarojs/taro'
-import { usePullDownRefresh, useReachBottom, useDidShow } from '@tarojs/taro'
+import {
+    usePullDownRefresh,
+    useReachBottom,
+    useDidShow,
+    usePageScroll
+} from '@tarojs/taro'
 import drawQrcode from 'weapp-qrcode-canvas-2d'
 import './inventory.scss'
 import inventoryApi from '../../api/inventoryAPI'
@@ -293,6 +308,9 @@ const currentItem = ref(null)
 
 // 二维码弹窗状态
 const showQRModal = ref(false)
+
+// 返回顶部按钮显示状态
+const showBackTop = ref(false)
 
 // Canvas 实例
 const canvasInstance = ref(null)
@@ -455,21 +473,23 @@ const handleSort = () => {
 // 添加耗材
 const handleAddItem = () => {
     Taro.navigateTo({
-        url: '/pages/inventory-edit/inventory-edit'
+        url: '/pages/inventory/inventory-edit/inventory-edit'
     })
 }
 
 // 编辑耗材
 const handleEdit = (item) => {
     Taro.navigateTo({
-        url: `/pages/inventory-edit/inventory-edit?id=${item._id || item.id}`
+        url: `/pages/inventory/inventory-edit/inventory-edit?id=${
+            item._id || item.id
+        }`
     })
 }
 
 // 记录使用
 const handleRecord = (item) => {
     Taro.navigateTo({
-        url: `/pages/inventory-record/inventory-record?id=${
+        url: `/pages/inventory/inventory-record/inventory-record?id=${
             item._id || item.id
         }`
     })
@@ -537,12 +557,11 @@ const handleQRCode = async (item) => {
                         typeNumber: -1,
                         correctLevel: 3
                     })
-
-                    Taro.showToast({
-                        title: '二维码生成成功',
-                        icon: 'success',
-                        duration: 1000
-                    })
+                    // Taro.showToast({
+                    //     title: '二维码生成成功',
+                    //     icon: 'success',
+                    //     duration: 1000
+                    // })
                 } catch (err) {
                     console.error('生成二维码失败:', err)
                     Taro.showToast({
@@ -623,7 +642,6 @@ const handleSaveQRCode = async () => {
             title: '已保存到相册',
             icon: 'success'
         })
-
     } catch (err) {
         console.error('保存失败：', err)
         Taro.hideLoading()
@@ -655,7 +673,15 @@ const handleItemClick = (item) => {
     Taro.setStorageSync('tempItemData', item)
     const itemId = item._id || item.id
     Taro.navigateTo({
-        url: `/pages/inventory-detail/inventory-detail?id=${itemId}`
+        url: `/pages/inventory/inventory-detail/inventory-detail?id=${itemId}`
+    })
+}
+
+// 返回顶部
+const handleBackToTop = () => {
+    Taro.pageScrollTo({
+        scrollTop: 0,
+        duration: 300 // 300ms 平滑滚动
     })
 }
 
@@ -670,6 +696,13 @@ useReachBottom(() => {
         currentPage.value++
         loadInventoryList()
     }
+})
+
+// 页面滚动监听
+usePageScroll((e) => {
+    const scrollTop = e.scrollTop
+    // 当滚动超过 300px 时显示返回顶部按钮
+    showBackTop.value = scrollTop > 300
 })
 
 // 页面显示时刷新

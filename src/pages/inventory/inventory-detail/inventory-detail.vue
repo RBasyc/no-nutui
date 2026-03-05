@@ -46,11 +46,15 @@
                     </view>
                     <view class="grid-item">
                         <text class="item-label">最小库存</text>
-                        <text class="item-value">{{ itemData.minQuantity }}</text>
+                        <text class="item-value">{{
+                            itemData.minQuantity
+                        }}</text>
                     </view>
                     <view class="grid-item">
                         <text class="item-label">最大库存</text>
-                        <text class="item-value">{{ itemData.maxQuantity || '-' }}</text>
+                        <text class="item-value">{{
+                            itemData.maxQuantity || '-'
+                        }}</text>
                     </view>
                 </view>
             </view>
@@ -68,7 +72,9 @@
                     </view>
                     <view class="info-row">
                         <text class="row-label">规格</text>
-                        <text class="row-value">{{ itemData.spec || itemData.specification || '-' }}</text>
+                        <text class="row-value">{{
+                            itemData.spec || itemData.specification || '-'
+                        }}</text>
                     </view>
                     <view class="info-row">
                         <text class="row-label">单价</text>
@@ -76,11 +82,15 @@
                     </view>
                     <view class="info-row">
                         <text class="row-label">供应商</text>
-                        <text class="row-value">{{ itemData.supplier || '-' }}</text>
+                        <text class="row-value">{{
+                            itemData.supplier || '-'
+                        }}</text>
                     </view>
                     <view class="info-row">
                         <text class="row-label">存放位置</text>
-                        <text class="row-value">{{ itemData.location || '-' }}</text>
+                        <text class="row-value">{{
+                            itemData.location || '-'
+                        }}</text>
                     </view>
                 </view>
             </view>
@@ -94,13 +104,21 @@
                 <view class="info-list">
                     <view class="info-row">
                         <text class="row-label">购买日期</text>
-                        <text class="row-value">{{ formatDate(itemData.purchaseDate) }}</text>
+                        <text class="row-value">{{
+                            formatDate(itemData.purchaseDate)
+                        }}</text>
                     </view>
                     <view class="info-row" v-if="itemData.expiryDate">
                         <text class="row-label">过期日期</text>
-                        <text class="row-value" :class="getExpiryClass(itemData.daysUntilExpiry)">
+                        <text
+                            class="row-value"
+                            :class="getExpiryClass(itemData.daysUntilExpiry)"
+                        >
                             {{ formatDate(itemData.expiryDate) }}
-                            <text v-if="itemData.daysUntilExpiry !== null" class="days-badge">
+                            <text
+                                v-if="itemData.daysUntilExpiry !== null"
+                                class="days-badge"
+                            >
                                 ({{ itemData.daysUntilExpiry }}天)
                             </text>
                         </text>
@@ -131,15 +149,24 @@
         </view>
 
         <!-- 二维码弹窗 -->
-        <view v-show="showQRModal" class="qrcode-modal" @tap="showQRModal = false">
-            <view class="qrcode-content" @tap.stop>
+        <view
+            v-show="showQRModal"
+            class="qrcode-modal"
+            catchtap="showQRModal = false"
+            catchtouchmove
+        >
+            <view class="qrcode-content" catchtap catchtouchmove>
                 <view class="qrcode-header">
                     <text class="qrcode-title">耗材二维码</text>
                     <view class="close-btn" @tap="showQRModal = false">✕</view>
                 </view>
                 <view class="qrcode-body">
                     <view class="qrcode-display">
-                        <canvas type="2d" id="qrcodeCanvas" class="qrcode-canvas" />
+                        <canvas
+                            type="2d"
+                            id="qrcodeCanvas"
+                            class="qrcode-canvas"
+                        />
                     </view>
                     <view class="qrcode-info">
                         <text class="info-name">{{ itemData?.name }}</text>
@@ -147,8 +174,12 @@
                     </view>
                 </view>
                 <view class="qrcode-footer">
-                    <view class="btn-secondary" @tap="showQRModal = false">关闭</view>
-                    <view class="btn-primary" @tap="handleSaveQRCode">保存图片</view>
+                    <view class="btn-secondary" @tap="showQRModal = false"
+                        >关闭</view
+                    >
+                    <view class="btn-primary" @tap="handleSaveQRCode"
+                        >保存图片</view
+                    >
                 </view>
             </view>
         </view>
@@ -210,7 +241,10 @@ const getStatusText = (status) => {
 const formatDate = (date) => {
     if (!date) return '-'
     const d = new Date(date)
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+        2,
+        '0'
+    )}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 // 获取过期状态样式
@@ -229,14 +263,18 @@ const handleBack = () => {
 // 编辑
 const handleEdit = () => {
     Taro.navigateTo({
-        url: `/pages/inventory-edit/inventory-edit?id=${itemData.value._id || itemData.value.id}`
+        url: `/pages/inventory/inventory-edit/inventory-edit?id=${
+            itemData.value._id || itemData.value.id
+        }`
     })
 }
 
 // 记录使用
 const handleRecord = () => {
     Taro.navigateTo({
-        url: `/pages/inventory-record/inventory-record?id=${itemData.value._id || itemData.value.id}`
+        url: `/pages/inventory/inventory-record/inventory-record?id=${
+            itemData.value._id || itemData.value.id
+        }`
     })
 }
 
@@ -296,11 +334,11 @@ const handleQRCode = async () => {
                         correctLevel: 3
                     })
 
-                    Taro.showToast({
-                        title: '二维码生成成功',
-                        icon: 'success',
-                        duration: 1000
-                    })
+                    // Taro.showToast({
+                    //     title: '二维码生成成功',
+                    //     icon: 'success',
+                    //     duration: 1000
+                    // })
                 } catch (err) {
                     console.error('生成二维码失败:', err)
                     Taro.showToast({
@@ -371,7 +409,6 @@ const handleSaveQRCode = async () => {
             title: '已保存到相册',
             icon: 'success'
         })
-
     } catch (err) {
         Taro.hideLoading()
         console.error('保存失败：', err)

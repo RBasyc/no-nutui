@@ -101,7 +101,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
-import inventoryApi from '../../api/inventoryAPI'
+import inventoryApi from '../../../api/inventoryAPI'
 import './inventory-record.scss'
 
 // 耗材数据

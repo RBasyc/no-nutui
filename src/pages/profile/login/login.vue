@@ -107,7 +107,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Taro from '@tarojs/taro'
-import userApi from '../../api/userapi'
+import userApi from '../../../api/userapi'
 import './login.scss'
 
 // 表单数据
@@ -232,7 +232,7 @@ const handleLogin = async () => {
                     })
                     setTimeout(() => {
                         Taro.navigateTo({
-                            url: '/pages/setting/setting'
+                            url: '/pages/profile/setting/setting'
                         })
                     }, 1500)
                 } else {
@@ -287,7 +287,7 @@ const handleForgotPassword = () => {
 // 注册
 const handleRegister = () => {
     Taro.navigateTo({
-        url: '/pages/register/register'
+        url: '/pages/profile/register/register'
     })
 }
 </script>

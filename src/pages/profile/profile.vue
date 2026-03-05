@@ -152,7 +152,7 @@ useDidShow(() => {
 // 跳转到登录页
 const handleLogin = () => {
     Taro.navigateTo({
-        url: '/pages/login/login'
+        url: '/pages/profile/login/login'
     })
 }
 
@@ -163,17 +163,17 @@ const handleMenuClick = (type) => {
     switch (type) {
         case 'settings':
             Taro.navigateTo({
-                url: '/pages/setting/setting'
+                url: '/pages/profile/setting/setting'
             })
             break
         case 'laboratory':
             Taro.navigateTo({
-                url: '/pages/laboratory/laboratory?from=profile'
+                url: '/pages/profile/laboratory/laboratory?from=profile'
             })
             break
         default:
             Taro.navigateTo({
-                url: '/pages/setting/setting'
+                url: '/pages/profile/setting/setting'
             })
     }
 }
@@ -204,7 +204,7 @@ const handleLogout = () => {
 
                     setTimeout(() => {
                         Taro.reLaunch({
-                            url: '/pages/login/login'
+                            url: '/pages/profile/login/login'
                         })
                     }, 1500)
                 } catch (e) {

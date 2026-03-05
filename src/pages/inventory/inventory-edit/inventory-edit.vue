@@ -348,7 +348,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
-import inventoryApi from '../../api/inventoryAPI'
+import inventoryApi from '../../../api/inventoryAPI'
 import './inventory-edit.scss'
 
 // 分类选项

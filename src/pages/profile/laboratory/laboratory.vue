@@ -166,8 +166,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import Taro, { useDidShow } from '@tarojs/taro'
-import labApi from '../../api/labapi'
-import userApi from '../../api/userapi'
+import labApi from '../../../api/labapi'
+import userApi from '../../../api/userapi'
 import './laboratory.scss'
 
 // 来源页面（用于判断返回路径）
@@ -265,7 +265,7 @@ const selectLab = (lab) => {
 const goToCreateLab = () => {
     showLabDropdown.value = false
     Taro.navigateTo({
-        url: '/pages/create-lab/create-lab?from=laboratory'
+        url: '/pages/profile/create-lab/create-lab?from=laboratory'
     })
 }
 

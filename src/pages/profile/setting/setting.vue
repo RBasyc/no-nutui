@@ -4,7 +4,11 @@
         <view class="setting-section">
             <view class="setting-item avatar-item">
                 <text class="item-label">头像</text>
-                <view class="avatar-wrapper" @tap="handleChooseAvatar">
+                <button
+                    class="avatar-wrapper"
+                    open-type="chooseAvatar"
+                    @chooseavatar="onChooseAvatar"
+                >
                     <image
                         v-if="formData.avatar"
                         :src="formData.avatar"
@@ -15,8 +19,10 @@
                         <text class="avatar-icon">📷</text>
                         <text class="avatar-text">选择头像</text>
                     </view>
-                    <text class="avatar-action">{{ formData.avatar ? '更换' : '选择' }}</text>
-                </view>
+                    <text class="avatar-action">{{
+                        formData.avatar ? '更换' : '选择'
+                    }}</text>
+                </button>
             </view>
         </view>
 
@@ -25,12 +31,16 @@
             <!-- 用户名 -->
             <view class="setting-item">
                 <text class="item-label">用户名</text>
-                <text class="item-value">{{ formData.nickName || '未设置' }}</text>
+                <text class="item-value">{{
+                    formData.nickName || '未设置'
+                }}</text>
             </view>
 
             <!-- 真实姓名 -->
             <view class="setting-item">
-                <text class="item-label">真实姓名 <text class="required">*</text></text>
+                <text class="item-label"
+                    >真实姓名 <text class="required">*</text></text
+                >
                 <input
                     v-model="formData.realName"
                     class="item-input"
@@ -42,7 +52,9 @@
 
             <!-- 手机号 -->
             <view class="setting-item">
-                <text class="item-label">手机号 <text class="required">*</text></text>
+                <text class="item-label"
+                    >手机号 <text class="required">*</text></text
+                >
                 <input
                     v-model="formData.phone"
                     type="number"
@@ -55,7 +67,9 @@
 
             <!-- 邮箱 -->
             <view class="setting-item">
-                <text class="item-label">邮箱 <text class="required">*</text></text>
+                <text class="item-label"
+                    >邮箱 <text class="required">*</text></text
+                >
                 <input
                     v-model="formData.email"
                     class="item-input"
@@ -73,13 +87,17 @@
             <!-- 注册时间 -->
             <view class="setting-item">
                 <text class="item-label">注册时间</text>
-                <text class="item-value">{{ formatDate(formData.createdAt) }}</text>
+                <text class="item-value">{{
+                    formatDate(formData.createdAt)
+                }}</text>
             </view>
 
             <!-- 最后登录 -->
             <view class="setting-item">
                 <text class="item-label">最后登录</text>
-                <text class="item-value">{{ formatDate(formData.lastLogin) }}</text>
+                <text class="item-value">{{
+                    formatDate(formData.lastLogin)
+                }}</text>
             </view>
         </view>
 
@@ -117,7 +135,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import Taro from '@tarojs/taro'
 import './setting.scss'
-import userApi from '../../api/userapi'
+import userApi from '../../../api/userapi'
 
 // 表单数据
 const formData = reactive({
@@ -205,7 +223,11 @@ const handleFieldBlur = (field) => {
             if (!stringValue || !stringValue.trim()) {
                 errors.email = '请输入邮箱'
                 errorMessage.value = '请输入邮箱'
-            } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(stringValue)) {
+            } else if (
+                !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+                    stringValue
+                )
+            ) {
                 errors.email = '邮箱格式不正确'
                 errorMessage.value = '邮箱格式不正确'
             } else {
@@ -216,30 +238,16 @@ const handleFieldBlur = (field) => {
     }
 }
 
-// 选择头像
-const handleChooseAvatar = () => {
-    Taro.chooseImage({
-        count: 1,
-        sizeType: ['compressed'],
-        sourceType: ['album', 'camera'],
-        success: (res) => {
-            const tempFilePath = res.tempFilePaths[0]
-            console.log('选择的头像:', tempFilePath)
+// 选择头像 - 使用微信小程序新版头像选择
+const onChooseAvatar = (e) => {
+    const { avatarUrl } = e.detail
+    console.log('选择的头像:', avatarUrl)
 
-            // 显示预览
-            formData.avatar = tempFilePath
+    // 显示预览
+    formData.avatar = avatarUrl
 
-            // 上传头像到服务器
-            uploadAvatar(tempFilePath)
-        },
-        fail: (err) => {
-            console.error('选择头像失败:', err)
-            Taro.showToast({
-                title: '选择头像失败',
-                icon: 'none'
-            })
-        }
-    })
+    // 上传头像到服务器
+    uploadAvatar(avatarUrl)
 }
 
 // 上传头像
@@ -261,14 +269,17 @@ const uploadAvatar = (filePath) => {
                 try {
                     const data = JSON.parse(res.data)
                     if (data.errCode === '0' || data.code === '0') {
-                        formData.avatar = data.data?.url || data.data?.path || filePath
+                        formData.avatar =
+                            data.data?.url || data.data?.path || filePath
                         console.log('上传成功，头像URL:', formData.avatar)
                         Taro.showToast({
                             title: '上传成功',
                             icon: 'success'
                         })
                     } else {
-                        throw new Error(data.errorInfo || data.message || '上传失败')
+                        throw new Error(
+                            data.errorInfo || data.message || '上传失败'
+                        )
                     }
                 } catch (e) {
                     console.error('解析失败:', e)
@@ -359,7 +370,9 @@ const handleSubmit = () => {
                         })
                     }, 1500)
                 } else {
-                    throw new Error(data.errorInfo || data.message || '保存失败')
+                    throw new Error(
+                        data.errorInfo || data.message || '保存失败'
+                    )
                 }
             }
         },
