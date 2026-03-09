@@ -65,6 +65,12 @@ pages/[page-name]/
 2. Add page route to `src/app.config.ts` pages array
 3. For tab bar pages, add to `tabBar.list` in `app.config.ts`
 
+**Current Inventory Pages:**
+- `pages/inventory/inventory` - Main inventory list with search and filters
+- `pages/inventory/inventory-record` - **Primary stock operation interface** (use/return items)
+- `pages/inventory/inventory-detail` - View detailed item information
+- `pages/inventory/inventory-edit` - Edit existing inventory items
+
 ### Navigation Patterns
 ```javascript
 // Navigate to new page
@@ -187,3 +193,37 @@ The laboratory feature has two distinct modes:
 The `laboratory.vue` page determines mode via URL parameter `?from=profile`.
 
 When creating a new lab from `laboratory.vue`, it navigates to `create-lab.vue` with `?from=laboratory`. After creation, the new lab name is stored in `newlyCreatedLab` and auto-selected when returning.
+
+## Stock Operations
+
+### Primary Interface: inventory-record Page
+
+The `inventory-record` page (`pages/inventory/inventory-record/`) is the main interface for stock operations:
+
+**Features:**
+- Two operation modes: **Use** (consume_out) and **Return** (return_in)
+- Real-time stock calculation and validation
+- Prevents operations that would result in negative stock
+- Supports QR code scanning to switch items
+- Records all operations to Transaction table with user info
+
+**API Call:**
+```javascript
+Taro.request({
+  url: inventoryApi.quantity(itemId),
+  method: 'PUT',
+  data: {
+    quantity: 5,
+    operation: 'subtract'  // or 'add'
+  },
+  header: {
+    Authorization: Taro.getStorageSync('token')
+  }
+})
+```
+
+**Backend automatically creates Transaction record with:**
+- `userName` - Current user's nickName/realName
+- `contact` - Current user's phone/email
+- `operationTime` - Timestamp of operation
+- Complete audit trail (quantityBefore, quantityAfter, type, etc.)
