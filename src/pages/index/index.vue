@@ -195,9 +195,50 @@ const getUserInfo = () => {
     }
 }
 
-// 页面加载时获取用户信息
+// 加载统计数据
+const loadStatsData = async () => {
+    try {
+        // 尝试从多个地方获取实验室名称
+        const userInfo = Taro.getStorageSync('userInfo')
+        let labName = userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
+
+        // 如果 userInfo 中没有，尝试从单独的存储中获取
+        if (!labName) {
+            labName = Taro.getStorageSync('labName') || ''
+        }
+
+        if (!labName) {
+            console.warn('未找到实验室名称，跳过统计')
+            return
+        }
+
+        const res = await Taro.request({
+            url: 'http://localhost:3001/tools/inventory-summary',
+            method: 'GET',
+            data: { labName },
+            header: {
+                'Content-Type': 'application/json'
+            }
+        })
+
+        if (res.statusCode === 200 && res.data.success) {
+            const data = res.data.data
+            statsData.value = {
+                totalStock: data.totalItems || 0,
+                expiringCount: data.expiringSoon || 0,
+                lowStockCount: data.lowStock || 0
+            }
+        }
+    } catch (error) {
+        console.error('加载统计数据失败:', error)
+        // 统计数据加载失败不影响主功能
+    }
+}
+
+// 页面加载时获取用户信息和统计数据
 onMounted(() => {
     getUserInfo()
+    loadStatsData()
 })
 
 // 统计卡片点击

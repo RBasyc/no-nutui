@@ -89,6 +89,39 @@
     }
 }
 
+.picker-input {
+    display: flex;
+    align-items: center;
+    padding: 0 20rpx;
+    background: #F5F7FB;
+    border-radius: 16rpx;
+    border: 2rpx solid transparent;
+    transition: all 0.2s ease;
+    height: 80rpx;
+
+    &.input-focused {
+        background: #fff;
+        border-color: #1E90FF;
+        box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.15);
+    }
+
+    .picker-value {
+        flex: 1;
+        font-size: 26rpx;
+        color: #2F4F4F;
+
+        &.placeholder {
+            color: #a0aeb9;
+        }
+    }
+
+    .picker-arrow {
+        font-size: 20rpx;
+        color: #a0aeb9;
+        margin-left: 8rpx;
+    }
+}
+
 .input-icon {
     font-size: 32rpx;
     margin-right: 12rpx;

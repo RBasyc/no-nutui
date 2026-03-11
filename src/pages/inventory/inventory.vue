@@ -139,7 +139,7 @@
                                 class="expiry-date"
                                 :class="getExpiryClass(item.daysUntilExpiry)"
                             >
-                                {{ item.expiryDate }}
+                                {{ formatDate(item.expiryDate) }}
                                 <text
                                     v-if="item.daysUntilExpiry !== null"
                                     class="days-badge"
@@ -388,6 +388,9 @@ const loadInventoryList = async (refresh = false) => {
 
         // 判断是否还有更多数据
         hasMore.value = inventoryItems.value.length < (data.total || 0)
+
+        // 加载统计数据
+        loadStatsData()
     } catch (error) {
         console.error('加载列表失败:', error)
         Taro.showToast({
@@ -402,6 +405,46 @@ const loadInventoryList = async (refresh = false) => {
         loading.value = false
         refreshing.value = false
         Taro.stopPullDownRefresh()
+    }
+}
+
+// 加载统计数据
+const loadStatsData = async () => {
+    try {
+        // 尝试从多个地方获取实验室名称
+        const userInfo = Taro.getStorageSync('userInfo')
+        let labName = userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
+
+        // 如果 userInfo 中没有，尝试从单独的存储中获取
+        if (!labName) {
+            labName = Taro.getStorageSync('labName') || ''
+        }
+
+        if (!labName) {
+            console.warn('未找到实验室名称，跳过统计')
+            return
+        }
+
+        const res = await Taro.request({
+            url: 'http://localhost:3001/tools/inventory-summary',
+            method: 'GET',
+            data: { labName },
+            header: {
+                'Content-Type': 'application/json'
+            }
+        })
+
+        if (res.statusCode === 200 && res.data.success) {
+            const data = res.data.data
+            statsData.value = {
+                totalItems: data.totalItems || 0,
+                expiring: data.expiringSoon || 0,
+                lowStock: data.lowStock || 0
+            }
+        }
+    } catch (error) {
+        console.error('加载统计数据失败:', error)
+        // 统计数据加载失败不影响主功能
     }
 }
 
@@ -438,6 +481,16 @@ const getExpiryClass = (days) => {
     if (days <= 7) return 'critical'
     if (days <= 30) return 'warning'
     return 'normal'
+}
+
+// 格式化日期
+const formatDate = (date) => {
+    if (!date) return '-'
+    const d = new Date(date)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+        2,
+        '0'
+    )}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 // 分类切换

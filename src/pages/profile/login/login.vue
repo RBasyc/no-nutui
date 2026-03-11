@@ -222,6 +222,8 @@ const handleLogin = async () => {
                 // 保存 token 和用户信息
                 Taro.setStorageSync('token', res.data.token)
                 Taro.setStorageSync('userInfo', res.data.userInfo)
+                console.log(Taro.getStorageSync('userInfo'))
+
                 Taro.setStorageSync('user_id', res.data.userInfo._id)
 
                 // 检查是否首次登录（没有手机号）

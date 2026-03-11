@@ -274,38 +274,50 @@
 
                     <view class="form-group">
                         <text class="form-label">购买日期</text>
-                        <view
-                            class="input-wrapper"
-                            :class="{ 'input-focused': focused.purchaseDate }"
+                        <Picker
+                            mode="date"
+                            :value="formData.purchaseDate"
+                            :end="today"
+                            @change="handlePurchaseDateChange"
                         >
-                            <text class="input-icon">📅</text>
-                            <input
-                                v-model="formData.purchaseDate"
-                                placeholder="YYYY-MM-DD"
-                                class="form-input"
-                                :disabled="loading"
-                                @focus="focused.purchaseDate = true"
-                                @blur="focused.purchaseDate = false"
-                            />
-                        </view>
+                            <view
+                                class="picker-input"
+                                :class="{ 'input-focused': focused.purchaseDate }"
+                            >
+                                <text class="input-icon">📅</text>
+                                <text
+                                    class="picker-value"
+                                    :class="{ placeholder: !formData.purchaseDate }"
+                                >
+                                    {{ formData.purchaseDate || '请选择购买日期' }}
+                                </text>
+                                <text class="picker-arrow">▼</text>
+                            </view>
+                        </Picker>
                     </view>
 
                     <view class="form-group">
                         <text class="form-label">过期日期</text>
-                        <view
-                            class="input-wrapper"
-                            :class="{ 'input-focused': focused.expiryDate }"
+                        <Picker
+                            mode="date"
+                            :value="formData.expiryDate"
+                            :start="today"
+                            @change="handleExpiryDateChange"
                         >
-                            <text class="input-icon">⏰</text>
-                            <input
-                                v-model="formData.expiryDate"
-                                placeholder="YYYY-MM-DD（可选）"
-                                class="form-input"
-                                :disabled="loading"
-                                @focus="focused.expiryDate = true"
-                                @blur="focused.expiryDate = false"
-                            />
-                        </view>
+                            <view
+                                class="picker-input"
+                                :class="{ 'input-focused': focused.expiryDate }"
+                            >
+                                <text class="input-icon">⏰</text>
+                                <text
+                                    class="picker-value"
+                                    :class="{ placeholder: !formData.expiryDate }"
+                                >
+                                    {{ formData.expiryDate || '请选择过期日期（可选）' }}
+                                </text>
+                                <text class="picker-arrow">▼</text>
+                            </view>
+                        </Picker>
                     </view>
                 </view>
 
@@ -347,6 +359,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { Picker } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import inventoryApi from '../../../api/inventoryAPI'
 import './inventory-edit.scss'
@@ -409,6 +422,21 @@ const focused = ref({
 
 // 加载状态
 const loading = ref(false)
+
+// 今天的日期（用于限制日期选择范围）
+const today = ref(new Date().toISOString().split('T')[0])
+
+// 处理购买日期选择
+const handlePurchaseDateChange = (e) => {
+    formData.value.purchaseDate = e.detail.value
+    focused.value.purchaseDate = false
+}
+
+// 处理过期日期选择
+const handleExpiryDateChange = (e) => {
+    formData.value.expiryDate = e.detail.value
+    focused.value.expiryDate = false
+}
 
 // 表单验证
 const isFormValid = computed(() => {
