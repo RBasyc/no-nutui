@@ -3,6 +3,12 @@
   "projectname": "no-nutui",
   "description": "test",
   "appid": "wxcd3a4639dd600ebc",
+  "plugins": {
+    "WechatSI": {
+      "version": "0.3.3",
+      "provider": "wx069ba97219f66d99"
+    }
+  },
   "setting": {
     "urlCheck": true,
     "es6": false,

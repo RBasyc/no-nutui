@@ -1,5 +1,6 @@
 export default defineAppConfig({
     pages: [
+    'pages/ai-chat/ai-chat',
     'pages/profile/login/login',
     'pages/profile/profile',
     'pages/profile/register/register',
@@ -11,13 +12,19 @@ export default defineAppConfig({
     'pages/inventory/inventory-edit/inventory-edit',
     'pages/inventory/inventory-record/inventory-record',
     'pages/index/index',
-    'pages/collaboration/collaboration',
+    'pages/collaboration/collaboration'
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#F0F5FA',
     navigationBarTitleText: 'WeChat',
     navigationBarTextStyle: 'black'
+  },
+  plugins: {
+    WechatSI: {
+      version: 'latest',
+      provider: 'wx069ba97219f66d99'
+    }
   },
   tabBar: {
     color: '#2F4F4F',
@@ -36,6 +43,12 @@ export default defineAppConfig({
         text: '库存',
         iconPath: './assets/icons/inventory.png',
         selectedIconPath: './assets/icons/inventory-active.png'
+      },
+      {
+        pagePath: 'pages/ai-chat/ai-chat',
+        text: 'AI助手',
+        iconPath: './assets/icons/ai-chat.png',
+        selectedIconPath: './assets/icons/ai-chat-active.png'
       },
       {
         pagePath: 'pages/collaboration/collaboration',

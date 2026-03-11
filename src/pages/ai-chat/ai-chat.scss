@@ -1,0 +1,569 @@
+.ai-chat-page {
+    background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+// ========== 顶部标题栏 ==========
+.page-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    padding: 24rpx 32rpx;
+    border-bottom: 2rpx solid rgba(30, 144, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0; // 防止被压缩
+
+    .header-title {
+        font-size: 36rpx;
+        font-weight: 700;
+        color: #2F4F4F;
+        text-align: center;
+        flex: 1;
+    }
+
+    .header-status {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+
+        .status-dot {
+            width: 16rpx;
+            height: 16rpx;
+            background: #39FF14;
+            border-radius: 50%;
+            box-shadow: 0 0 10rpx rgba(57, 255, 20, 0.5);
+        }
+
+        .status-text {
+            font-size: 22rpx;
+            color: #666;
+        }
+    }
+
+    // 录音指示器
+    .recording-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 8rpx 16rpx;
+        background: rgba(255, 59, 59, 0.1);
+        border-radius: 20rpx;
+        border: 2rpx solid rgba(255, 59, 59, 0.3);
+        animation: recordingIndicatorPulse 1.5s infinite ease-in-out;
+
+        .recording-dot {
+            width: 12rpx;
+            height: 12rpx;
+            background: #FF3B3B;
+            border-radius: 50%;
+            animation: recordingDotBlink 1s infinite;
+        }
+
+        .recording-text {
+            font-size: 22rpx;
+            color: #FF3B3B;
+            font-weight: 600;
+            min-width: 40rpx;
+            text-align: center;
+        }
+    }
+}
+
+// 录音指示器脉冲动画
+@keyframes recordingIndicatorPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+// 录音红点闪烁动画
+@keyframes recordingDotBlink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+// ========== 消息列表区域 ==========
+.messages-container {
+    flex: 1;
+    padding: 32rpx;
+    padding-bottom: 240rpx; // 增加底部空间，避免被输入框遮挡
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+    height: 100vh; // 确保容器高度正确
+
+    // 反转显示顺序，最新消息在顶部
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+// ========== 欢迎区域 ==========
+.welcome-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60rpx 32rpx;
+    animation: fadeIn 0.5s ease;
+
+    .welcome-avatar {
+        width: 120rpx;
+        height: 120rpx;
+        font-size: 64rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+        border-radius: 50%;
+        margin-bottom: 32rpx;
+        box-shadow: 0 8rpx 24rpx rgba(30, 144, 255, 0.25);
+    }
+
+    .welcome-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20rpx);
+        border-radius: 24rpx;
+        padding: 40rpx;
+        border: 2rpx solid rgba(30, 144, 255, 0.2);
+        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16rpx;
+
+        .welcome-title {
+            font-size: 32rpx;
+            font-weight: 700;
+            color: #1E90FF;
+            text-align: center;
+            margin-bottom: 8rpx;
+        }
+
+        .welcome-content {
+            font-size: 28rpx;
+            color: #2F4F4F;
+            font-weight: 600;
+        }
+
+        .welcome-item {
+            font-size: 26rpx;
+            color: #666;
+            line-height: 1.6;
+            padding-left: 16rpx;
+        }
+    }
+}
+
+// ========== 消息包装器 ==========
+.message-wrapper {
+    display: flex;
+    margin-bottom: 32rpx;
+    animation: slideIn 0.3s ease;
+
+    &.user {
+        flex-direction: row-reverse;
+    }
+
+    &.ai,
+    &.system {
+        flex-direction: row;
+    }
+}
+
+// ========== 消息头像 ==========
+.message-avatar {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36rpx;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+    box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.2);
+    overflow: hidden;
+
+    &.user {
+        background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+        margin-left: 16rpx;
+    }
+
+    &:not(.user) {
+        margin-right: 16rpx;
+    }
+}
+
+// image标签样式
+.message-avatar image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+// ========== 消息内容容器 ==========
+.message-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+}
+
+// ========== 消息气泡 ==========
+.message-bubble {
+    padding: 20rpx 24rpx;
+    border-radius: 24rpx;
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.1);
+
+    .bubble-text {
+        font-size: 28rpx;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .cursor {
+        display: inline-block;
+        animation: blink 0.8s infinite;
+        margin-left: 2rpx;
+        color: #1E90FF;
+    }
+
+    // 用户消息气泡（右对齐）
+    &.user {
+        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+        color: #ffffff;
+        border-radius: 24rpx 24rpx 4rpx 24rpx;
+        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.25);
+
+        .bubble-text {
+            color: #ffffff;
+        }
+
+        .cursor {
+            color: #ffffff;
+        }
+    }
+
+    // AI 消息气泡（左对齐）
+    &.ai,
+    &.system {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20rpx);
+        border: 2rpx solid rgba(30, 144, 255, 0.25);
+        color: #2F4F4F;
+        border-radius: 24rpx 24rpx 24rpx 4rpx;
+    }
+
+    // 流式输出中的光标效果
+    &[is-streaming="true"] {
+        .cursor {
+            display: inline-block;
+        }
+    }
+}
+
+// ========== 消息时间 ==========
+.message-time {
+    font-size: 20rpx;
+    color: #999;
+    margin-top: 8rpx;
+    padding: 0 8rpx;
+}
+
+.message-wrapper.user .message-time {
+    text-align: right;
+}
+
+// ========== AI 思考中指示器 ==========
+.typing-indicator {
+    display: flex;
+    gap: 8rpx;
+    padding: 20rpx 24rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.25);
+    border-radius: 24rpx 24rpx 24rpx 4rpx;
+    width: fit-content;
+    box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.1);
+
+    .dot {
+        width: 12rpx;
+        height: 12rpx;
+        background: #1E90FF;
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out;
+
+        &:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        &:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    }
+}
+
+// ========== 输入区域 ==========
+.input-container {
+    position: fixed;
+    bottom: 20rpx; // 直接贴近底部，留20rpx安全边距
+    left: 24rpx;
+    right: 24rpx;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    border-radius: 32rpx;
+    padding: 16rpx 20rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.25);
+    box-shadow: 0 -4rpx 20rpx rgba(30, 144, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    z-index: 100;
+    transition: all 0.3s ease;
+
+    &:focus-within {
+        border-color: rgba(30, 144, 255, 0.4);
+        box-shadow: 0 -4rpx 24rpx rgba(30, 144, 255, 0.15);
+    }
+}
+
+.input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+}
+
+.message-input {
+    flex: 1;
+    min-height: 40rpx;
+    max-height: 200rpx;
+    font-size: 28rpx;
+    color: #2F4F4F;
+    padding: 12rpx 16rpx;
+    background: transparent;
+    border: none;
+    line-height: 1.6;
+
+    &::placeholder {
+        color: #999;
+        font-size: 26rpx;
+    }
+
+    &:disabled {
+        color: #ccc;
+    }
+}
+
+// ========== 返回语音按钮（输入框模式下的"按住说话"按钮）==========
+.back-to-voice-button {
+    padding: 12rpx 20rpx;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
+    border-radius: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4rpx 12rpx rgba(255, 107, 157, 0.3);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    .back-to-voice-text {
+        font-size: 24rpx;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    &:active {
+        transform: scale(0.95);
+        box-shadow: 0 2rpx 8rpx rgba(255, 107, 157, 0.4);
+    }
+}
+
+// ========== 语音输入按钮（默认显示的大按钮）==========
+.voice-input-button {
+    flex: 1;
+    height: 72rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30, 144, 255, 0.08);
+    border-radius: 24rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    .voice-button-text {
+        font-size: 28rpx;
+        color: #1E90FF;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    &.recording {
+        background: rgba(255, 59, 59, 0.1);
+        border-color: rgba(255, 59, 59, 0.4);
+        animation: recordingPulse 1.5s infinite ease-in-out;
+
+        .voice-button-text {
+            color: #FF3B3B;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            border-radius: 24rpx;
+            background: rgba(255, 59, 59, 0.2);
+            animation: recordingRipple 1.5s infinite ease-out;
+            z-index: -1;
+        }
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+}
+
+// ========== 发送按钮 ==========
+.send-button {
+    width: 72rpx;
+    height: 72rpx;
+    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.25);
+
+    .send-icon {
+        font-size: 32rpx;
+        color: #ffffff;
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &.disabled {
+        background: linear-gradient(135deg, #ccc 0%, #999 100%);
+        box-shadow: none;
+        opacity: 0.6;
+
+        &:active {
+            transform: scale(1);
+        }
+    }
+}
+
+// ========== 底部占位 ==========
+.bottom-placeholder {
+    height: 40rpx; // 增加占位空间
+}
+
+// ========== 动画效果 ==========
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-10rpx);
+        opacity: 1;
+    }
+}
+
+// ========== 录音脉冲动画 ==========
+@keyframes recordingPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.4);
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 0.9;
+        box-shadow: 0 0 0 10rpx rgba(255, 59, 59, 0);
+    }
+}
+
+// ========== 录音波纹动画 ==========
+@keyframes recordingRipple {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+// ========== 响应式调整 ==========
+@media (max-width: 375px) {
+    .message-bubble {
+        max-width: 80%;
+    }
+
+    .input-container {
+        left: 20rpx;
+        right: 20rpx;
+    }
+}
