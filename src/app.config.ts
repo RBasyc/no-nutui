@@ -1,7 +1,7 @@
 export default defineAppConfig({
     pages: [
-    'pages/ai-chat/ai-chat',
     'pages/profile/login/login',
+    'pages/ai-chat/ai-chat',
     'pages/profile/profile',
     'pages/profile/register/register',
     'pages/profile/setting/setting',
