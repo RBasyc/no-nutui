@@ -23,7 +23,7 @@ export default defineAppConfig({
   plugins: {
     WechatSI: {
       version: 'latest',
-      provider: 'wx069ba97219f66d99'
+      provider: process.env.TARO_APP_ID || 'wx069ba97219f66d99'
     }
   },
   tabBar: {

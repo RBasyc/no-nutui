@@ -1,8 +1,57 @@
+# Taro 构建产物
 dist/
 deploy_versions/
 .temp/
 .rn_temp/
+
+# 依赖
 node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 环境变量文件（包含敏感配置）
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 .DS_Store
-.swc
+*.swc
+
+# 日志文件
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 临时文件
 *.local
+*.tmp
+*.temp
+.cache/
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# 构建相关
+.tsbuildinfo
