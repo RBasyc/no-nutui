@@ -153,6 +153,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useDidShow } from '@tarojs/taro'
 import Taro from '@tarojs/taro'
 import './ai-chat.scss'
+import { API_BASE_URL } from '../../api/config'
 
 // 声明微信插件类型
 declare const requirePlugin: (name: string) => any
@@ -322,68 +323,12 @@ const initVoiceEngine = () => {
     })
 }
 
-// 模拟 AI 回复数据
-const mockResponses = {
-    greeting: '您好！我是实验室AI助手，有什么可以帮您的吗？',
-    experiment:
-        '我已收到您的实验计划。根据分析，您可能需要以下耗材：\n\n• RIPA裂解液：约50mL\n• BCA试剂盒：1盒（用于蛋白定量）\n• 胰蛋白酶：3瓶\n\n是否需要我帮您检查当前库存？',
-    inventory:
-        '当前库存概况：\n\n总库存：128项\n即将过期：12项（21天内）\n库存不足：5项\n\n建议优先处理：胰蛋白酶（仅剩3瓶，8天后过期）',
-    help: '我可以帮您：\n\n1. 发送实验计划文本，我会提取耗材需求\n2. 询问库存状态，我会分析并提供建议\n3. 咨询采购建议，我会生成清单\n\n请直接告诉我您的需求！',
-    purchase:
-        '根据当前库存和实验计划，建议采购清单：\n\n• 胰蛋白酶：10瓶（当前仅剩3瓶）\n• RIPA裂解液：5瓶（21天后过期）\n• BCA试剂盒：2盒（库存预警）\n\n已为您生成采购建议，可直接导出Excel。',
-    expiry: '过期预警提醒：\n\n🔴 紧急（8天内）：\n  - 胰蛋白酶：3瓶\n\n⚠️ 注意（15天内）：\n  - BCA试剂盒：2盒\n  - RIPA裂解液：5瓶\n\n建议优先使用即将过期的耗材，避免浪费。',
-    default:
-        '我理解您的问题。作为实验室AI助手，我可以帮您：\n\n• 分析实验计划并提取耗材需求\n• 检查库存状态并提供预警\n• 生成采购建议清单\n• 解答实验室管理相关问题\n\n请告诉我更多细节，我会更好地帮助您！'
-}
-
 // 获取当前时间
 const getCurrentTime = () => {
     const now = new Date()
     const hours = String(now.getHours()).padStart(2, '0')
     const minutes = String(now.getMinutes()).padStart(2, '0')
     return `${hours}:${minutes}`
-}
-
-// 根据输入获取模拟回复
-const getMockResponse = (input: string): string => {
-    const lowerInput = input.toLowerCase()
-
-    if (lowerInput.includes('实验') || lowerInput.includes('计划')) {
-        return mockResponses.experiment
-    } else if (
-        lowerInput.includes('库存') ||
-        lowerInput.includes('还剩') ||
-        lowerInput.includes('多少')
-    ) {
-        return mockResponses.inventory
-    } else if (
-        lowerInput.includes('帮助') ||
-        lowerInput.includes('怎么用') ||
-        lowerInput.includes('功能')
-    ) {
-        return mockResponses.help
-    } else if (
-        lowerInput.includes('采购') ||
-        lowerInput.includes('买') ||
-        lowerInput.includes('清单')
-    ) {
-        return mockResponses.purchase
-    } else if (
-        lowerInput.includes('过期') ||
-        lowerInput.includes('有效期') ||
-        lowerInput.includes('预警')
-    ) {
-        return mockResponses.expiry
-    } else if (
-        lowerInput.includes('你好') ||
-        lowerInput.includes('您好') ||
-        lowerInput.includes('hi')
-    ) {
-        return mockResponses.greeting
-    } else {
-        return mockResponses.default
-    }
 }
 
 // 滚动到顶部（显示最新消息）
@@ -419,10 +364,125 @@ const simulateStreamResponse = async (
     scrollToTop()
 }
 
+// 格式化 AI 结构化响应
+const formatAIResponse = (aiData: any): string => {
+    if (!aiData) return '抱歉，我无法理解您的请求。'
+
+    switch (aiData.type) {
+        case 'experiment_plan':
+            let content = `✅ 已解析您的实验计划\n\n`
+            if (aiData.summary) {
+                content += `${aiData.summary}\n\n`
+            }
+            content += `📋 耗材需求清单：\n`
+            if (aiData.parsed_items && Array.isArray(aiData.parsed_items)) {
+                aiData.parsed_items.forEach((item: any, index: number) => {
+                    content += `${index + 1}. ${item.name}${item.specification ? ' ' + item.specification : ''}\n`
+                    content += `   数量：${item.quantity} ${item.unit || ''}\n`
+                    if (item.category) {
+                        content += `   分类：${item.category}\n`
+                    }
+                    content += `\n`
+                })
+            }
+            return content
+
+        case 'inventory_analysis':
+            let invContent = `📊 库存状态分析\n\n`
+
+            if (aiData.alerts) {
+                if (aiData.alerts.expired?.length > 0) {
+                    invContent += `🔴 已过期（${aiData.alerts.expired.length}项）：\n`
+                    aiData.alerts.expired.forEach((item: any) => {
+                        invContent += `  • ${item.name}：${item.quantity}${item.unit || ''}（${item.expiryDate}）\n`
+                    })
+                    invContent += `\n`
+                }
+
+                if (aiData.alerts.expiring_soon?.length > 0) {
+                    invContent += `⚠️ 即将过期（${aiData.alerts.expiring_soon.length}项）：\n`
+                    aiData.alerts.expiring_soon.forEach((item: any) => {
+                        invContent += `  • ${item.name}：${item.quantity}${item.unit || ''}（${item.days_left}天后过期）\n`
+                    })
+                    invContent += `\n`
+                }
+
+                if (aiData.alerts.low_stock?.length > 0) {
+                    invContent += `📉 库存不足（${aiData.alerts.low_stock.length}项）：\n`
+                    aiData.alerts.low_stock.forEach((item: any) => {
+                        invContent += `  • ${item.name}：当前${item.current}，最小${item.min}\n`
+                    })
+                    invContent += `\n`
+                }
+
+                if (aiData.alerts.out_of_stock?.length > 0) {
+                    invContent += `❌ 缺货（${aiData.alerts.out_of_stock.length}项）：\n`
+                    aiData.alerts.out_of_stock.forEach((item: any) => {
+                        invContent += `  • ${item.name}\n`
+                    })
+                    invContent += `\n`
+                }
+            }
+
+            if (aiData.recommendations?.length > 0) {
+                invContent += `💡 建议：\n`
+                aiData.recommendations.forEach((rec: string) => {
+                    invContent += `  • ${rec}\n`
+                })
+            }
+
+            if (aiData.summary) {
+                invContent += `\n${aiData.summary}`
+            }
+
+            return invContent || '当前库存状态正常'
+
+        case 'purchase_recommendation':
+            let purContent = `🛒 采购建议\n\n`
+            if (aiData.summary) {
+                purContent += `${aiData.summary}\n\n`
+            }
+            purContent += `📦 采购清单：\n`
+            if (aiData.items && Array.isArray(aiData.items)) {
+                aiData.items.forEach((item: any, index: number) => {
+                    const priorityIcon = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '🟢'
+                    purContent += `${priorityIcon} ${item.name}\n`
+                    purContent += `   当前库存：${item.current_quantity}\n`
+                    purContent += `   建议采购：${item.recommended_purchase}${item.unit || ''}\n`
+                    purContent += `   原因：${item.reason}\n`
+                    if (item.estimated_cost) {
+                        purContent += `   预估成本：¥${item.estimated_cost}\n`
+                    }
+                    purContent += `\n`
+                })
+            }
+            if (aiData.total_estimated_cost) {
+                purContent += `💰 总预估成本：¥${aiData.total_estimated_cost}\n`
+            }
+            return purContent
+
+        case 'text':
+            return aiData.content || ''
+
+        default:
+            // 如果是未知类型，尝试返回原始内容
+            if (typeof aiData === 'string') {
+                return aiData
+            }
+            return JSON.stringify(aiData, null, 2)
+    }
+}
+
+// 防止重复发送的标志位
+let isSending = false
+
 // 发送消息
 const handleSendMessage = async () => {
     const text = inputValue.value.trim()
-    if (!text || isThinking.value) return
+    if (!text || isThinking.value || isSending) return
+
+    // 设置发送标志，防止重复执行
+    isSending = true
 
     const userMessage: ChatMessage = {
         id: Date.now().toString(),
@@ -439,34 +499,93 @@ const handleSendMessage = async () => {
     await nextTick()
     scrollToTop()
 
-    await processUserMessage(text)
+    try {
+        await processUserMessage(text)
+    } finally {
+        // 无论成功或失败，都清除发送标志
+        isSending = false
+    }
 }
 
 // 处理用户消息（语音和手动输入共用）
 const processUserMessage = async (text: string) => {
     isThinking.value = true
-    await new Promise((resolve) =>
-        setTimeout(resolve, 800 + Math.random() * 700)
-    )
-    isThinking.value = false
 
-    const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: '',
-        timestamp: getCurrentTime(),
-        avatar: '🤖',
-        avatarUrl: '',
-        isStreaming: true
+    try {
+        // 获取对话历史（用于上下文）
+        const conversationHistory = messages.value
+            .slice(-10) // 只保留最近10条消息
+            .map(msg => ({
+                role: msg.type === 'user' ? 'user' : 'assistant',
+                content: msg.content
+            }))
+
+        // 调用后端 AI API
+        const response = await Taro.request({
+            url: `${API_BASE_URL}/ai/chat`,
+            method: 'POST',
+            header: {
+                'Content-Type': 'application/json',
+                'Authorization': Taro.getStorageSync('token') || ''
+            },
+            data: {
+                message: text,
+                conversationHistory: conversationHistory
+            }
+        })
+
+        isThinking.value = false
+
+        if (response.statusCode === 200 && response.data.errCode === '0') {
+            const aiData = response.data.data.response
+
+            // 创建 AI 消息
+            const aiMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: '',
+                timestamp: getCurrentTime(),
+                avatar: '🤖',
+                avatarUrl: '',
+                isStreaming: true
+            }
+            messages.value.push(aiMessage)
+
+            await nextTick()
+            scrollToTop()
+
+            // 根据 AI 返回类型格式化显示
+            const formattedContent = formatAIResponse(aiData)
+            const messageIndex = messages.value.length - 1
+            await simulateStreamResponse(messageIndex, formattedContent)
+        } else {
+            // API 调用失败
+            throw new Error(response.data.errorInfo || 'AI 服务暂时不可用')
+        }
+    } catch (error: any) {
+        console.error('AI 聊天错误:', error)
+        isThinking.value = false
+
+        // 显示错误消息
+        Taro.showToast({
+            title: error.message || 'AI 服务暂时不可用',
+            icon: 'none',
+            duration: 3000
+        })
+
+        // 添加系统错误消息
+        const errorMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            type: 'system',
+            content: `抱歉，${error.message || 'AI 服务暂时不可用，请稍后重试'}\n\n如果问题持续存在，请检查：\n1. 网络连接是否正常\n2. 后端服务是否启动\n3. DeepSeek API Key 是否正确配置`,
+            timestamp: getCurrentTime(),
+            avatar: '⚠️'
+        }
+        messages.value.push(errorMessage)
+
+        await nextTick()
+        scrollToTop()
     }
-    messages.value.push(aiMessage)
-
-    await nextTick()
-    scrollToTop()
-
-    const response = getMockResponse(text)
-    const messageIndex = messages.value.length - 1
-    await simulateStreamResponse(messageIndex, response)
 }
 
 // 显示输入框（单击语音按钮）
