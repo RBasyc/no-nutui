@@ -198,24 +198,61 @@ const itemData = ref(null)
 // 二维码弹窗状态
 const showQRModal = ref(false)
 
-// 获取耗材详情（从临时存储读取）
-const loadItemDetail = () => {
+// 获取耗材详情（从 API 获取）
+const loadItemDetail = async () => {
     try {
-        // 从临时存储中获取耗材数据
-        const tempData = Taro.getStorageSync('tempItemData')
+        // 从路由参数中获取耗材ID
+        const instance = Taro.getCurrentInstance()
+        const itemId = instance.router?.params?.id
 
-        if (!tempData) {
+        if (!itemId) {
             Taro.showToast({
-                title: '数据未找到',
+                title: '缺少耗材ID',
                 icon: 'none'
             })
             return
         }
 
-        itemData.value = tempData
+        const res = await Taro.request({
+            url: `http://localhost:3000/adminapi/inventory/detail/${itemId}`,
+            method: 'GET',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
 
-        // 清除临时数据
-        Taro.removeStorageSync('tempItemData')
+        if (res.statusCode === 200 && res.data.errCode === '0') {
+            const data = res.data.data
+
+            // 计算剩余天数
+            let daysUntilExpiry = null
+            if (data.expiryDate) {
+                const now = new Date()
+                const expiryDate = new Date(data.expiryDate)
+                const diffTime = expiryDate.getTime() - now.getTime()
+                daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+            }
+
+            // 设置图标
+            const categoryIcons = {
+                试剂: '🧪',
+                耗材: '💊',
+                仪器: '⚙️',
+                其他: '📦'
+            }
+
+            itemData.value = {
+                ...data,
+                icon: categoryIcons[data.category] || '📦',
+                daysUntilExpiry
+            }
+        } else {
+            Taro.showToast({
+                title: res.data?.errorInfo || '加载失败',
+                icon: 'none'
+            })
+        }
     } catch (error) {
         console.error('加载耗材详情失败:', error)
         Taro.showToast({
@@ -287,66 +324,75 @@ const handleQRCode = async () => {
     // 等待 DOM 更新后生成二维码
     await Taro.nextTick()
 
-    setTimeout(() => {
-        const query = Taro.createSelectorQuery()
-        query
-            .select('#qrcodeCanvas')
-            .fields({
-                node: true,
-                size: true
+    setTimeout(async () => {
+        try {
+            const query = Taro.createSelectorQuery()
+            query
+                .select('#qrcodeCanvas')
+                .fields({
+                    node: true,
+                    size: true
+                })
+
+            const res = await new Promise((resolve, reject) => {
+                query.exec((result) => {
+                    if (result && result[0]) {
+                        resolve(result)
+                    } else {
+                        reject(new Error('Canvas 节点未找到'))
+                    }
+                })
             })
-            .exec(async (res) => {
-                if (!res || !res[0]) {
-                    console.error('Canvas 节点未找到')
-                    Taro.showToast({
-                        title: 'Canvas 初始化失败',
-                        icon: 'none'
-                    })
-                    return
-                }
 
-                try {
-                    const canvas = res[0].node
-                    const ctx = canvas.getContext('2d')
+            if (!res || !res[0]) {
+                console.error('Canvas 节点未找到')
+                Taro.showToast({
+                    title: 'Canvas 初始化失败',
+                    icon: 'none'
+                })
+                return
+            }
 
-                    // 获取设备像素比
-                    const dpr = Taro.getSystemInfoSync().pixelRatio || 1
+            const canvas = res[0].node
+            const ctx = canvas.getContext('2d')
 
-                    // 设置 canvas 实际渲染尺寸（物理像素）
-                    const canvasSize = 200
-                    canvas.width = canvasSize * dpr
-                    canvas.height = canvasSize * dpr
+            // 获取设备像素比
+            const dpr = Taro.getSystemInfoSync().pixelRatio || 1
 
-                    // 缩放上下文以匹配 dpr
-                    ctx.scale(dpr, dpr)
+            // 设置 canvas 实际渲染尺寸（物理像素）
+            const canvasSize = 200
+            canvas.width = canvasSize * dpr
+            canvas.height = canvasSize * dpr
 
-                    // 调用方法 drawQrcode 生成二维码
-                    await drawQrcode({
-                        canvas: canvas,
-                        canvasId: 'qrcodeCanvas',
-                        width: canvasSize,
-                        height: canvasSize,
-                        padding: 15,
-                        background: '#ffffff',
-                        foreground: '#000000',
-                        text: itemData.value._id || itemData.value.id || '',
-                        typeNumber: -1,
-                        correctLevel: 3
-                    })
+            // 缩放上下文以匹配 dpr
+            ctx.scale(dpr, dpr)
 
-                    // Taro.showToast({
-                    //     title: '二维码生成成功',
-                    //     icon: 'success',
-                    //     duration: 1000
-                    // })
-                } catch (err) {
-                    console.error('生成二维码失败:', err)
-                    Taro.showToast({
-                        title: '生成二维码失败',
-                        icon: 'none'
-                    })
-                }
+            // 调用方法 drawQrcode 生成二维码
+            await drawQrcode({
+                canvas: canvas,
+                canvasId: 'qrcodeCanvas',
+                width: canvasSize,
+                height: canvasSize,
+                padding: 15,
+                background: '#ffffff',
+                foreground: '#000000',
+                text: itemData.value._id || itemData.value.id || '',
+                typeNumber: -1,
+                correctLevel: 3
             })
+
+            // Taro.showToast({
+            //     title: '二维码生成成功',
+            //     icon: 'success',
+            //     duration: 1000
+            // })
+        } catch (err) {
+            console.error('生成二维码失败:', err)
+            Taro.showToast({
+                title: '生成二维码失败',
+                icon: 'none'
+            })
+        }
     }, 300)
 }
 
@@ -371,14 +417,17 @@ const handleSaveQRCode = async () => {
         const canvasNode = await new Promise((resolve, reject) => {
             query
                 .select(`#${canvasId}`)
-                .node((res) => {
-                    if (res && res.node) {
-                        resolve(res.node)
+                .fields({
+                    node: true,
+                    size: true
+                })
+                .exec((res) => {
+                    if (res && res[0] && res[0].node) {
+                        resolve(res[0].node)
                     } else {
                         reject(new Error('获取 canvas 节点失败'))
                     }
                 })
-                .exec()
         })
 
         // 生成临时文件路径

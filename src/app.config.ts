@@ -47,8 +47,8 @@ export default defineAppConfig({
       {
         pagePath: 'pages/ai-chat/ai-chat',
         text: 'AI助手',
-        iconPath: './assets/icons/ai-chat.png',
-        selectedIconPath: './assets/icons/ai-chat-active.png'
+        iconPath: './assets/icons/robot-3-line.png',
+        selectedIconPath: './assets/icons/robot-3-line-active.png'
       },
       {
         pagePath: 'pages/collaboration/collaboration',

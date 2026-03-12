@@ -73,25 +73,39 @@
                 <text class="list-title">即将过期耗材</text>
                 <text class="list-more" @tap="handleViewAll">查看全部 →</text>
             </view>
-            <view class="consumable-list">
+
+            <!-- 有数据时显示列表 -->
+            <view v-if="expiringItems.length > 0" class="consumable-list">
                 <view
                     v-for="(item, index) in expiringItems"
                     :key="index"
                     class="list-item"
+                    @tap="handleItemClick(item)"
                 >
                     <text class="item-icon">{{ item.icon }}</text>
                     <view class="item-info">
                         <text class="item-name">{{ item.name }}</text>
                         <view class="item-desc">
                             <text>货号: {{ item.code }}</text>
-                            <text>库存: {{ item.stock }}瓶</text>
+                            <text>库存: {{ item.stock }}</text>
                         </view>
                     </view>
-                    <text v-if="item.days" class="item-expire"
-                        >{{ item.days }}天</text
-                    >
+                    <view v-if="item.days !== null" class="item-expire-wrapper">
+                        <text
+                            class="item-expire"
+                            :class="getExpiryClass(item.days)"
+                        >
+                            {{ item.days }}天
+                        </text>
+                    </view>
                     <text v-else class="item-tag">{{ item.status }}</text>
                 </view>
+            </view>
+
+            <!-- 无数据时显示空状态 -->
+            <view v-else class="empty-state">
+                <text class="empty-icon">✅</text>
+                <text class="empty-text">暂无即将过期的耗材</text>
             </view>
         </view>
 
@@ -139,7 +153,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import './index.scss'
 
 // 用户信息
@@ -167,12 +181,7 @@ const quickActions = ref([
 ])
 
 // 即将过期耗材
-const expiringItems = ref([
-    { icon: '🧪', name: 'RIPA裂解液', code: 'P0013', stock: 5, days: 21 },
-    { icon: '💊', name: 'BCA试剂盒', code: 'P0028', stock: 2, days: 15 },
-    { icon: '🧬', name: '胰蛋白酶', code: 'P0042', stock: 3, days: 8 },
-    { icon: '💉', name: 'PBS缓冲液', code: 'P0056', stock: 8, days: 30 }
-])
+const expiringItems = ref([])
 
 // 待处理采购清单
 const purchaseItems = ref([
@@ -200,7 +209,8 @@ const loadStatsData = async () => {
     try {
         // 尝试从多个地方获取实验室名称
         const userInfo = Taro.getStorageSync('userInfo')
-        let labName = userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
+        let labName =
+            userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
 
         // 如果 userInfo 中没有，尝试从单独的存储中获取
         if (!labName) {
@@ -217,7 +227,8 @@ const loadStatsData = async () => {
             method: 'GET',
             data: { labName },
             header: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
             }
         })
 
@@ -235,10 +246,102 @@ const loadStatsData = async () => {
     }
 }
 
+// 加载即将过期耗材列表
+const loadExpiringItems = async () => {
+    try {
+        const res = await Taro.request({
+            url: 'http://localhost:3000/adminapi/inventory/alerts',
+            method: 'GET',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data.errCode === '0') {
+            const allAlertItems = res.data.data.items || []
+
+            // 筛选即将过期和已过期的耗材
+            const expiringSoonItems = allAlertItems.filter(
+                (item) =>
+                    item.status === 'expiring_soon' || item.status === 'expired'
+            )
+
+            // 计算剩余天数并排序
+            const now = new Date()
+            const itemsWithDays = expiringSoonItems.map((item) => {
+                let days = null
+                let status = '正常'
+
+                if (item.expiryDate) {
+                    const expiryDate = new Date(item.expiryDate)
+                    const diffTime = expiryDate.getTime() - now.getTime()
+                    days = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+                    if (days < 0) {
+                        status = '已过期'
+                    } else if (days <= 7) {
+                        status = '紧急'
+                    } else if (days <= 15) {
+                        status = '预警'
+                    } else {
+                        status = '即将过期'
+                    }
+                }
+
+                return {
+                    ...item,
+                    days,
+                    status
+                }
+            })
+
+            // 按剩余天数排序（天数少的在前）
+            itemsWithDays.sort((a, b) => {
+                if (a.days === null) return 1
+                if (b.days === null) return -1
+                return a.days - b.days
+            })
+
+            // 取前4个
+            expiringItems.value = itemsWithDays.slice(0, 4).map((item) => {
+                // 根据分类设置图标
+                const categoryIcons = {
+                    试剂: '🧪',
+                    耗材: '💊',
+                    仪器: '⚙️',
+                    其他: '📦'
+                }
+
+                return {
+                    icon: categoryIcons[item.category] || '📦',
+                    name: item.name,
+                    code: item.code,
+                    stock: item.quantity,
+                    days: item.days,
+                    status: item.status,
+                    id: item._id || item.id
+                }
+            })
+        }
+    } catch (error) {
+        console.error('加载即将过期耗材失败:', error)
+        // 加载失败时显示空列表
+        expiringItems.value = []
+    }
+}
+
 // 页面加载时获取用户信息和统计数据
 onMounted(() => {
     getUserInfo()
     loadStatsData()
+    loadExpiringItems()
+})
+
+// 页面显示时刷新统计数据（包括从其他页面返回时）
+useDidShow(() => {
+    loadStatsData()
+    loadExpiringItems()
 })
 
 // 统计卡片点击
@@ -324,10 +427,24 @@ const toggleReminder = () => {
 
 // 查看全部
 const handleViewAll = () => {
-    Taro.showToast({
-        title: '跳转到库存页',
-        icon: 'none'
+    Taro.switchTab({
+        url: '/pages/inventory/inventory'
     })
+}
+
+// 点击耗材项
+const handleItemClick = (item) => {
+    Taro.navigateTo({
+        url: `/pages/inventory/inventory-detail/inventory-detail?id=${item.id}`
+    })
+}
+
+// 获取过期状态样式类
+const getExpiryClass = (days) => {
+    if (days < 0) return 'expired'
+    if (days <= 7) return 'critical'
+    if (days <= 15) return 'warning'
+    return 'normal'
 }
 
 // 协作共享点击

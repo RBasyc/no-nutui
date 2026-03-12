@@ -329,10 +329,31 @@
                 }
             }
 
+            .item-expire-wrapper {
+                padding: 4rpx 12rpx;
+                border-radius: 12rpx;
+                background: rgba(255, 140, 0, 0.1);
+            }
+
             .item-expire {
                 font-size: 24rpx;
                 font-weight: 600;
-                color: #FF8C00;
+
+                &.expired {
+                    color: #FF3B3B; // 已过期 - 红色
+                }
+
+                &.critical {
+                    color: #FF4500; // 7天内 - 橙红色
+                }
+
+                &.warning {
+                    color: #FF8C00; // 15天内 - 橙色
+                }
+
+                &.normal {
+                    color: #1E90FF; // 正常 - 蓝色
+                }
             }
 
             .item-tag {
@@ -347,6 +368,30 @@
                     color: #FF4500;
                 }
             }
+        }
+    }
+
+    .empty-state {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20rpx);
+        border-radius: 20rpx;
+        border: 2rpx solid rgba(30, 144, 255, 0.25);
+        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+        padding: 60rpx 32rpx;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .empty-icon {
+            font-size: 64rpx;
+            margin-bottom: 16rpx;
+        }
+
+        .empty-text {
+            font-size: 28rpx;
+            color: #666;
+            text-align: center;
         }
     }
 }

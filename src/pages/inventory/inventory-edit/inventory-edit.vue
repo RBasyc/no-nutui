@@ -484,6 +484,17 @@ const handleFieldBlur = (field) => {
     }
 }
 
+// 格式化日期为 YYYY-MM-DD
+const formatDateForPicker = (date) => {
+    if (!date) return ''
+    const d = new Date(date)
+    if (isNaN(d.getTime())) return ''
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
 // 加载耗材详情（编辑模式）
 const loadItemDetail = async () => {
     if (!itemId.value) return
@@ -517,8 +528,8 @@ const loadItemDetail = async () => {
             maxQuantity: item.maxQuantity?.toString() || '',
             price: item.price?.toString() || '',
             supplier: item.supplier || '',
-            purchaseDate: item.purchaseDate || '',
-            expiryDate: item.expiryDate || '',
+            purchaseDate: formatDateForPicker(item.purchaseDate),
+            expiryDate: formatDateForPicker(item.expiryDate),
             location: item.location || '',
             remarks: item.remarks || ''
         }

@@ -247,7 +247,7 @@ const toggleLabDropdown = () => {
     if (showLabDropdown.value && labList.value.length === 0) {
         loadLabList()
     }
-    focused.value.labName = showLabDropdown.value
+    focused.labName = showLabDropdown.value
 }
 
 // 选择实验室
@@ -255,6 +255,15 @@ const selectLab = (lab) => {
     selectedLab.value = lab
     formData.labName = lab.labName
     formData.university = lab.university
+
+    // 同步更新管理信息
+    if (lab.managerName) {
+        formData.managerName = lab.managerName
+    }
+    if (lab.managerContact) {
+        formData.managerContact = lab.managerContact
+    }
+
     showLabDropdown.value = false
     focused.labName = false
     errors.labName = ''
@@ -392,6 +401,26 @@ const handleSubmit = () => {
                         }
                         Taro.setStorageSync('labName', formData.labName)
                         Taro.setStorageSync('laboratoryInfo', formData)
+
+                        // 更新 token（后端会返回包含新 labName 的 token）
+                        if (res.data.token) {
+                            Taro.setStorageSync('token', res.data.token)
+                        }
+
+                        // 清除库存相关缓存，以便切换实验室后能看到正确的耗材
+                        Taro.removeStorageSync('inventoryList')
+                        Taro.removeStorageSync('inventoryData')
+
+                        // 更新新选择的实验室完整信息
+                        if (selectedLab.value) {
+                            const updatedLabInfo = {
+                                labName: selectedLab.value.labName,
+                                university: selectedLab.value.university,
+                                managerName: formData.managerName,
+                                managerContact: formData.managerContact
+                            }
+                            Taro.setStorageSync('laboratoryInfo', updatedLabInfo)
+                        }
                     }
 
                     Taro.showToast({

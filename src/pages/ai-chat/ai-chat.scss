@@ -103,7 +103,7 @@
 .messages-container {
     flex: 1;
     padding: 32rpx;
-    padding-bottom: 240rpx; // 增加底部空间，避免被输入框遮挡
+    padding-bottom: 140rpx; // 减小底部空间，因为输入框现在贴底
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
@@ -328,18 +328,20 @@
 // ========== 输入区域 ==========
 .input-container {
     position: fixed;
-    bottom: 20rpx; // 直接贴近底部，留20rpx安全边距
-    left: 24rpx;
-    right: 24rpx;
+    bottom: 0; // 贴合屏幕底部
+    left: 0;
+    right: 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20rpx);
-    border-radius: 32rpx;
-    padding: 16rpx 20rpx;
+    border-radius: 32rpx 32rpx 0 0; // 只在上面圆角
+    padding: 16rpx 24rpx;
+    padding-bottom: calc(16rpx + env(safe-area-inset-bottom)); // 适配底部安全区
     border: 2rpx solid rgba(30, 144, 255, 0.25);
+    border-bottom: none; // 底部无边框
     box-shadow: 0 -4rpx 20rpx rgba(30, 144, 255, 0.1);
     display: flex;
     align-items: center;
-    gap: 12rpx;
+    gap: 8rpx; // 减小间距
     z-index: 100;
     transition: all 0.3s ease;
 
@@ -353,19 +355,22 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 12rpx;
+    gap: 8rpx; // 减小间距
+    min-width: 0; // 防止flex子元素溢出
 }
 
 .message-input {
     flex: 1;
     min-height: 40rpx;
-    max-height: 200rpx;
+    max-height: 120rpx; // 减小最大高度
     font-size: 28rpx;
     color: #2F4F4F;
     padding: 12rpx 16rpx;
-    background: transparent;
+    background: rgba(30, 144, 255, 0.05); // 添加背景色
+    border-radius: 20rpx; // 添加圆角
     border: none;
     line-height: 1.6;
+    overflow-y: auto; // 添加垂直滚动
 
     &::placeholder {
         color: #999;
@@ -379,7 +384,7 @@
 
 // ========== 返回语音按钮（输入框模式下的"按住说话"按钮）==========
 .back-to-voice-button {
-    padding: 12rpx 20rpx;
+    padding: 10rpx 16rpx; // 减小padding
     background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
     border-radius: 20rpx;
     display: flex;
@@ -388,11 +393,13 @@
     box-shadow: 0 4rpx 12rpx rgba(255, 107, 157, 0.3);
     transition: all 0.2s ease;
     flex-shrink: 0;
+    min-width: 0; // 防止溢出
 
     .back-to-voice-text {
-        font-size: 24rpx;
+        font-size: 22rpx; // 减小字号
         color: #ffffff;
         font-weight: 600;
+        white-space: nowrap; // 防止换行
     }
 
     &:active {
@@ -453,8 +460,8 @@
 
 // ========== 发送按钮 ==========
 .send-button {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx; // 减小尺寸
+    height: 64rpx;
     background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
     border-radius: 50%;
     display: flex;
@@ -465,7 +472,7 @@
     box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.25);
 
     .send-icon {
-        font-size: 32rpx;
+        font-size: 28rpx; // 减小字号
         color: #ffffff;
     }
 
@@ -486,7 +493,7 @@
 
 // ========== 底部占位 ==========
 .bottom-placeholder {
-    height: 40rpx; // 增加占位空间
+    height: 20rpx; // 减小占位空间
 }
 
 // ========== 动画效果 ==========
@@ -563,7 +570,29 @@
     }
 
     .input-container {
-        left: 20rpx;
-        right: 20rpx;
+        padding: 12rpx 20rpx;
+        gap: 6rpx;
+    }
+
+    .back-to-voice-button {
+        padding: 8rpx 12rpx;
+
+        .back-to-voice-text {
+            font-size: 20rpx;
+        }
+    }
+
+    .send-button {
+        width: 56rpx;
+        height: 56rpx;
+
+        .send-icon {
+            font-size: 24rpx;
+        }
+    }
+
+    .message-input {
+        font-size: 26rpx;
+        padding: 10rpx 12rpx;
     }
 }
