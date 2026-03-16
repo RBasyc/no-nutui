@@ -1,5 +1,6 @@
 export default defineAppConfig({
     pages: [
+    'pages/index/index',
     'pages/profile/login/login',
     'pages/ai-chat/ai-chat',
     'pages/profile/profile',
@@ -11,8 +12,8 @@ export default defineAppConfig({
     'pages/inventory/inventory-detail/inventory-detail',
     'pages/inventory/inventory-edit/inventory-edit',
     'pages/inventory/inventory-record/inventory-record',
-    'pages/index/index',
-    'pages/collaboration/collaboration'
+    'pages/collaboration/collaboration',
+    'pages/experiment-plan/experiment-plan'
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -52,9 +53,9 @@ export default defineAppConfig({
       },
       {
         pagePath: 'pages/collaboration/collaboration',
-        text: '协作',
-        iconPath: './assets/icons/collaboration.png',
-        selectedIconPath: './assets/icons/collaboration-active.png'
+        text: '计划',
+        iconPath: './assets/icons/plan.png',
+        selectedIconPath: './assets/icons/plan-active.png'
       },
       {
         pagePath: 'pages/profile/profile',

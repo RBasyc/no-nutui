@@ -1,4 +1,4 @@
-/* 🤝 协作页 - 科技实验室风格 */
+/* 📋 计划页 - 实验计划与耗材共享 */
 
 .collaboration-page {
     min-height: 100vh;
@@ -36,64 +36,180 @@
     }
 }
 
-/* 统计概览 */
-.collab-stats {
-    display: flex;
-    justify-content: space-between;
-    padding: 24rpx 32rpx;
-    gap: 16rpx;
+/* ====== 上半部分：实验计划区域 ====== */
+.experiment-plan-section {
+    padding: 24rpx 32rpx 32rpx;
 
-    .stat-card {
-        flex: 1;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20rpx);
-        border-radius: 16rpx;
-        padding: 24rpx 16rpx;
+    .section-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        gap: 12rpx;
-        border: 2rpx solid rgba(30, 144, 255, 0.25);
-        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+        margin-bottom: 20rpx;
 
-        .stat-icon {
-            font-size: 36rpx;
+        .section-title {
+            font-size: 32rpx;
+            font-weight: 700;
+            color: #2F4F4F;
         }
 
-        .stat-info {
-            display: flex;
-            flex-direction: column;
-
-            .stat-value {
-                font-size: 32rpx;
-                font-weight: 700;
-                background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-
-            .stat-label {
-                font-size: 22rpx;
-                color: #2F4F4F;
-                font-weight: 500;
-            }
-        }
-
-        &.warning .stat-value {
-            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        &.success .stat-value {
-            background: linear-gradient(135deg, #32CD32 0%, #39FF14 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .view-more {
+            font-size: 24rpx;
+            color: #1E90FF;
+            font-weight: 500;
         }
     }
+
+    .plan-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20rpx;
+    }
+
+    .plan-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20rpx);
+        border-radius: 20rpx;
+        padding: 24rpx;
+        border: 2rpx solid rgba(30, 144, 255, 0.25);
+        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+        transition: all 0.15s ease;
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16rpx;
+
+            .plan-title {
+                font-size: 30rpx;
+                font-weight: 600;
+                color: #2F4F4F;
+                flex: 1;
+            }
+
+            .plan-status {
+                padding: 8rpx 20rpx;
+                border-radius: 16rpx;
+                font-size: 22rpx;
+                font-weight: 600;
+
+                &.pending {
+                    background: rgba(255, 140, 0, 0.15);
+                    color: #FF8C00;
+                }
+
+                &.ongoing {
+                    background: rgba(30, 144, 255, 0.15);
+                    color: #1E90FF;
+                }
+
+                &.completed {
+                    background: rgba(50, 205, 50, 0.15);
+                    color: #32CD32;
+                }
+            }
+        }
+
+        .plan-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16rpx;
+
+            .plan-type {
+                font-size: 24rpx;
+                color: #1E90FF;
+                font-weight: 500;
+            }
+
+            .plan-date {
+                font-size: 24rpx;
+                color: #999;
+            }
+        }
+
+        .plan-items {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16rpx;
+
+            .items-label {
+                font-size: 24rpx;
+                color: #999;
+                margin-bottom: 12rpx;
+            }
+
+            .items-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12rpx;
+
+                .item-tag {
+                    padding: 8rpx 16rpx;
+                    border-radius: 12rpx;
+                    font-size: 22rpx;
+                    font-weight: 500;
+
+                    &.sufficient {
+                        background: rgba(50, 205, 50, 0.15);
+                        color: #32CD32;
+                    }
+
+                    &.insufficient {
+                        background: rgba(255, 69, 0, 0.15);
+                        color: #FF4500;
+                    }
+
+                    &.expiring {
+                        background: rgba(255, 140, 0, 0.15);
+                        color: #FF8C00;
+                    }
+
+                    &.more {
+                        background: rgba(30, 144, 255, 0.15);
+                        color: #1E90FF;
+                    }
+                }
+            }
+        }
+
+        .plan-progress {
+            display: flex;
+            align-items: center;
+            gap: 16rpx;
+
+            .progress-bar {
+                flex: 1;
+                height: 12rpx;
+                background: rgba(30, 144, 255, 0.1);
+                border-radius: 6rpx;
+                overflow: hidden;
+
+                .progress-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #1E90FF 0%, #00BFFF 100%);
+                    border-radius: 6rpx;
+                    transition: width 0.3s ease;
+                }
+            }
+
+            .progress-text {
+                font-size: 24rpx;
+                font-weight: 600;
+                color: #1E90FF;
+                min-width: 70rpx;
+                text-align: right;
+            }
+        }
+    }
+}
+
+/* ====== 下半部分：耗材共享区域 ====== */
+.consumable-sharing-section {
+    padding: 0 0 24rpx;
 }
 
 /* 标签切换 */
@@ -320,36 +436,6 @@
     }
 }
 
-/* 我的协作 */
-.my-collab-list {
-    padding: 80rpx 32rpx;
-
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        .empty-icon {
-            font-size: 120rpx;
-            margin-bottom: 24rpx;
-            opacity: 0.3;
-        }
-
-        .empty-text {
-            font-size: 30rpx;
-            color: #2F4F4F;
-            font-weight: 600;
-            margin-bottom: 12rpx;
-        }
-
-        .empty-hint {
-            font-size: 24rpx;
-            color: #999;
-        }
-    }
-}
-
 /* 我的共享 */
 .my-share-list {
     padding: 0 32rpx;
@@ -419,65 +505,6 @@
                 background: rgba(30, 144, 255, 0.1);
                 padding: 6rpx 16rpx;
                 border-radius: 12rpx;
-            }
-        }
-    }
-}
-
-/* 消息列表 */
-.message-list {
-    padding: 0 32rpx;
-
-    .message-item {
-        display: flex;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20rpx);
-        border-radius: 16rpx;
-        padding: 24rpx;
-        margin-bottom: 16rpx;
-        border: 2rpx solid rgba(30, 144, 255, 0.25);
-        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
-
-        .message-avatar {
-            width: 64rpx;
-            height: 64rpx;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32rpx;
-            margin-right: 16rpx;
-            flex-shrink: 0;
-        }
-
-        .message-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-
-            .message-top {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 8rpx;
-
-                .message-name {
-                    font-size: 28rpx;
-                    font-weight: 600;
-                    color: #2F4F4F;
-                }
-
-                .message-time {
-                    font-size: 22rpx;
-                    color: #999;
-                }
-            }
-
-            .message-content {
-                font-size: 26rpx;
-                color: #666;
-                line-height: 1.5;
             }
         }
     }

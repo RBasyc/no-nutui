@@ -23,6 +23,8 @@ export default defineConfig<'vite'>(async (merge, { command, mode }) => {
     defineConstants: {
       'process.env.TARO_APP_ID': JSON.stringify(process.env.TARO_APP_ID || 'wxXXXXXXXXXXXXXXXX'),
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'http://localhost:3000'),
+      'import.meta.env.VITE_BACKEND_BASE_URL': JSON.stringify(process.env.VITE_BACKEND_BASE_URL || 'http://localhost:3000'),
+      'import.meta.env.VITE_MCP_BASE_URL': JSON.stringify(process.env.VITE_MCP_BASE_URL || 'http://localhost:3001'),
     },
     copy: {
       patterns: [

@@ -1,3 +1,15 @@
+// Vite 环境变量类型声明
+interface ImportMetaEnv {
+  readonly VITE_BACKEND_BASE_URL?: string
+  readonly VITE_MCP_BASE_URL?: string
+  readonly VITE_API_BASE_URL?: string
+  readonly TARO_APP_ID?: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
 // 微信小程序插件类型声明
 declare function requirePlugin(name: string): any
 

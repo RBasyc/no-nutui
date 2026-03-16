@@ -426,7 +426,7 @@ const loadStatsData = async () => {
         }
 
         const res = await Taro.request({
-            url: 'http://localhost:3001/tools/inventory-summary',
+            url: inventoryApi.summary,
             method: 'GET',
             data: { labName },
             header: {

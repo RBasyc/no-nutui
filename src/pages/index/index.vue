@@ -113,26 +113,34 @@
         <view class="list-section">
             <view class="list-header">
                 <text class="list-title">待处理采购清单</text>
-                <text class="list-more" @tap="handleActionClick('导出Excel')"
+                <text class="list-more" @tap="handleExportPurchaseList"
                     >导出Excel</text
                 >
             </view>
-            <view class="consumable-list">
+            <!-- 有数据时显示列表 -->
+            <view v-if="purchaseItems.length > 0" class="consumable-list">
                 <view
                     v-for="(item, index) in purchaseItems"
                     :key="index"
                     class="list-item purchase-item"
+                    @tap="handleItemClick(item)"
                 >
                     <text class="item-icon">{{ item.icon }}</text>
                     <view class="item-info">
                         <text class="item-name">{{ item.name }}</text>
                         <view class="item-desc">
-                            <text>建议采购量: {{ item.suggestQty }}支</text>
-                            <text>缺货预警</text>
+                            <text>建议采购: {{ item.suggestQty }}{{ item.unit }}</text>
+                            <text>当前: {{ item.currentStock }}</text>
                         </view>
                     </view>
                     <text class="item-tag urgent">{{ item.status }}</text>
                 </view>
+            </view>
+
+            <!-- 无数据时显示空状态 -->
+            <view v-else class="empty-state">
+                <text class="empty-icon">✅</text>
+                <text class="empty-text">暂无需要采购的耗材</text>
             </view>
         </view>
 
@@ -154,6 +162,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Taro, { useDidShow } from '@tarojs/taro'
+import inventoryApi from '../../api/inventoryAPI'
 import './index.scss'
 
 // 用户信息
@@ -184,10 +193,7 @@ const quickActions = ref([
 const expiringItems = ref([])
 
 // 待处理采购清单
-const purchaseItems = ref([
-    { icon: '🧬', name: '胰蛋白酶', suggestQty: 10, status: '缺货' },
-    { icon: '🧪', name: 'RIPA裂解液', suggestQty: 5, status: '预警' }
-])
+const purchaseItems = ref([])
 
 // 获取用户信息
 const getUserInfo = () => {
@@ -223,7 +229,7 @@ const loadStatsData = async () => {
         }
 
         const res = await Taro.request({
-            url: 'http://localhost:3001/tools/inventory-summary',
+            url: inventoryApi.summary,
             method: 'GET',
             data: { labName },
             header: {
@@ -250,7 +256,7 @@ const loadStatsData = async () => {
 const loadExpiringItems = async () => {
     try {
         const res = await Taro.request({
-            url: 'http://localhost:3000/adminapi/inventory/alerts',
+            url: inventoryApi.alerts,
             method: 'GET',
             header: {
                 'Content-Type': 'application/json',
@@ -331,17 +337,158 @@ const loadExpiringItems = async () => {
     }
 }
 
+// 加载待处理采购清单
+const loadPurchaseItems = async () => {
+    try {
+        const res = await Taro.request({
+            url: inventoryApi.alerts,
+            method: 'GET',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data.errCode === '0') {
+            const allAlertItems = res.data.data.items || []
+
+            // 筛选库存不足和缺货的耗材
+            const lowStockItems = allAlertItems.filter(
+                (item) =>
+                    item.status === 'low_stock' || item.status === 'out_of_stock'
+            )
+
+            // 计算建议采购量并排序
+            const itemsWithSuggestion = lowStockItems.map((item) => {
+                // 建议采购量 = 最大库存 - 当前库存
+                // 如果没有最大库存，则使用最小库存的2倍作为建议量
+                const maxQty = item.maxQuantity || item.minQuantity * 2
+                const suggestQty = Math.max(0, maxQty - item.quantity)
+
+                // 根据分类设置图标
+                const categoryIcons = {
+                    试剂: '🧪',
+                    耗材: '💊',
+                    仪器: '⚙️',
+                    其他: '📦'
+                }
+
+                return {
+                    icon: categoryIcons[item.category] || '📦',
+                    name: item.name,
+                    code: item.code,
+                    suggestQty: suggestQty,
+                    unit: item.unit,
+                    currentStock: item.quantity,
+                    maxQuantity: item.maxQuantity || item.minQuantity * 2,
+                    status: item.quantity === 0 ? '缺货' : '预警',
+                    id: item._id || item.id
+                }
+            })
+
+            // 按库存短缺程度排序（缺货的在前，然后按建议采购量降序）
+            itemsWithSuggestion.sort((a, b) => {
+                if (a.status === '缺货' && b.status !== '缺货') return -1
+                if (a.status !== '缺货' && b.status === '缺货') return 1
+                return b.suggestQty - a.suggestQty
+            })
+
+            // 取前4个
+            purchaseItems.value = itemsWithSuggestion.slice(0, 4)
+        }
+    } catch (error) {
+        console.error('加载采购清单失败:', error)
+        // 加载失败时显示空列表
+        purchaseItems.value = []
+    }
+}
+
+// 导出采购清单（保存为 XLS 文件）
+const handleExportPurchaseList = async () => {
+    try {
+        if (purchaseItems.value.length === 0) {
+            Taro.showToast({
+                title: '暂无采购数据',
+                icon: 'none'
+            })
+            return
+        }
+
+        Taro.showLoading({ title: '生成中...' })
+
+        // 格式化日期
+        const now = new Date()
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+        // 构建 CSV 内容（逗号分隔，Excel 兼容）
+        // 添加 UTF-8 BOM，让 Excel 正确识别中文编码
+        const BOM = '\uFEFF'
+        let csvContent = BOM + '耗材名称,货号,当前库存,单位,建议采购量,状态\n'
+        purchaseItems.value.forEach(item => {
+            csvContent += `${item.name},${item.code},${item.currentStock},${item.unit},${item.suggestQty},${item.status}\n`
+        })
+
+        // 写入文件
+        const fs = Taro.getFileSystemManager()
+        const fileName = `采购清单_${dateStr}.xls`
+        const tempFilePath = `${wx.env.USER_DATA_PATH}/${fileName}`
+
+        await new Promise((resolve, reject) => {
+            fs.writeFile({
+                filePath: tempFilePath,
+                data: csvContent,
+                encoding: 'utf8',
+                success: resolve,
+                fail: reject
+            })
+        })
+
+        Taro.hideLoading()
+
+        // 打开文档预览（用户可通过右上角菜单保存）
+        Taro.openDocument({
+            filePath: tempFilePath,
+            fileType: 'xls',
+            showMenu: true,
+            success: () => {
+                console.log('文档打开成功，用户可通过右上角菜单保存')
+            },
+            fail: (err) => {
+                console.error('打开文档失败:', err)
+                // 降级方案：复制到剪贴板
+                Taro.setClipboardData({
+                    data: csvContent
+                })
+                Taro.showModal({
+                    title: '预览失败',
+                    content: '已将内容复制到剪贴板\n\n可粘贴到 Excel 使用',
+                    showCancel: false
+                })
+            }
+        })
+    } catch (error) {
+        Taro.hideLoading()
+        console.error('导出失败:', error)
+        Taro.showToast({
+            title: '导出失败',
+            icon: 'none'
+        })
+    }
+}
+
 // 页面加载时获取用户信息和统计数据
 onMounted(() => {
     getUserInfo()
     loadStatsData()
     loadExpiringItems()
+    loadPurchaseItems()
 })
 
 // 页面显示时刷新统计数据（包括从其他页面返回时）
 useDidShow(() => {
     loadStatsData()
     loadExpiringItems()
+    loadPurchaseItems()
 })
 
 // 统计卡片点击

@@ -117,7 +117,7 @@
                 />
 
                 <view class="back-to-voice-button" @tap="hideInput">
-                    <text class="back-to-voice-text">按住说话</text>
+                    <text class="back-to-voice-text">按住说话/</text>
                 </view>
 
                 <view
@@ -141,7 +141,7 @@
                 @touchcancel="handleTouchCancel"
             >
                 <text class="voice-button-text">
-                    {{ isRecording ? `录音中 ${recordingTime}s` : '按住说话' }}
+                    {{ isRecording ? `录音中 ${recordingTime}s` : '长按说话/点击输入' }}
                 </text>
             </view>
         </view>

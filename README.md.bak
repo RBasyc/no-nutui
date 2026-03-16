@@ -168,74 +168,14 @@ npm run build:h5       # H5
 ## ⚙️ 配置说明
 
 ### API 配置
-
-项目使用**双服务架构**，需要配置两个后端地址：
-
-#### 1. 环境变量配置
-
-在项目根目录创建 `.env.local` 文件（参考 [.env.example](.env.example)）：
-
-```bash
-# 后端服务地址 (端口 3000) - 主要业务接口
-VITE_BACKEND_BASE_URL=http://localhost:3000
-
-# MCP 服务地址 (端口 3001) - AI 工具接口
-VITE_MCP_BASE_URL=http://localhost:3001
-
-# 微信小程序 AppID
-TARO_APP_ID=wx069ba97219f66d99
-```
-
-#### 2. 生产环境配置
-
-在生产环境中，创建 `.env.production` 文件：
-
-```bash
-# 生产环境 API 地址
-VITE_BACKEND_BASE_URL=https://your-api.com
-VITE_MCP_BASE_URL=https://your-mcp.com
-TARO_APP_ID=wxXXXXXXXXXXXXXXXX
-```
-
-#### 3. 代码中的使用
+在 [src/api/config.ts](src/api/config.ts) 中配置后端 API 地址：
 
 ```typescript
-// src/api/config.ts
-import { BACKEND_BASE_URL, MCP_BASE_URL } from './config'
-
-// 后端服务接口 - 用户、库存、实验室等业务
-const apiUrl = BACKEND_BASE_URL + '/adminapi/inventory/list'
-
-// MCP 服务接口 - AI 智能查询工具
-const mcpUrl = MCP_BASE_URL + '/tools/inventory-summary'
-```
-
-#### 4. 内网/远程调试
-
-如果需要连接内网或远程服务器：
-
-```bash
-# .env.local
-VITE_BACKEND_BASE_URL=http://192.168.0.31:3000
-VITE_MCP_BASE_URL=http://192.168.0.31:3001
+export const API_BASE_URL = 'https://your-api.com/api'
 ```
 
 ### 页面路由配置
-
 在 [src/app.config.ts](src/app.config.ts) 中配置页面路由和底部导航栏。
-
-### 微信语音识别插件配置
-
-在 `src/app.config.ts` 中已配置微信语音识别插件：
-
-```typescript
-plugins: {
-  wechatSI: {
-    version: '0.3.3',
-    provider: 'wx069ba97219f66d99'
-  }
-}
-```
 
 ## 📱 页面说明
 
@@ -257,108 +197,44 @@ plugins: {
 
 ## 🔌 API 接口
 
-> **服务架构**：
-> - **后端服务** (3000端口): 用户认证、库存管理、实验室管理等核心业务
-> - **MCP 服务** (3001端口): AI 智能查询工具（库存摘要、过期预警等）
+> **基础 URL**: 配置在 `src/api/config.ts`，默认为 `http://localhost:3000`
 
 > **响应格式**:
 > - 成功: `{ errCode: '0', data: {...} }`
 > - 失败: `{ errCode: '-1', errorInfo: '错误信息' }`
 
 ### 用户相关 (`userapi.ts`)
-- `POST /user/login` - 用户登录
-- `POST /user/register` - 用户注册
-- `POST /user/update-profile` - 更新用户信息
-- `POST /user/check-nickname` - 检查昵称可用性
-- `POST /upload/image` - 上传文件（头像等）
+- `POST /api/user/register` - 用户注册
+- `POST /api/user/login` - 用户登录
+- `POST /api/user/update` - 更新用户信息
+- `POST /api/user/profile` - 获取用户信息
+- `POST /api/upload` - 上传文件（头像等）
 
 ### 库存相关 (`inventoryAPI.ts`)
-- `GET /adminapi/inventory/list` - 获取库存列表（支持搜索）
-- `GET /adminapi/inventory/detail/:id` - 获取库存详情
-- `GET /adminapi/inventory/search` - 搜索耗材
-- `GET /adminapi/inventory/by-code` - 扫码查询
-- `GET /adminapi/inventory/alerts` - 获取预警耗材
-- `GET /adminapi/inventory/stats` - 库存统计
-- `POST /adminapi/inventory/add` - 创建库存物品
-- `PUT /adminapi/inventory/update/:id` - 更新库存物品
-- `PUT /adminapi/inventory/quantity/:id` - 更新库存数量
+- `GET /api/inventory/list` - 获取库存列表（支持搜索）
+- `GET /api/inventory/detail/:id` - 获取库存详情
+- `POST /api/inventory/create` - 创建库存物品
+- `POST /api/inventory/update` - 更新库存物品
+- `PUT /api/inventory/quantity/:id` - 更新库存数量
   - 参数: `{ quantity: number, operation: 'add' | 'subtract' }`
   - 自动创建出入库流水记录
-- `DELETE /adminapi/inventory/delete/:id` - 删除库存物品
-- `GET /tools/inventory-summary` - **MCP 服务**: 库存统计摘要
+- `DELETE /api/inventory/delete/:id` - 删除库存物品
 
 ### 出入库流水 (`transactionAPI.ts`)
-- `GET /adminapi/transaction/list` - 查询流水记录
-- `GET /adminapi/transaction/statistics` - 流水统计
+- `POST /api/transaction/stock-in` - 入库操作
+- `POST /api/transaction/stock-out` - 出库操作
+- `GET /api/transaction/records` - 查询流水记录
+- `DELETE /api/transaction/records/:id` - 删除流水记录
 
 > **流水记录自动包含**: 操作人姓名、联系方式、操作时间、数量变化等完整审计信息
 
 ### 实验室相关 (`labapi.ts`)
-- `GET /lab/list` - 获取实验室列表
-- `GET /lab/search` - 搜索实验室
-- `GET /lab/detail/:labName` - 获取实验室详情
-- `POST /lab/create` - 创建实验室
-- `PUT /lab/update/:labName` - 更新实验室信息
-- `DELETE /lab/delete/:labName` - 删除实验室
-
-### AI 智能助手
-- `POST /ai/chat` - AI 聊天接口
-  - 支持自然语言库存查询
-  - 自动调用 MCP 工具获取数据
-
-## 🌐 服务架构说明
-
-### 双服务设计
-
-```
-┌─────────────────┐
-│  前端 (no-nutui) │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
-┌──────┐  ┌──────┐
-│ 3000 │  │ 3001 │
-│后端  │  │ MCP  │
-│服务  │  │ 服务 │
-└──────┘  └──────┘
-```
-
-**后端服务** (端口 3000):
-- 用户认证与授权
-- 库存 CRUD 操作
-- 出入库流水管理
-- 实验室管理
-- AI 聊天接口
-
-**MCP 服务** (端口 3001):
-- `/tools/inventory-summary` - 库存统计摘要
-- `/tools/expired-items` - 已过期耗材
-- `/tools/expiring-items` - 即将过期耗材
-- `/tools/low-stock-items` - 库存不足耗材
-- `/tools/out-of-stock-items` - 缺货耗材
-- `/tools/search-inventory` - 搜索耗材
-- `/tools/check-item` - 检查耗材可用性
-- `/tools/purchase-suggestions` - 采购建议
-
-### MCP 工具调用流程
-
-```
-用户语音/文字输入
-       ↓
-AI 聊天接口 (/ai/chat)
-       ↓
-DeepSeek AI 解析意图
-       ↓
-调用 MCP 工具 (如 /tools/inventory-summary)
-       ↓
-返回结构化数据
-       ↓
-AI 生成自然语言回复
-       ↓
-展示给用户
-```
+- `GET /api/lab/list` - 获取实验室列表
+- `GET /api/lab/search` - 搜索实验室
+- `GET /api/lab/detail/:labName` - 获取实验室详情
+- `POST /api/lab/create` - 创建实验室
+- `POST /api/lab/update/:labName` - 更新实验室信息
+- `DELETE /api/lab/delete/:labName` - 删除实验室
 
 ## 📄 许可证
 
@@ -387,9 +263,7 @@ MIT License
 
 ```typescript
 // 1. 在对应的 API 文件中定义接口
-import { BACKEND_BASE_URL } from './config'
-
-export const apiName = BACKEND_BASE_URL + '/path/to/api'
+export const apiName = API_BASE_URL + '/path/to/api'
 
 // 2. 发起请求
 Taro.request({
