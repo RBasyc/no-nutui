@@ -117,7 +117,7 @@
                 />
 
                 <view class="back-to-voice-button" @tap="hideInput">
-                    <text class="back-to-voice-text">按住说话/</text>
+                    <text class="back-to-voice-text">按住说话</text>
                 </view>
 
                 <view

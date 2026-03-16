@@ -13,6 +13,7 @@ export default defineAppConfig({
     'pages/inventory/inventory-edit/inventory-edit',
     'pages/inventory/inventory-record/inventory-record',
     'pages/collaboration/collaboration',
+    'pages/share-publish/share-publish',
     'pages/experiment-plan/experiment-plan'
   ],
   window: {
