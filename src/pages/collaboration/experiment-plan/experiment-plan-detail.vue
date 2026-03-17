@@ -44,11 +44,6 @@
                 </view>
 
                 <view class="info-item">
-                    <text class="info-label">实验类型</text>
-                    <text class="info-value">{{ planData.experimentType || '未设置' }}</text>
-                </view>
-
-                <view class="info-item">
                     <text class="info-label">实验日期</text>
                     <text class="info-value">{{ formatDate(planData.experimentDate) || '未设置' }}</text>
                 </view>

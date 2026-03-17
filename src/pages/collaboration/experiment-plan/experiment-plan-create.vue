@@ -36,21 +36,6 @@
                 </view>
 
                 <view class="form-item">
-                    <text class="form-label">实验类型</text>
-                    <picker
-                        :range="experimentTypes"
-                        :value="experimentTypeIndex"
-                        @change="handleTypeChange"
-                    >
-                        <view class="picker-wrapper">
-                            <text class="picker-text">{{
-                                formData.experimentType || '请选择'
-                            }}</text>
-                        </view>
-                    </picker>
-                </view>
-
-                <view class="form-item">
                     <text class="form-label">实验日期</text>
                     <picker
                         mode="date"
@@ -275,21 +260,10 @@ import './experiment-plan-create.scss'
 // 表单数据
 const formData = reactive({
     title: '',
-    experimentType: '',
     experimentDate: '',
     description: '',
     itemsNeeded: []
 })
-
-// 实验类型列表
-const experimentTypes = [
-    '蛋白实验',
-    '细胞培养',
-    '分子生物学',
-    '动物实验',
-    '其他'
-]
-const experimentTypeIndex = ref(0)
 
 // 标记是否来自 AI
 const isFromAI = ref(false)
@@ -504,49 +478,10 @@ onMounted(async () => {
             console.log('接收到的AI数据:', aiData)
 
             if (aiData.type === 'experiment_plan') {
-                // 智能解析标题：提取实验类型和人员信息
-                let title = aiData.summary || '实验计划'
-
-                // 如果summary包含完整句子，尝试提取简洁标题
-                if (title.includes('要做') || title.includes('需要')) {
-                    // 提取实验类型作为标题
-                    const expMatch = title.match(
-                        /(.*?)(?:要做|需要)(.+?)(?:实验|，|$)/
-                    )
-                    if (expMatch) {
-                        const user = expMatch[1]?.trim() || '用户'
-                        const expType = expMatch[2]?.trim() || '实验'
-                        formData.title = `${user}${expType}`.trim()
-                        formData.description = title // 原始文本作为描述
-                        formData.experimentType = expType.includes('生物')
-                            ? '生物实验'
-                            : expType.includes('蛋白')
-                            ? '蛋白实验'
-                            : expType.includes('细胞')
-                            ? '细胞培养'
-                            : expType.includes('分子')
-                            ? '分子生物学'
-                            : expType.includes('动物')
-                            ? '动物实验'
-                            : '其他'
-                    } else {
-                        // 备用方案：取前20个字符作为标题
-                        formData.title =
-                            title.substring(0, 20) +
-                            (title.length > 20 ? '...' : '')
-                        formData.description = title
-                    }
-                } else {
-                    formData.title = title
-                    formData.description = aiData.description || ''
-                }
-
-                // 解析实验日期（如果AI提供了）
-                if (aiData.experiment_date) {
-                    formData.experimentDate = aiData.experiment_date
-                } else if (aiData.date) {
-                    formData.experimentDate = aiData.date
-                }
+                // 直接使用 AI 返回的字段
+                formData.title = aiData.title || aiData.summary || '实验计划'
+                formData.experimentDate = aiData.date || ''
+                formData.description = aiData.content || aiData.summary || ''
 
                 // 解析耗材清单：确保数据格式正确并与仓库联动
                 if (
@@ -672,12 +607,6 @@ const handleDecreaseQty = (index) => {
 // 删除耗材项
 const handleDeleteItem = (index) => {
     formData.itemsNeeded.splice(index, 1)
-}
-
-// 选择实验类型
-const handleTypeChange = (e) => {
-    experimentTypeIndex.value = e.detail.value
-    formData.experimentType = experimentTypes[e.detail.value]
 }
 
 // 选择实验日期

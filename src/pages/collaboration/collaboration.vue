@@ -28,7 +28,6 @@
                     </view>
 
                     <view class="plan-info">
-                        <text class="plan-type">{{ plan.experimentType }}</text>
                         <text class="plan-date">{{ plan.date }}</text>
                     </view>
 
@@ -387,7 +386,6 @@ const loadExperimentPlans = async () => {
             experimentPlans.value = items.map(item => ({
                 id: item._id,
                 title: item.title,
-                experimentType: item.experimentType,
                 date: formatDate(item.experimentDate),
                 status: item.status,
                 statusText: getPlanStatusText(item.status),
