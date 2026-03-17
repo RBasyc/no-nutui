@@ -82,6 +82,28 @@
                         <text class="bubble-text">{{ message.content }}</text>
                         <text v-if="message.isStreaming" class="cursor">|</text>
                     </view>
+                    <!-- 新增：如果 AI 返回实验计划，显示卡片式操作按钮 -->
+                    <view
+                        v-if="message.aiData?.type === 'experiment_plan' && !message.isStreaming"
+                        class="plan-card"
+                    >
+                        <view class="plan-card-header">
+                            <text class="plan-card-icon">📋</text>
+                            <text class="plan-card-title">实验计划已生成</text>
+                        </view>
+                        <view class="plan-card-info">
+                            <text class="plan-card-summary">{{ message.aiData.summary || '实验计划' }}</text>
+                            <text class="plan-card-items-count">共 {{ message.aiData.parsed_items?.length || 0 }} 项耗材</text>
+                        </view>
+                        <view class="plan-card-actions">
+                            <view class="plan-card-btn btn-cancel" @tap="handleCancelPlan(message.id)">
+                                <text class="btn-text">取消</text>
+                            </view>
+                            <view class="plan-card-btn btn-confirm" @tap="handleGoToVerify(message.aiData)">
+                                <text class="btn-text">去核对</text>
+                            </view>
+                        </view>
+                    </view>
                     <text class="message-time">{{ message.timestamp }}</text>
                 </view>
             </view>
@@ -157,7 +179,17 @@ import { API_BASE_URL } from '../../api/config'
 
 // 声明微信插件类型
 declare const requirePlugin: (name: string) => any
-const plugin = requirePlugin('WechatSI')
+let plugin: any = null
+
+// 安全加载插件
+try {
+    plugin = requirePlugin('WechatSI')
+    if (!plugin) {
+        console.warn('微信同声传译插件未加载')
+    }
+} catch (error) {
+    console.warn('插件加载失败:', error)
+}
 
 // 消息数据
 interface ChatMessage {
@@ -168,6 +200,7 @@ interface ChatMessage {
     isStreaming?: boolean
     avatar?: string
     avatarUrl?: string
+    aiData?: any // 保存 AI 原始响应数据
 }
 
 // 响应式数据
@@ -370,21 +403,12 @@ const formatAIResponse = (aiData: any): string => {
 
     switch (aiData.type) {
         case 'experiment_plan':
-            let content = `✅ 已解析您的实验计划\n\n`
+            // 简化显示，详情在卡片中
+            let content = `✅ 已为您生成实验计划`
             if (aiData.summary) {
-                content += `${aiData.summary}\n\n`
+                content += `\n\n${aiData.summary}`
             }
-            content += `📋 耗材需求清单：\n`
-            if (aiData.parsed_items && Array.isArray(aiData.parsed_items)) {
-                aiData.parsed_items.forEach((item: any, index: number) => {
-                    content += `${index + 1}. ${item.name}${item.specification ? ' ' + item.specification : ''}\n`
-                    content += `   数量：${item.quantity} ${item.unit || ''}\n`
-                    if (item.category) {
-                        content += `   分类：${item.category}\n`
-                    }
-                    content += `\n`
-                })
-            }
+            content += `\n\n📋 包含 ${aiData.parsed_items?.length || 0} 项耗材`
             return content
 
         case 'inventory_analysis':
@@ -444,7 +468,7 @@ const formatAIResponse = (aiData: any): string => {
             }
             purContent += `📦 采购清单：\n`
             if (aiData.items && Array.isArray(aiData.items)) {
-                aiData.items.forEach((item: any, index: number) => {
+                aiData.items.forEach((item: any) => {
                     const priorityIcon = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '🟢'
                     purContent += `${priorityIcon} ${item.name}\n`
                     purContent += `   当前库存：${item.current_quantity}\n`
@@ -547,7 +571,8 @@ const processUserMessage = async (text: string) => {
                 timestamp: getCurrentTime(),
                 avatar: '🤖',
                 avatarUrl: '',
-                isStreaming: true
+                isStreaming: true,
+                aiData: aiData // 保存原始 AI 响应数据
             }
             messages.value.push(aiMessage)
 
@@ -825,6 +850,44 @@ const cancelRecording = () => {
     setTimeout(() => {
         cleanupRecording()
     }, 100)
+}
+
+// 取消实验计划
+const handleCancelPlan = (messageId: string) => {
+    // 可选：从列表中删除该消息或标记为已取消
+    const messageIndex = messages.value.findIndex(m => m.id === messageId)
+    if (messageIndex >= 0) {
+        // 添加取消标记
+        messages.value[messageIndex].content = '❌ 已取消此实验计划'
+        messages.value[messageIndex].aiData = undefined
+    }
+}
+
+// 去核对实验计划（跳转到创建页面）
+const handleGoToVerify = (aiData: any) => {
+    if (!aiData || aiData.type !== 'experiment_plan') {
+        Taro.showToast({
+            title: '无效的实验计划数据',
+            icon: 'none'
+        })
+        return
+    }
+
+    try {
+        // 将 AI 数据编码为 URL 参数
+        const encodedData = encodeURIComponent(JSON.stringify(aiData))
+
+        // 导航到实验计划创建页面
+        Taro.navigateTo({
+            url: `/pages/collaboration/experiment-plan/experiment-plan-create?aiData=${encodedData}`
+        })
+    } catch (error) {
+        console.error('导航失败:', error)
+        Taro.showToast({
+            title: '打开页面失败',
+            icon: 'none'
+        })
+    }
 }
 
 // 获取用户信息

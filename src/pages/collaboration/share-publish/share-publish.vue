@@ -225,7 +225,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import Taro from '@tarojs/taro'
-import shareRequestApi from '../../api/shareRequestApi'
+import shareRequestApi from '../../../api/shareRequestApi'
 import './share-publish.scss'
 
 // 表单数据

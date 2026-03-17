@@ -1,0 +1,472 @@
+/* 实验详情页面样式 */
+
+.experiment-detail-page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 顶部导航栏 */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 32rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border-bottom: 2rpx solid rgba(30, 144, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    .header-back {
+        width: 64rpx;
+        height: 64rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+
+        &:active {
+            background: rgba(0, 0, 0, 0.05);
+            transform: scale(0.95);
+        }
+
+        .back-icon {
+            font-size: 36rpx;
+            color: #2F4F4F;
+            font-weight: 700;
+        }
+    }
+
+    .header-title {
+        font-size: 36rpx;
+        font-weight: 700;
+        color: #2F4F4F;
+        flex: 1;
+        text-align: center;
+    }
+
+    .header-placeholder {
+        width: 64rpx;
+    }
+}
+
+/* 加载状态 */
+.loading-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24rpx;
+
+    .loading-spinner {
+        width: 64rpx;
+        height: 64rpx;
+        border: 4rpx solid rgba(30, 144, 255, 0.2);
+        border-top-color: #1E90FF;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        font-size: 28rpx;
+        color: #999;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 详情内容区 */
+.detail-content {
+    flex: 1;
+    padding: 24rpx 32rpx 180rpx;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* 状态卡片 */
+.status-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border-radius: 20rpx;
+    padding: 32rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+    margin-bottom: 24rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16rpx;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .status-badge {
+        padding: 12rpx 32rpx;
+        border-radius: 24rpx;
+        font-size: 28rpx;
+        font-weight: 700;
+
+        &.status-upcoming {
+            background: rgba(153, 153, 153, 0.15);
+            color: #999;
+        }
+
+        &.status-in_progress {
+            background: rgba(30, 144, 255, 0.15);
+            color: #1E90FF;
+        }
+
+        &.status-cancelled {
+            background: rgba(244, 67, 54, 0.15);
+            color: #F44336;
+        }
+    }
+
+    .create-time {
+        font-size: 24rpx;
+        color: #999;
+    }
+}
+
+/* 信息区块 */
+.info-section,
+.items-section {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border-radius: 20rpx;
+    padding: 32rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+    margin-bottom: 24rpx;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    margin-bottom: 24rpx;
+
+    .title-icon {
+        font-size: 36rpx;
+    }
+
+    .title-text {
+        font-size: 32rpx;
+        font-weight: 700;
+        color: #2F4F4F;
+    }
+
+    .title-count {
+        font-size: 24rpx;
+        color: #999;
+        margin-left: 4rpx;
+    }
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+    padding: 20rpx 0;
+    border-bottom: 2rpx solid rgba(0, 0, 0, 0.05);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-size: 24rpx;
+        color: #999;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-size: 28rpx;
+        color: #2F4F4F;
+        line-height: 1.6;
+        word-break: break-all;
+    }
+
+    &.description-item {
+        .info-value {
+            background: rgba(30, 144, 255, 0.05);
+            padding: 20rpx;
+            border-radius: 12rpx;
+            border: 2rpx solid rgba(30, 144, 255, 0.1);
+        }
+    }
+}
+
+/* 耗材卡片 */
+.item-card {
+    background: rgba(240, 245, 250, 0.6);
+    border-radius: 16rpx;
+    padding: 24rpx;
+    margin-bottom: 16rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .item-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16rpx;
+        width: 100%;
+        box-sizing: border-box;
+
+        .item-name {
+            font-size: 28rpx;
+            font-weight: 700;
+            color: #2F4F4F;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-quantity {
+            display: flex;
+            align-items: baseline;
+            gap: 4rpx;
+            flex-shrink: 0;
+
+            .quantity-value {
+                font-size: 36rpx;
+                font-weight: 700;
+                color: #1E90FF;
+            }
+
+            .quantity-unit {
+                font-size: 24rpx;
+                color: #999;
+            }
+        }
+    }
+
+    .item-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+        width: 100%;
+        box-sizing: border-box;
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 8rpx;
+            width: 100%;
+            box-sizing: border-box;
+
+            .detail-label {
+                font-size: 24rpx;
+                color: #999;
+                flex-shrink: 0;
+            }
+
+            .detail-value {
+                font-size: 24rpx;
+                color: #666;
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+                &.stock-status {
+                    font-weight: 600;
+
+                    &.sufficient {
+                        color: #4CAF50;
+                    }
+
+                    &.insufficient {
+                        color: #F44336;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* 底部占位 */
+.footer-placeholder {
+    height: 180rpx;
+}
+
+/* 底部操作栏 */
+.footer-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24rpx 32rpx;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    border-top: 2rpx solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+    z-index: 99;
+    width: 100%;
+    box-sizing: border-box;
+
+    .cancel-btn {
+        width: 100%;
+        padding: 28rpx;
+        background: linear-gradient(135deg, #F44336 0%, #E53935 100%);
+        border-radius: 48rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12rpx;
+        box-shadow: 0 8rpx 24rpx rgba(244, 67, 54, 0.3);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+
+        &:active {
+            transform: scale(0.98);
+            box-shadow: 0 4rpx 12rpx rgba(244, 67, 54, 0.2);
+        }
+
+        .cancel-icon {
+            font-size: 32rpx;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .cancel-text {
+            font-size: 28rpx;
+            color: #ffffff;
+            font-weight: 600;
+        }
+    }
+}
+
+/* 取消确认弹窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 32rpx;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 600rpx;
+    background: #ffffff;
+    border-radius: 24rpx;
+    padding: 32rpx;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+
+    .modal-header {
+        margin-bottom: 24rpx;
+
+        .modal-title {
+            font-size: 32rpx;
+            font-weight: 700;
+            color: #2F4F4F;
+            text-align: center;
+        }
+    }
+
+    .modal-body {
+        margin-bottom: 32rpx;
+
+        .modal-desc {
+            font-size: 28rpx;
+            color: #666;
+            text-align: center;
+            line-height: 1.6;
+            display: block;
+            margin-bottom: 24rpx;
+        }
+
+        .return-list {
+            background: rgba(244, 67, 54, 0.05);
+            border-radius: 16rpx;
+            padding: 20rpx;
+            border: 2rpx solid rgba(244, 67, 54, 0.15);
+
+            .return-title {
+                font-size: 24rpx;
+                color: #F44336;
+                font-weight: 600;
+                display: block;
+                margin-bottom: 12rpx;
+            }
+
+            .return-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8rpx 0;
+
+                .return-name {
+                    font-size: 24rpx;
+                    color: #666;
+                }
+
+                .return-qty {
+                    font-size: 24rpx;
+                    color: #4CAF50;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 16rpx;
+
+        .modal-btn {
+            flex: 1;
+            padding: 24rpx;
+            border-radius: 48rpx;
+            text-align: center;
+            font-size: 28rpx;
+            font-weight: 600;
+            transition: all 0.3s ease;
+
+            &:active {
+                transform: scale(0.98);
+            }
+
+            &.btn-secondary {
+                background: rgba(240, 245, 250, 0.8);
+                color: #666;
+                border: 2rpx solid rgba(0, 0, 0, 0.05);
+            }
+
+            &.btn-danger {
+                background: linear-gradient(135deg, #F44336 0%, #E53935 100%);
+                color: #ffffff;
+                box-shadow: 0 4rpx 12rpx rgba(244, 67, 54, 0.3);
+            }
+        }
+    }
+}

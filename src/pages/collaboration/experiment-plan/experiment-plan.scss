@@ -1,0 +1,282 @@
+/* 实验计划列表页面样式 */
+
+.experiment-plan-page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 顶部导航栏 */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 32rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border-bottom: 2rpx solid rgba(30, 144, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    .header-placeholder {
+        width: 140rpx;
+        flex-shrink: 0;
+    }
+
+    .header-title {
+        font-size: 36rpx;
+        font-weight: 700;
+        color: #2F4F4F;
+        flex: 1;
+        text-align: center;
+    }
+
+    .header-action {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 12rpx 20rpx;
+        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+        border-radius: 24rpx;
+        box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.2);
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+
+        &:active {
+            transform: scale(0.95);
+        }
+
+        .create-icon {
+            font-size: 32rpx;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .create-text {
+            font-size: 24rpx;
+            color: #ffffff;
+            font-weight: 600;
+        }
+    }
+}
+
+/* 加载状态 */
+.loading-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24rpx;
+
+    .loading-spinner {
+        width: 64rpx;
+        height: 64rpx;
+        border: 4rpx solid rgba(30, 144, 255, 0.2);
+        border-top-color: #1E90FF;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        font-size: 28rpx;
+        color: #999;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 空状态 */
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80rpx 32rpx;
+
+    .empty-icon {
+        font-size: 160rpx;
+        margin-bottom: 32rpx;
+        opacity: 0.6;
+    }
+
+    .empty-title {
+        font-size: 48rpx;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 48rpx;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 24rpx;
+        width: 100%;
+        max-width: 500rpx;
+
+        .action-btn {
+            padding: 28rpx 48rpx;
+            border-radius: 48rpx;
+            font-size: 28rpx;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.15s ease;
+
+            &:active {
+                transform: scale(0.95);
+            }
+
+            &.primary {
+                background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+                color: #ffffff;
+                box-shadow: 0 8rpx 24rpx rgba(30, 144, 255, 0.3);
+            }
+
+            &.secondary {
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(20rpx);
+                color: #1E90FF;
+                border: 2rpx solid rgba(30, 144, 255, 0.25);
+            }
+        }
+    }
+
+    .empty-hint {
+        margin-top: 48rpx;
+        padding: 0 32rpx;
+
+        .hint-text {
+            font-size: 24rpx;
+            color: #999;
+            text-align: center;
+            line-height: 1.6;
+        }
+    }
+}
+
+/* 计划列表 */
+.plan-list {
+    flex: 1;
+    padding: 24rpx 32rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 24rpx;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.plan-item {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border-radius: 20rpx;
+    padding: 32rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    &:active {
+        transform: scale(0.98);
+        box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.1);
+    }
+
+    .plan-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16rpx;
+        width: 100%;
+        box-sizing: border-box;
+
+        .plan-title {
+            font-size: 32rpx;
+            font-weight: 700;
+            color: #2F4F4F;
+            flex: 1;
+            min-width: 0;
+            margin-right: 16rpx;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .plan-status {
+            flex-shrink: 0;
+            padding: 8rpx 16rpx;
+            border-radius: 12rpx;
+            font-size: 22rpx;
+            font-weight: 600;
+            white-space: nowrap;
+
+            &.status-upcoming {
+                background: rgba(153, 153, 153, 0.1);
+                color: #999;
+            }
+
+            &.status-in_progress {
+                background: rgba(30, 144, 255, 0.15);
+                color: #1E90FF;
+            }
+
+            &.status-cancelled {
+                background: rgba(244, 67, 54, 0.15);
+                color: #F44336;
+            }
+        }
+    }
+
+    .plan-info {
+        display: flex;
+        gap: 24rpx;
+        margin-bottom: 12rpx;
+        width: 100%;
+        box-sizing: border-box;
+
+        .plan-date {
+            font-size: 24rpx;
+            color: #1E90FF;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .plan-items-count {
+            font-size: 24rpx;
+            color: #999;
+            flex-shrink: 0;
+        }
+    }
+
+    .plan-description {
+        margin-top: 12rpx;
+        padding-top: 12rpx;
+        border-top: 2rpx solid rgba(0, 0, 0, 0.05);
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+
+        .description-text {
+            font-size: 24rpx;
+            color: #666;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-all;
+        }
+    }
+}

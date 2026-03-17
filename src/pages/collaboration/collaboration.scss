@@ -97,19 +97,24 @@
                 font-size: 22rpx;
                 font-weight: 600;
 
-                &.pending {
-                    background: rgba(255, 140, 0, 0.15);
-                    color: #FF8C00;
+                &.draft {
+                    background: rgba(153, 153, 153, 0.15);
+                    color: #999;
                 }
 
-                &.ongoing {
+                &.in_progress {
                     background: rgba(30, 144, 255, 0.15);
                     color: #1E90FF;
                 }
 
                 &.completed {
-                    background: rgba(50, 205, 50, 0.15);
-                    color: #32CD32;
+                    background: rgba(76, 175, 80, 0.15);
+                    color: #4CAF50;
+                }
+
+                &.cancelled {
+                    background: rgba(244, 67, 54, 0.15);
+                    color: #F44336;
                 }
             }
         }

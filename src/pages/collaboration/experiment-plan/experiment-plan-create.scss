@@ -1,0 +1,893 @@
+/* 实验计划创建页面样式 */
+
+.plan-create-page {
+    width: 100%;
+    /* 确保页面宽度不超过视口 */
+    min-height: 100vh;
+    background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    /* 防止水平溢出 */
+}
+
+/* 顶部导航 */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 32rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border-bottom: 2rpx solid rgba(30, 144, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    .header-back {
+        width: 64rpx;
+        height: 64rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+
+        &:active {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .back-icon {
+            font-size: 36rpx;
+            color: #2F4F4F;
+            font-weight: 600;
+        }
+    }
+
+    .header-title {
+        font-size: 36rpx;
+        font-weight: 700;
+        color: #2F4F4F;
+        flex: 1;
+        text-align: center;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .header-action {
+        padding: 12rpx 24rpx;
+        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+        border-radius: 24rpx;
+        box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.2);
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+
+        &:active {
+            transform: scale(0.95);
+        }
+
+        .save-text {
+            font-size: 26rpx;
+            color: #ffffff;
+            font-weight: 600;
+        }
+    }
+}
+
+/* 提示横幅 */
+.hint-banner {
+    width: calc(100% - 64rpx);
+    /* 减去左右 margin */
+    margin: 24rpx 32rpx;
+    padding: 20rpx 24rpx;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
+    border: 2rpx solid rgba(255, 193, 7, 0.3);
+    border-radius: 16rpx;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    box-sizing: border-box;
+
+    .hint-icon {
+        font-size: 32rpx;
+        flex-shrink: 0;
+    }
+
+    .hint-text {
+        flex: 1;
+        font-size: 24rpx;
+        color: #666;
+        line-height: 1.5;
+    }
+}
+
+/* 表单容器 */
+.form-container {
+    flex: 1;
+    width: 100%;
+    /* 确保宽度 */
+    box-sizing: border-box;
+    /* padding 包含在宽度内 */
+    padding: 0 32rpx 32rpx;
+    overflow-x: hidden;
+    /* 防止水平溢出 */
+}
+
+.form-section {
+    width: 100%;
+    /* 确保宽度 */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 32rpx;
+
+    .form-item {
+        display: flex;
+        flex-direction: column;
+        gap: 16rpx;
+
+        .form-label {
+            font-size: 28rpx;
+            font-weight: 600;
+            color: #2F4F4F;
+        }
+    }
+}
+
+/* 输入框包装器 - 参考 inventory-edit 的实现 */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    border-radius: 16rpx;
+    height: 80rpx;
+    box-sizing: border-box;
+    box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.05);
+    transition: all 0.2s ease;
+
+    &:focus-within {
+        border-color: #1E90FF;
+        box-shadow: 0 0 0 4rpx rgba(30, 144, 255, 0.1);
+    }
+}
+
+/* input 本身的样式 */
+.form-input {
+    flex: 1;
+    height: 100%;
+    font-size: 28rpx;
+    color: #2F4F4F;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+/* picker 包装器 */
+.picker-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    border-radius: 16rpx;
+    height: 80rpx;
+    box-sizing: border-box;
+    box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.05);
+
+    .picker-text {
+        flex: 1;
+        font-size: 28rpx;
+        color: #2F4F4F;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* 文本域 */
+.form-textarea {
+    width: 100%;
+    min-height: 160rpx;
+    padding: 24rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    border-radius: 16rpx;
+    font-size: 28rpx;
+    color: #2F4F4F;
+    line-height: 1.6;
+    box-sizing: border-box;
+    box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.05);
+
+    &:focus {
+        border-color: #1E90FF;
+        box-shadow: 0 0 0 4rpx rgba(30, 144, 255, 0.1);
+    }
+}
+
+/* 表单分组标题 */
+.form-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16rpx;
+    margin-top: 16rpx;
+    border-top: 2rpx solid rgba(0, 0, 0, 0.05);
+
+    .title-text {
+        font-size: 32rpx;
+        font-weight: 700;
+        color: #2F4F4F;
+    }
+
+    .add-item-btn {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 12rpx 24rpx;
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        border-radius: 24rpx;
+        box-shadow: 0 4rpx 12rpx rgba(76, 175, 80, 0.3);
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+
+        &:active {
+            transform: scale(0.95);
+            box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.4);
+        }
+
+        .add-icon {
+            font-size: 28rpx;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .add-text {
+            font-size: 26rpx;
+            color: #ffffff;
+            font-weight: 600;
+        }
+    }
+}
+
+/* 耗材列表项 */
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+    border-radius: 16rpx;
+    padding: 20rpx;
+    box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.05);
+    box-sizing: border-box;
+
+    .item-inputs {
+        flex: 1;
+        display: flex;
+        gap: 12rpx;
+        min-width: 0;
+
+        .item-name-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-qty-wrapper {
+            width: 140rpx;
+            flex-shrink: 0;
+        }
+    }
+
+    .item-actions {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+
+        .delete-btn {
+            width: 56rpx;
+            height: 56rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 12rpx;
+            transition: all 0.15s ease;
+
+            &:active {
+                background: rgba(244, 67, 54, 0.2);
+                transform: scale(0.95);
+            }
+
+            text {
+                font-size: 32rpx;
+                color: #F44336;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+/* 空状态提示 */
+.empty-items-hint {
+    padding: 64rpx 32rpx;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20rpx;
+    background: rgba(76, 175, 80, 0.05);
+    border: 2rpx dashed rgba(76, 175, 80, 0.3);
+    border-radius: 24rpx;
+    margin: 24rpx 0;
+
+    .hint-icon {
+        font-size: 64rpx;
+        opacity: 0.6;
+    }
+
+    .hint-text {
+        font-size: 30rpx;
+        color: #2F4F4F;
+        font-weight: 600;
+    }
+
+    .hint-sub {
+        font-size: 24rpx;
+        color: #4CAF50;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+}
+
+/* 新式耗材项样式 */
+.item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
+    padding: 16rpx;
+}
+
+.item-name-section {
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:active {
+        opacity: 0.7;
+    }
+
+    .item-label {
+        font-size: 24rpx;
+        color: #999;
+        margin-bottom: 8rpx;
+        display: block;
+    }
+
+    .item-name-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8rpx;
+    }
+
+    .item-name {
+        font-size: 28rpx;
+        color: #2F4F4F;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    .item-change-hint {
+        font-size: 22rpx;
+        color: #1E90FF;
+        background: rgba(30, 144, 255, 0.1);
+        padding: 4rpx 12rpx;
+        border-radius: 12rpx;
+    }
+
+    .item-spec {
+        font-size: 24rpx;
+        color: #666;
+        margin-top: 4rpx;
+        display: block;
+    }
+}
+
+.item-qty-section {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+
+    .item-label {
+        font-size: 24rpx;
+        color: #999;
+        white-space: nowrap;
+    }
+
+    .qty-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        background: rgba(255, 255, 255, 0.9);
+        border: 2rpx solid rgba(30, 144, 255, 0.2);
+        border-radius: 12rpx;
+        overflow: hidden;
+    }
+
+    .qty-btn {
+        width: 48rpx;
+        height: 48rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(30, 144, 255, 0.1);
+        color: #1E90FF;
+        font-size: 24rpx;
+        font-weight: 600;
+        transition: all 0.15s ease;
+
+        &:active {
+            background: rgba(30, 144, 255, 0.2);
+        }
+    }
+
+    .qty-input {
+        width: 80rpx;
+        height: 48rpx;
+        text-align: center;
+        font-size: 26rpx;
+        color: #2F4F4F;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+    }
+
+    .item-unit {
+        font-size: 24rpx;
+        color: #666;
+        white-space: nowrap;
+    }
+}
+
+.stock-status {
+    margin-top: 8rpx;
+
+    .stock-indicator {
+        font-size: 22rpx;
+        padding: 6rpx 12rpx;
+        border-radius: 12rpx;
+        display: inline-block;
+
+        &.sufficient {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+        }
+
+        &.insufficient {
+            background: rgba(244, 67, 54, 0.1);
+            color: #F44336;
+        }
+    }
+}
+
+/* ========== 新式耗材卡片布局 ========== */
+.item-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    border: 2rpx solid rgba(30, 144, 255, 0.12);
+    border-radius: 24rpx;
+    overflow: hidden;
+    box-shadow: 0 4rpx 20rpx rgba(30, 144, 255, 0.1);
+    transition: all 0.2s ease;
+
+    &:active {
+        transform: scale(0.98);
+        box-shadow: 0 2rpx 12rpx rgba(30, 144, 255, 0.15);
+    }
+}
+
+.item-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx;
+    gap: 20rpx;
+}
+
+.item-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:active {
+        opacity: 0.7;
+    }
+
+    .item-header {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+        flex-wrap: wrap;
+    }
+
+    .item-name {
+        font-size: 32rpx;
+        color: #1a1a1a;
+        font-weight: 700;
+        line-height: 1.3;
+        flex: 1;
+    }
+
+    .item-badge {
+        background: linear-gradient(135deg, #1E90FF 0%, #63A4FF 100%);
+        padding: 6rpx 16rpx;
+        border-radius: 16rpx;
+        box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.2);
+
+        .badge-text {
+            font-size: 22rpx;
+            color: #ffffff;
+            font-weight: 600;
+        }
+    }
+
+    .item-spec {
+        font-size: 26rpx;
+        color: #666;
+        line-height: 1.4;
+    }
+
+    .stock-hint {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        margin-top: 4rpx;
+    }
+
+    .stock-dot {
+        width: 16rpx;
+        height: 16rpx;
+        border-radius: 50%;
+        box-shadow: 0 0 0 4rpx rgba(0, 0, 0, 0.05);
+
+        &.sufficient {
+            background: #4CAF50;
+            box-shadow: 0 0 0 4rpx rgba(76, 175, 80, 0.1);
+        }
+
+        &.insufficient {
+            background: #F44336;
+            box-shadow: 0 0 0 4rpx rgba(244, 67, 54, 0.1);
+        }
+    }
+
+    .stock-text {
+        font-size: 24rpx;
+        font-weight: 600;
+
+        &.sufficient {
+            color: #4CAF50;
+        }
+
+        &.insufficient {
+            color: #F44336;
+        }
+    }
+}
+
+.item-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16rpx;
+}
+
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    background: linear-gradient(135deg, rgba(30, 144, 255, 0.08) 0%, rgba(99, 164, 255, 0.08) 100%);
+    border-radius: 20rpx;
+    padding: 12rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.15);
+}
+
+.qty-btn {
+    width: 64rpx;
+    height: 64rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16rpx;
+    transition: all 0.15s ease;
+
+    &.decrease {
+        background: linear-gradient(135deg, #FF5252 0%, #FF1744 100%);
+        box-shadow: 0 4rpx 12rpx rgba(255, 82, 82, 0.3);
+
+        &:active {
+            transform: scale(0.9);
+            box-shadow: 0 2rpx 6rpx rgba(255, 82, 82, 0.4);
+        }
+
+        .btn-icon {
+            color: #ffffff;
+        }
+    }
+
+    &.increase {
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        box-shadow: 0 4rpx 12rpx rgba(76, 175, 80, 0.3);
+
+        &:active {
+            transform: scale(0.9);
+            box-shadow: 0 2rpx 6rpx rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-icon {
+            color: #ffffff;
+        }
+    }
+
+    .btn-icon {
+        font-size: 32rpx;
+        font-weight: 700;
+        line-height: 1;
+    }
+}
+
+.qty-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 88rpx;
+    padding: 0 12rpx;
+
+    .qty-value {
+        font-size: 36rpx;
+        font-weight: 800;
+        color: #1E90FF;
+        line-height: 1;
+    }
+
+    .qty-unit {
+        font-size: 22rpx;
+        color: #999;
+        margin-top: 4rpx;
+        font-weight: 500;
+    }
+}
+
+.delete-btn {
+    width: 64rpx;
+    height: 64rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(255, 82, 82, 0.1) 100%);
+    border: 2rpx solid rgba(244, 67, 54, 0.2);
+    border-radius: 16rpx;
+    transition: all 0.15s ease;
+
+    &:active {
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(255, 82, 82, 0.2) 100%);
+        transform: scale(0.9);
+    }
+
+    .delete-icon {
+        font-size: 32rpx;
+        line-height: 1;
+    }
+}
+
+/* 仓库搜索弹窗 */
+.inventory-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 32rpx;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 640rpx;
+    background: #ffffff;
+    border-radius: 32rpx;
+    overflow: hidden;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32rpx;
+    border-bottom: 2rpx solid #f0f0f0;
+}
+
+.modal-title {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.modal-close {
+    width: 56rpx;
+    height: 56rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    transition: all 0.15s ease;
+
+    &:active {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .close-icon {
+        font-size: 32rpx;
+        color: #666;
+        font-weight: 600;
+    }
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    padding: 24rpx 32rpx;
+    background: #f8f9fa;
+    border-bottom: 2rpx solid #f0f0f0;
+    gap: 16rpx;
+
+    .search-icon {
+        font-size: 32rpx;
+        opacity: 0.5;
+    }
+
+    .search-input {
+        flex: 1;
+        font-size: 28rpx;
+        color: #1a1a1a;
+        background: transparent;
+        border: none;
+    }
+
+    .clear-btn {
+        width: 40rpx;
+        height: 40rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 50%;
+
+        &:active {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .clear-icon {
+            font-size: 24rpx;
+            color: #999;
+            font-weight: 600;
+        }
+    }
+}
+
+.search-results {
+    flex: 1;
+    min-height: 400rpx;
+}
+
+.search-loading,
+.search-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80rpx 32rpx;
+    gap: 16rpx;
+
+    .loading-text,
+    .empty-text {
+        font-size: 28rpx;
+        color: #999;
+    }
+
+    .empty-icon {
+        font-size: 64rpx;
+        opacity: 0.5;
+    }
+}
+
+.inventory-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 32rpx;
+    border-bottom: 2rpx solid #f0f0f0;
+    transition: all 0.15s ease;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:active {
+        background: #f8f9fa;
+    }
+
+    .item-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+
+        .item-name {
+            font-size: 30rpx;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+            flex-wrap: wrap;
+
+            .item-spec {
+                font-size: 24rpx;
+                color: #666;
+            }
+
+            .item-category {
+                font-size: 22rpx;
+                color: #999;
+                background: rgba(0, 0, 0, 0.05);
+                padding: 4rpx 12rpx;
+                border-radius: 12rpx;
+            }
+        }
+    }
+
+    .item-stock {
+        .stock-text {
+            font-size: 24rpx;
+            font-weight: 600;
+            padding: 8rpx 16rpx;
+            border-radius: 16rpx;
+
+            &.sufficient {
+                background: rgba(76, 175, 80, 0.1);
+                color: #4CAF50;
+            }
+
+            &.insufficient {
+                background: rgba(244, 67, 54, 0.1);
+                color: #F44336;
+            }
+        }
+    }
+}

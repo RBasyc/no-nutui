@@ -1,105 +1,205 @@
 <template>
     <view class="laboratory-page">
-        <!-- 基本信息 -->
-        <view class="setting-section">
-            <!-- 实验室选择 - 下拉选择 -->
-            <view class="setting-item lab-selector-wrapper">
-                <text class="item-label"
-                    >实验室名称 <text class="required">*</text></text
-                >
+        <!-- 当前实验室卡片 -->
+        <view class="current-lab-card">
+            <view class="card-header">
+                <text class="header-title">当前实验室</text>
+                <text v-if="!currentLab" class="no-lab-hint">未加入实验室</text>
+            </view>
+            <view v-if="currentLab" class="lab-info">
+                <view class="lab-main">
+                    <text class="lab-name">{{ currentLab.labName }}</text>
+                    <text class="lab-university">{{ currentLab.university }}</text>
+                </view>
+                <view class="lab-role-badge" :class="`role-${currentLab.role}`">
+                    <text>{{ getRoleText(currentLab.role) }}</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 我加入的实验室列表 -->
+        <view class="my-labs-section">
+            <view class="section-header">
+                <text class="section-title">我加入的实验室</text>
+                <text v-if="myLabs.length > 0" class="lab-count">{{ myLabs.length }}个</text>
+            </view>
+
+            <!-- 实验室列表 -->
+            <view v-if="loadingMyLabs" class="loading-container">
+                <text class="loading-text">加载中...</text>
+            </view>
+            <view v-else-if="myLabs.length === 0" class="empty-state">
+                <text class="empty-icon">🔬</text>
+                <text class="empty-text">还未加入任何实验室</text>
+                <text class="empty-hint">搜索并申请加入实验室</text>
+            </view>
+            <view v-else class="lab-list">
                 <view
-                    class="input-wrapper"
-                    :class="{
-                        'input-error': errors.labName,
-                        'input-focused': focused.labName
-                    }"
-                    @tap="toggleLabDropdown"
+                    v-for="lab in myLabs"
+                    :key="lab.id"
+                    class="lab-item"
+                    :class="{ 'is-current': lab.isActive }"
                 >
-                    <text class="input-icon">🔬</text>
-                    <text
-                        class="form-input"
-                        :class="{ 'input-placeholder': !selectedLab }"
-                    >
-                        {{
-                            selectedLab
-                                ? selectedLab.labName
-                                : '请选择或搜索实验室'
-                        }}
-                    </text>
-                    <text class="toggle-icon">
-                        {{ showLabDropdown ? '▲' : '▼' }}
+                    <view class="lab-item-content">
+                        <view class="lab-item-info">
+                            <text class="lab-item-name">{{ lab.labName }}</text>
+                            <text class="lab-item-university">{{ lab.university }}</text>
+                        </view>
+                        <view class="lab-item-status">
+                            <view
+                                class="status-badge"
+                                :class="`status-${lab.status}`"
+                            >
+                                <text>{{ getStatusText(lab.status) }}</text>
+                            </view>
+                            <view
+                                v-if="lab.isActive"
+                                class="role-badge"
+                                :class="`role-${lab.role}`"
+                            >
+                                <text>{{ getRoleText(lab.role) }}</text>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="lab-item-actions">
+                        <text v-if="lab.isActive" class="current-badge"
+                            >当前使用</text
+                        >
+                        <view
+                            v-else-if="lab.status === 'active'"
+                            class="action-btn btn-switch"
+                            @tap="switchLab(lab)"
+                        >
+                            <text>切换</text>
+                        </view>
+                        <view
+                            v-if="lab.status === 'pending'"
+                            class="action-btn btn-cancel"
+                            @tap="cancelApplication(lab)"
+                        >
+                            <text>取消申请</text>
+                        </view>
+                        <view
+                            v-if="lab.status === 'active' && !lab.isActive"
+                            class="action-btn btn-leave"
+                            @tap="leaveLab(lab)"
+                        >
+                            <text>离开</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 浏览实验室 -->
+        <view class="search-section">
+            <view class="section-header">
+                <text class="section-title">浏览实验室</text>
+            </view>
+
+            <!-- 搜索框 -->
+            <view class="search-wrapper">
+                <view
+                    class="search-input-wrapper"
+                    :class="{ 'input-focused': showLabList }"
+                >
+                    <text class="search-icon">🔬</text>
+                    <input
+                        v-model="searchKeyword"
+                        class="search-input"
+                        placeholder="搜索实验室名称或大学..."
+                        @focus="handleSearchFocus"
+                        @input="handleSearchInput"
+                    />
+                    <text v-if="searchKeyword" class="clear-btn" @tap="clearSearch">
+                        ✕
                     </text>
                 </view>
-                <text v-if="errors.labName" class="error-text">{{
-                    errors.labName
-                }}</text>
 
-                <!-- 已选实验室提示 -->
-                <view
-                    v-if="selectedLab && !showLabDropdown"
-                    class="lab-info-bar"
-                >
-                    <text class="lab-info-icon">✓</text>
-                    <view class="lab-info-content">
-                        <text class="lab-info-name">{{
+                <!-- 选中的实验室信息 -->
+                <view v-if="selectedLab" class="selected-lab-info">
+                    <view class="selected-lab-details">
+                        <text class="selected-lab-name">{{
                             selectedLab.labName
                         }}</text>
-                        <text
-                            v-if="selectedLab.university"
-                            class="lab-info-university"
-                            >{{ selectedLab.university }}</text
+                        <text class="selected-lab-university">{{
+                            selectedLab.university
+                        }}</text>
+                    </view>
+                    <view class="selected-lab-actions">
+                        <view
+                            v-if="isApplied(selectedLab._id)"
+                            class="status-badge applied"
                         >
+                            <text>已申请</text>
+                        </view>
+                        <view
+                            v-else-if="isMember(selectedLab._id)"
+                            class="status-badge member"
+                        >
+                            <text>已加入</text>
+                        </view>
+                        <view
+                            v-else
+                            class="action-btn btn-apply-main"
+                            @tap="showApplyModal(selectedLab)"
+                        >
+                            <text>申请加入</text>
+                        </view>
                     </view>
                 </view>
 
                 <!-- 实验室下拉列表 -->
-                <view v-if="showLabDropdown" class="lab-dropdown">
-                    <!-- 头部：在 scroll-view 外面 -->
-                    <view
-                        v-if="!loadingLabs && labList.length > 0"
-                        class="lab-list-header"
-                    >
-                        <text class="lab-count-text"
-                            >共 {{ labList.length }} 个实验室</text
-                        >
-                    </view>
-
-                    <!-- 可滚动列表区域 -->
+                <view v-if="showLabList" class="lab-dropdown">
+                    <!-- 加载状态 -->
                     <scroll-view
                         v-if="loadingLabs"
                         scrollY="true"
                         class="lab-list-scroll"
                     >
-                        <view class="lab-item lab-loading">
+                        <view class="lab-item-dropdown">
                             <text class="loading-text">加载中...</text>
                         </view>
                     </scroll-view>
+
+                    <!-- 实验室列表 -->
                     <scroll-view
-                        v-else-if="labList.length > 0"
+                        v-else-if="filteredLabs.length > 0"
                         scrollY="true"
                         class="lab-list-scroll"
                     >
                         <view
-                            v-for="lab in labList"
-                            :key="lab.labName"
-                            class="lab-item"
+                            v-for="lab in filteredLabs"
+                            :key="lab._id"
+                            class="lab-item-dropdown"
+                            :class="{ 'is-selected': isSelectedLab(lab) }"
                             @tap="selectLab(lab)"
                         >
-                            <view class="lab-info">
-                                <text class="lab-name">{{
+                            <view class="lab-info-dropdown">
+                                <text class="lab-name-dropdown">{{
                                     lab.labName
                                 }}</text>
-                                <text class="lab-university">{{
+                                <text class="lab-university-dropdown">{{
                                     lab.university
                                 }}</text>
                             </view>
+                            <view class="lab-selection-indicator">
+                                <view
+                                    v-if="isSelectedLab(lab)"
+                                    class="check-icon"
+                                >
+                                    ✓
+                                </view>
+                            </view>
                         </view>
                     </scroll-view>
+
+                    <!-- 空状态 -->
                     <view v-else class="lab-no-result">
-                        <text class="no-result-text">暂无实验室</text>
+                        <text class="no-result-text">未找到匹配的实验室</text>
                     </view>
 
-                    <!-- 创建新实验室入口：固定在底部 -->
+                    <!-- 创建新实验室入口 -->
                     <view class="lab-create-link" @tap="goToCreateLab">
                         <text class="create-icon">➕</text>
                         <text class="create-text"
@@ -108,51 +208,90 @@
                     </view>
                 </view>
             </view>
+        </view>
 
-            <!-- 负责人姓名 -->
-            <view class="setting-item">
-                <text class="item-label">负责人姓名</text>
-                <input
-                    v-model="formData.managerName"
-                    class="item-input"
-                    placeholder="请输入负责人姓名"
-                    maxlength="50"
-                    @blur="handleFieldBlur('managerName')"
-                />
-                <text v-if="errors.managerName" class="error-text">{{
-                    errors.managerName
-                }}</text>
-            </view>
-
-            <!-- 联系方式 -->
-            <view class="setting-item">
-                <text class="item-label">联系方式</text>
-                <input
-                    v-model="formData.managerContact"
-                    type="number"
-                    class="item-input"
-                    placeholder="请输入联系方式"
-                    maxlength="20"
-                    @blur="handleFieldBlur('managerContact')"
-                />
-                <text v-if="errors.managerContact" class="error-text">{{
-                    errors.managerContact
-                }}</text>
+        <!-- 申请加入弹窗 -->
+        <view v-if="isApplyModalVisible" class="modal-overlay" @tap="hideApplyModal">
+            <view class="modal-content" @tap.stop>
+                <view class="modal-header">
+                    <text class="modal-title">申请加入实验室</text>
+                    <view class="modal-close" @tap="hideApplyModal">
+                        <text>✕</text>
+                    </view>
+                </view>
+                <view class="modal-body">
+                    <view class="apply-lab-info">
+                        <text class="apply-lab-name">{{
+                            selectedLabForApply?.labName
+                        }}</text>
+                        <text class="apply-lab-university">{{
+                            selectedLabForApply?.university
+                        }}</text>
+                    </view>
+                    <view class="form-item">
+                        <text class="form-label">申请理由</text>
+                        <textarea
+                            v-model="applyReason"
+                            class="form-textarea"
+                            placeholder="请简要说明申请理由（选填）"
+                            maxlength="500"
+                        />
+                        <text class="char-count">{{ applyReason.length }}/500</text>
+                    </view>
+                </view>
+                <view class="modal-footer">
+                    <view class="modal-btn btn-cancel" @tap="hideApplyModal">
+                        <text>取消</text>
+                    </view>
+                    <view
+                        class="modal-btn btn-confirm"
+                        :class="{ 'btn-loading': submittingApply }"
+                        @tap="submitApply"
+                    >
+                        <text v-if="!submittingApply">提交申请</text>
+                        <view v-else class="loading-spinner"></view>
+                    </view>
+                </view>
             </view>
         </view>
 
-        <!-- 按钮组 -->
-        <view class="button-group">
-            <view
-                class="btn-primary"
-                :class="{ 'btn-loading': loading }"
-                @tap="handleSubmit"
-            >
-                <text v-if="!loading">{{ buttonText }}</text>
-                <view v-else class="loading-spinner"></view>
-            </view>
-            <view class="btn-secondary" @tap="handleReset">
-                <text>重置</text>
+        <!-- 离开实验室确认弹窗 -->
+        <view
+            v-if="isLeaveModalVisible"
+            class="modal-overlay"
+            @tap="hideLeaveModal"
+        >
+            <view class="modal-content" @tap.stop>
+                <view class="modal-header">
+                    <text class="modal-title">确认离开实验室</text>
+                    <view class="modal-close" @tap="hideLeaveModal">
+                        <text>✕</text>
+                    </view>
+                </view>
+                <view class="modal-body">
+                    <view class="leave-warning">
+                        <text class="warning-icon">⚠️</text>
+                        <text class="warning-text"
+                            >确定要离开「{{ labToLeave?.labName }}」吗？</text
+                        >
+                    </view>
+                    <text class="leave-hint"
+                        >离开后将无法访问该实验室的数据</text
+                    >
+                </view>
+                <view class="modal-footer">
+                    <view class="modal-btn btn-cancel" @tap="hideLeaveModal">
+                        <text>取消</text>
+                    </view>
+                    <view
+                        class="modal-btn btn-confirm btn-danger"
+                        :class="{ 'btn-loading': leavingLab }"
+                        @tap="confirmLeave"
+                    >
+                        <text v-if="!leavingLab">确认离开</text>
+                        <view v-else class="loading-spinner"></view>
+                    </view>
+                </view>
             </view>
         </view>
 
@@ -164,60 +303,129 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import Taro, { useDidShow } from '@tarojs/taro'
 import labApi from '../../../api/labapi'
-import userApi from '../../../api/userapi'
+import labMemberApi from '../../../api/labMemberApi'
 import './laboratory.scss'
 
-// 来源页面（用于判断返回路径）
-const fromPage = ref('')
+// 当前实验室
+const currentLab = ref(null)
 
-// 表单数据
-const formData = reactive({
-    labName: '',
-    university: '',
-    managerName: '',
-    managerContact: ''
-})
+// 我的实验室列表
+const myLabs = ref([])
+const loadingMyLabs = ref(false)
+
+// 可用实验室列表
+const availableLabs = ref([])
+const filteredLabs = ref([])
+const showLabList = ref(false)
+const loadingLabs = ref(false)
+const searchKeyword = ref('')
+const selectedLab = ref(null)
+
+// 申请相关
+const isApplyModalVisible = ref(false)
+const selectedLabForApply = ref(null)
+const applyReason = ref('')
+const submittingApply = ref(false)
+
+// 离开实验室相关
+const isLeaveModalVisible = ref(false)
+const labToLeave = ref(null)
+const leavingLab = ref(false)
 
 // 错误信息
 const errorMessage = ref('')
 
-// 加载状态
-const loading = ref(false)
-
-// 表单验证错误
-const errors = reactive({
-    labName: '',
-    university: '',
-    managerName: '',
-    managerContact: ''
-})
-
-// 焦点状态
-const focused = reactive({
-    labName: false
-})
-
-// 实验室选择相关状态
-const labList = ref([])
-const selectedLab = ref(null)
-const showLabDropdown = ref(false)
-const loadingLabs = ref(false)
-
-// 按钮文本（根据场景动态显示）
-const buttonText = computed(() => {
-    if (fromPage.value === 'profile') {
-        return '保存更改'
+// 获取角色文本
+const getRoleText = (role) => {
+    const roleMap = {
+        admin: '管理员',
+        member: '成员',
+        pending: '待审批'
     }
-    return '创建实验室'
-})
+    return roleMap[role] || '未知'
+}
 
-// ============ 实验室选择相关方法 ============
+// 获取状态文本
+const getStatusText = (status) => {
+    const statusMap = {
+        pending: '待审批',
+        active: '已加入',
+        rejected: '已拒绝',
+        left: '已离开'
+    }
+    return statusMap[status] || '未知'
+}
 
-// 获取所有实验室列表
-const loadLabList = async () => {
+// 检查是否已申请
+const isApplied = (labId) => {
+    return myLabs.value.some(
+        (lab) => lab.labId === labId && lab.status === 'pending'
+    )
+}
+
+// 检查是否已加入
+const isMember = (labId) => {
+    return myLabs.value.some(
+        (lab) => lab.labId === labId && lab.status === 'active'
+    )
+}
+
+// 加载我的实验室
+const loadMyLabs = async () => {
+    if (loadingMyLabs.value) return
+
+    loadingMyLabs.value = true
+    errorMessage.value = ''
+
+    try {
+        const res = await Taro.request({
+            url: labMemberApi.myLabs,
+            method: 'GET',
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            const items = res.data.data?.items || []
+            myLabs.value = items
+
+            // 设置当前实验室
+            const activeLab = items.find((lab) => lab.isActive)
+            if (activeLab) {
+                currentLab.value = activeLab
+                // 保存到本地存储
+                Taro.setStorageSync('currentLabId', activeLab.labId)
+                Taro.setStorageSync('currentLabName', activeLab.labName)
+            } else {
+                currentLab.value = null
+            }
+        } else {
+            throw new Error(res.data?.errorInfo || '加载失败')
+        }
+    } catch (error) {
+        console.error('加载我的实验室失败:', error)
+        errorMessage.value = error.message || '加载失败'
+        myLabs.value = []
+        currentLab.value = null
+    } finally {
+        loadingMyLabs.value = false
+    }
+}
+
+// 切换实验室列表显示
+const toggleLabList = () => {
+    showLabList.value = !showLabList.value
+    if (showLabList.value && availableLabs.value.length === 0) {
+        loadAvailableLabs()
+    }
+}
+
+// 加载可用实验室列表
+const loadAvailableLabs = async () => {
     if (loadingLabs.value) return
 
     loadingLabs.value = true
@@ -225,381 +433,277 @@ const loadLabList = async () => {
     try {
         const res = await Taro.request({
             url: labApi.list,
-            method: 'GET'
+            method: 'GET',
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
         })
 
-        if (res.statusCode === 200 && res.data && res.data.errCode === '0') {
-            labList.value = res.data.data || []
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            availableLabs.value = res.data.data || []
+            filterLabs() // 加载后立即过滤
         } else {
-            labList.value = []
+            availableLabs.value = []
         }
     } catch (error) {
-        console.error('获取实验室列表失败:', error)
-        labList.value = []
+        console.error('加载实验室列表失败:', error)
+        availableLabs.value = []
     } finally {
         loadingLabs.value = false
     }
 }
 
-// 切换下拉框显示
-const toggleLabDropdown = () => {
-    showLabDropdown.value = !showLabDropdown.value
-    if (showLabDropdown.value && labList.value.length === 0) {
-        loadLabList()
+// 搜索框聚焦
+const handleSearchFocus = () => {
+    showLabList.value = true
+    if (availableLabs.value.length === 0) {
+        loadAvailableLabs()
+    } else {
+        filterLabs()
     }
-    focused.labName = showLabDropdown.value
+}
+
+// 搜索输入
+const handleSearchInput = () => {
+    filterLabs()
+}
+
+// 过滤实验室
+const filterLabs = () => {
+    if (!searchKeyword.value.trim()) {
+        filteredLabs.value = availableLabs.value
+        return
+    }
+
+    const keyword = searchKeyword.value.toLowerCase()
+    filteredLabs.value = availableLabs.value.filter(
+        (lab) =>
+            lab.labName.toLowerCase().includes(keyword) ||
+            lab.university.toLowerCase().includes(keyword)
+    )
+}
+
+// 清空搜索
+const clearSearch = () => {
+    searchKeyword.value = ''
+    filterLabs()
 }
 
 // 选择实验室
 const selectLab = (lab) => {
     selectedLab.value = lab
-    formData.labName = lab.labName
-    formData.university = lab.university
+    showLabList.value = false
+}
 
-    // 同步更新管理信息
-    if (lab.managerName) {
-        formData.managerName = lab.managerName
-    }
-    if (lab.managerContact) {
-        formData.managerContact = lab.managerContact
-    }
+// 检查是否选中
+const isSelectedLab = (lab) => {
+    return selectedLab.value?._id === lab._id
+}
 
-    showLabDropdown.value = false
-    focused.labName = false
-    errors.labName = ''
-    errors.university = ''
+// 切换实验室
+const switchLab = async (lab) => {
+    if (lab.isActive) return
+
+    try {
+        const res = await Taro.request({
+            url: labMemberApi.currentLab(lab.labId),
+            method: 'PUT',
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            // 更新 token
+            if (res.data.data?.token) {
+                Taro.setStorageSync('token', res.data.data.token)
+            }
+
+            // 清除库存缓存
+            Taro.removeStorageSync('inventoryList')
+            Taro.removeStorageSync('inventoryData')
+
+            Taro.showToast({
+                title: '切换成功',
+                icon: 'success'
+            })
+
+            // 重新加载列表
+            await loadMyLabs()
+        } else {
+            throw new Error(res.data?.errorInfo || '切换失败')
+        }
+    } catch (error) {
+        console.error('切换实验室失败:', error)
+        Taro.showToast({
+            title: error.message || '切换失败',
+            icon: 'none'
+        })
+    }
+}
+
+// 显示申请弹窗
+const showApplyModal = (lab) => {
+    selectedLabForApply.value = lab
+    applyReason.value = ''
+    isApplyModalVisible.value = true
+}
+
+// 隐藏申请弹窗
+const hideApplyModal = () => {
+    isApplyModalVisible.value = false
+    selectedLabForApply.value = null
+    applyReason.value = ''
+}
+
+// 提交申请
+const submitApply = async () => {
+    if (!selectedLabForApply.value) return
+
+    submittingApply.value = true
+
+    try {
+        const res = await Taro.request({
+            url: labMemberApi.apply,
+            method: 'POST',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            },
+            data: {
+                labId: selectedLabForApply.value._id,
+                reason: applyReason.value.trim()
+            }
+        })
+
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            Taro.showToast({
+                title: '申请已提交',
+                icon: 'success'
+            })
+
+            hideApplyModal()
+            // 重新加载列表
+            await loadMyLabs()
+        } else {
+            throw new Error(res.data?.errorInfo || '申请失败')
+        }
+    } catch (error) {
+        console.error('申请加入失败:', error)
+        Taro.showToast({
+            title: error.message || '申请失败',
+            icon: 'none'
+        })
+    } finally {
+        submittingApply.value = false
+    }
+}
+
+// 取消申请
+const cancelApplication = async (lab) => {
+    try {
+        // 使用 leaveLab API 来取消申请（适用于 pending 状态）
+        const res = await Taro.request({
+            url: labMemberApi.leave(lab.labId),
+            method: 'POST',
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            Taro.showToast({
+                title: '已取消申请',
+                icon: 'success'
+            })
+            await loadMyLabs()
+        } else {
+            throw new Error(res.data?.errorInfo || '取消失败')
+        }
+    } catch (error) {
+        console.error('取消申请失败:', error)
+        Taro.showToast({
+            title: error.message || '取消失败',
+            icon: 'none'
+        })
+    }
+}
+
+// 显示离开确认弹窗
+const showLeaveModal = (lab) => {
+    labToLeave.value = lab
+    isLeaveModalVisible.value = true
+}
+
+// 隐藏离开确认弹窗
+const hideLeaveModal = () => {
+    isLeaveModalVisible.value = false
+    labToLeave.value = null
+}
+
+// 离开实验室
+const leaveLab = async (lab) => {
+    showLeaveModal(lab)
+}
+
+// 确认离开
+const confirmLeave = async () => {
+    if (!labToLeave.value) return
+
+    leavingLab.value = true
+
+    try {
+        const res = await Taro.request({
+            url: labMemberApi.leave(labToLeave.value.labId),
+            method: 'POST',
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            Taro.showToast({
+                title: '已离开实验室',
+                icon: 'success'
+            })
+
+            hideLeaveModal()
+            // 重新加载列表
+            await loadMyLabs()
+
+            // 如果离开的是当前实验室，清除缓存
+            if (labToLeave.value.isActive) {
+                Taro.removeStorageSync('inventoryList')
+                Taro.removeStorageSync('inventoryData')
+            }
+        } else {
+            throw new Error(res.data?.errorInfo || '离开失败')
+        }
+    } catch (error) {
+        console.error('离开实验室失败:', error)
+        Taro.showToast({
+            title: error.message || '离开失败',
+            icon: 'none'
+        })
+    } finally {
+        leavingLab.value = false
+    }
 }
 
 // 跳转到创建实验室页面
 const goToCreateLab = () => {
-    showLabDropdown.value = false
     Taro.navigateTo({
-        url: '/pages/profile/create-lab/create-lab?from=laboratory'
+        url: '/pages/profile/create-lab/create-lab'
     })
 }
 
-// 字段失焦验证
-const handleFieldBlur = (field) => {
-    const value = formData[field]
-    const stringValue = value != null ? String(value) : ''
-
-    switch (field) {
-        case 'labName':
-            // 选择模式：验证是否已选择
-            if (!stringValue || !stringValue.trim()) {
-                errors.labName = '请选择实验室'
-                errorMessage.value = '请选择实验室'
-            } else {
-                errors.labName = ''
-                if (
-                    !errors.university &&
-                    !errors.managerName &&
-                    !errors.managerContact
-                ) {
-                    errorMessage.value = ''
-                }
-            }
-            break
-
-        case 'managerName':
-            if (stringValue && stringValue.trim() && stringValue.length < 2) {
-                errors.managerName = '负责人姓名至少2个字符'
-                errorMessage.value = '负责人姓名至少2个字符'
-            } else {
-                errors.managerName = ''
-                if (
-                    !errors.labName &&
-                    !errors.university &&
-                    !errors.managerContact
-                ) {
-                    errorMessage.value = ''
-                }
-            }
-            break
-
-        case 'managerContact':
-            if (
-                stringValue &&
-                stringValue.trim() &&
-                !/^1[3-9]\d{9}$/.test(stringValue)
-            ) {
-                errors.managerContact = '联系方式格式不正确'
-                errorMessage.value = '联系方式格式不正确'
-            } else {
-                errors.managerContact = ''
-                if (
-                    !errors.labName &&
-                    !errors.university &&
-                    !errors.managerName
-                ) {
-                    errorMessage.value = ''
-                }
-            }
-            break
-    }
-}
-
-// 提交表单
-const handleSubmit = () => {
-    // 验证必填字段
-    handleFieldBlur('labName')
-
-    // 检查是否有错误
-    if (errors.labName) {
-        return
-    }
-
-    loading.value = true
-
-    // 判断操作类型
-    const isUpdateProfile = fromPage.value === 'profile' && selectedLab.value
-
-    // 根据场景确定 API 和方法
-    let url, method, requestData
-    if (isUpdateProfile) {
-        // 更新用户所属实验室 - 需要调用用户 API 更新
-        url = userApi.updateProfile
-        method = 'POST'
-        requestData = {
-            _id: Taro.getStorageSync('user_id'),
-            labName: formData.labName.trim()
-        }
-    } else {
-        // 创建新实验室
-        const submitData = {
-            labName: formData.labName.trim(),
-            university: formData.university.trim(),
-            managerName: formData.managerName?.trim() || '',
-            managerContact: formData.managerContact?.trim() || '',
-            status: 'active'
-        }
-        url = labApi.create
-        method = 'POST'
-        requestData = submitData
-    }
-
-    Taro.request({
-        url,
-        method,
-        header: {
-            'Content-Type': 'application/json',
-            Authorization: Taro.getStorageSync('token') || ''
-        },
-        data: requestData,
-        success: (res) => {
-            loading.value = false
-            if (res.statusCode === 200 || res.statusCode === 201) {
-                const data = res.data
-
-                if (data.errCode === '0') {
-                    if (isUpdateProfile) {
-                        // 更新用户所属实验室
-                        const userInfo = Taro.getStorageSync('userInfo')
-                        if (userInfo) {
-                            userInfo.labName = formData.labName
-                            Taro.setStorageSync('userInfo', userInfo)
-                        }
-                        Taro.setStorageSync('labName', formData.labName)
-                        Taro.setStorageSync('laboratoryInfo', formData)
-
-                        // 更新 token（后端会返回包含新 labName 的 token）
-                        if (res.data.token) {
-                            Taro.setStorageSync('token', res.data.token)
-                        }
-
-                        // 清除库存相关缓存，以便切换实验室后能看到正确的耗材
-                        Taro.removeStorageSync('inventoryList')
-                        Taro.removeStorageSync('inventoryData')
-
-                        // 更新新选择的实验室完整信息
-                        if (selectedLab.value) {
-                            const updatedLabInfo = {
-                                labName: selectedLab.value.labName,
-                                university: selectedLab.value.university,
-                                managerName: formData.managerName,
-                                managerContact: formData.managerContact
-                            }
-                            Taro.setStorageSync('laboratoryInfo', updatedLabInfo)
-                        }
-                    }
-
-                    Taro.showToast({
-                        title: isUpdateProfile ? '更改成功' : '创建成功',
-                        icon: 'success'
-                    })
-
-                    setTimeout(() => {
-                        Taro.navigateBack()
-                    }, 1500)
-                } else {
-                    // 后端返回业务错误
-                    const errorMsg =
-                        data.errorInfo || data.errCode === '-1'
-                            ? '操作失败'
-                            : '操作失败'
-                    Taro.showToast({
-                        title: data.errorInfo || errorMsg,
-                        icon: 'none',
-                        duration: 2000
-                    })
-                }
-            } else {
-                // HTTP 状态码错误
-                const errorMsg =
-                    res.data?.errorInfo || `HTTP ${res.statusCode}`
-                Taro.showToast({
-                    title: errorMsg,
-                    icon: 'none',
-                    duration: 2000
-                })
-            }
-        },
-        fail: (err) => {
-            loading.value = false
-            console.error('操作失败:', err)
-            const errorMsg = err.errMsg || '操作失败，请检查网络连接'
-            errorMessage.value = errorMsg
-            Taro.showToast({
-                title: errorMsg,
-                icon: 'none',
-                duration: 2000
-            })
-        }
-    })
-}
-
-// 重置表单
-const handleReset = () => {
-    selectedLab.value = null
-
-    // 从本地存储加载实验室信息
-    const labInfo = Taro.getStorageSync('laboratoryInfo')
-    if (labInfo) {
-        Object.assign(formData, {
-            labName: labInfo.labName || '',
-            university: labInfo.university || '',
-            managerName: labInfo.managerName || '',
-            managerContact: labInfo.managerContact || ''
-        })
-        // 设置已选实验室
-        if (labInfo.labName) {
-            selectedLab.value = {
-                labName: labInfo.labName,
-                university: labInfo.university || ''
-            }
-        }
-    } else {
-        Object.assign(formData, {
-            labName: '',
-            university: '',
-            managerName: '',
-            managerContact: ''
-        })
-    }
-
-    // 清空错误
-    errors.labName = ''
-    errors.university = ''
-    errors.managerName = ''
-    errors.managerContact = ''
-    errorMessage.value = ''
-
-    Taro.showToast({
-        title: '已重置',
-        icon: 'success'
-    })
-}
-
-// 页面显示时刷新实验室列表
-useDidShow(() => {
-    // 页面显示时重新加载实验室列表
-    loadLabList()
-
-    // 检查是否有新创建的实验室并自动选择
-    const newLabName = Taro.getStorageSync('newlyCreatedLab')
-    if (newLabName) {
-        loadLabList().then(() => {
-            const newLab = labList.value.find(
-                lab => lab.labName === newLabName
-            )
-            if (newLab) {
-                selectLab(newLab)
-            }
-
-            // 清除临时存储
-            Taro.removeStorageSync('newlyCreatedLab')
-            Taro.removeStorageSync('newlyCreatedLabUniversity')
-        })
-    }
+// 页面加载
+onMounted(() => {
+    loadMyLabs()
 })
 
-// 页面加载时获取实验室信息
-onMounted(() => {
-    // 获取 URL 参数
-    const instance = Taro.getCurrentInstance()
-    const params = instance.router?.params
-    fromPage.value = params?.from || ''
-
-    // 从用户信息中获取实验室名称
-    const userInfo = Taro.getStorageSync('userInfo')
-
-    // 尝试从多个地方获取实验室名称
-    let labName = userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
-    // 如果 userInfo 中没有，尝试从单独的存储中获取
-    if (!labName) {
-        labName = Taro.getStorageSync('labName') || ''
-    }
-
-    if (labName) {
-        // 用户已有实验室，从后端获取实验室详情
-        Taro.request({
-            url: labApi.detail(labName),
-            method: 'GET',
-            header: {
-                Authorization: Taro.getStorageSync('token') || ''
-            },
-            success: (res) => {
-                if (res.statusCode === 200 && res.data.errCode === '0') {
-                    const labData = res.data.data
-                    Object.assign(formData, {
-                        labName: labData.labName || '',
-                        university: labData.university || '',
-                        managerName: labData.managerName || '',
-                        managerContact: labData.managerContact || ''
-                    })
-                    // 设置已选实验室，进入选择模式
-                    selectedLab.value = {
-                        labName: labData.labName || '',
-                        university: labData.university || ''
-                    }
-                }
-            },
-            fail: (err) => {
-                console.error('获取实验室信息失败:', err)
-                // 从本地存储加载
-                const labInfo = Taro.getStorageSync('laboratoryInfo')
-                if (labInfo) {
-                    Object.assign(formData, labInfo)
-                    selectedLab.value = {
-                        labName: labInfo.labName || '',
-                        university: labInfo.university || ''
-                    }
-                }
-            }
-        })
-    } else {
-        // 用户没有实验室，从本地存储加载（如果有）
-        const labInfo = Taro.getStorageSync('laboratoryInfo')
-        if (labInfo) {
-            Object.assign(formData, labInfo)
-            selectedLab.value = {
-                labName: labInfo.labName || '',
-                university: labInfo.university || ''
-            }
-        }
-    }
-
-    // 加载实验室列表
-    loadLabList()
+// 页面显示时刷新（从其他页面返回时）
+useDidShow(() => {
+    loadMyLabs()
 })
 </script>

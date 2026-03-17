@@ -4,7 +4,7 @@
 
 ## 📋 项目简介
 
-本系统是一个现代化的实验室库存管理解决方案，集成了 **AI 智能助手**、**库存管理**、**出入库记录追踪**、**实验室信息管理**、**多人协作** 等功能，帮助实验室实现高效的库存数字化管理。
+本系统是一个现代化的实验室库存管理解决方案，集成了 **AI 智能助手**、**库存管理**、**实验计划管理**、**耗材共享协作**、**出入库记录追踪**、**实验室信息管理** 等功能，帮助实验室实现高效的库存数字化管理和团队协作。
 
 ## ✨ 功能特性
 
@@ -13,8 +13,18 @@
 #### 🤖 AI 智能助手
 - 语音识别输入（微信语音识别插件）
 - 智能对话交互
+- **实验计划自动生成**：描述实验需求，AI 自动解析并生成耗材清单
 - 库存查询助手
 - 操作指南与建议
+
+#### 📋 实验计划管理 ⭐ 新增
+- **计划列表**：查看所有实验计划，状态自动判断（未开始/进行中）
+- **创建计划**：手动创建实验计划，从仓库选择耗材
+- **AI 生成计划**：在 AI 聊天中描述实验，自动生成计划卡片
+- **计划详情**：查看完整计划信息和耗材清单
+- **取消计划**：取消实验计划，**自动归还所有耗材到仓库**
+- **库存联动**：创建计划时自动扣减库存，取消时自动归还
+- **状态管理**：根据实验日期自动判断状态（无需手动设置）
 
 #### 📦 库存管理
 - 库存列表查看与搜索（支持关键词搜索）
@@ -26,16 +36,19 @@
 - QR 码扫描快速切换物品
 - 库存操作智能验证（防止负库存）
 
+#### 🤝 耗材共享协作 ⭐ 新增
+- **需求大厅**：查看其他实验室的耗材需求
+- **发布需求**：发布耗材需求（我需要/我富余）
+- **我的共享**：管理发布的共享信息
+- **分类筛选**：按类型查看需求
+- **联系方式**：查看发布者联系方式
+- **删除共享**：删除已发布的共享信息
+
 #### 🏢 实验室管理
 - 实验室信息查看与编辑
 - 实验室列表与搜索
 - 创建新实验室
 - 实验室成员管理
-
-#### 👥 协作功能
-- 多用户协作管理库存
-- 实时同步库存状态
-- 操作记录审计追踪
 
 #### ⚙️ 设置中心
 - 个人资料编辑
@@ -51,6 +64,7 @@
 - 🔄 **Token 身份验证**：安全的用户认证机制
 - 🎤 **语音交互**：集成微信语音识别插件
 - 📊 **数据可视化**：库存统计与图表展示
+- 🔄 **自动状态判断**：根据日期自动判断实验计划状态
 
 ## 🛠 技术栈
 
@@ -88,7 +102,9 @@ no-nutui/
 │   │   ├── userapi.ts                # 用户相关接口
 │   │   ├── inventoryAPI.ts           # 库存相关接口
 │   │   ├── labapi.ts                 # 实验室相关接口
-│   │   └── transactionAPI.ts         # 出入库流水接口
+│   │   ├── transactionAPI.ts         # 出入库流水接口
+│   │   ├── shareRequestApi.ts        # 耗材共享接口 ⭐ 新增
+│   │   └── experimentPlanApi.ts      # 实验计划接口 ⭐ 新增
 │   ├── assets/                       # 静态资源
 │   │   └── icons/                    # 图标资源（首页/库存/AI/协作/个人）
 │   ├── pages/                        # 页面组件
@@ -106,7 +122,14 @@ no-nutui/
 │   │   │   ├── inventory-edit/       # 库存编辑
 │   │   │   └── inventory-record/     # 出入库记录（主要操作界面）
 │   │   ├── ai-chat/                  # AI 聊天助手
-│   │   └── collaboration/            # 协作页
+│   │   └── collaboration/            # 协作页 ⭐ 重构
+│   │       ├── collaboration.vue    # 协作主页（实验计划 + 耗材共享）
+│   │       └── experiment-plan/      # 实验计划模块 ⭐ 新增
+│   │           ├── experiment-plan.vue           # 计划列表
+│   │           ├── experiment-plan-create.vue   # 创建/核对计划
+│   │           └── experiment-plan-detail.vue   # 计划详情
+│   │       └── share-publish/        # 耗材共享模块 ⭐ 新增
+│   │           └── share-publish.vue            # 发布共享
 │   ├── app.config.ts                 # 应用配置（路由/TabBar/插件）
 │   ├── app.scss                      # 全局样式
 │   └── app.ts                        # 应用入口
@@ -114,6 +137,7 @@ no-nutui/
 │   └── index.ts                      # 编译配置
 ├── .husky/                           # Git Hooks 配置
 ├── CLAUDE.md                         # Claude Code 开发指南
+├── MEMORY.md                         # 开发记忆文档
 ├── package.json                      # 项目依赖与脚本
 └── tsconfig.json                     # TypeScript 配置
 ```
@@ -203,64 +227,59 @@ TARO_APP_ID=wxXXXXXXXXXXXXXXXX
 // src/api/config.ts
 import { BACKEND_BASE_URL, MCP_BASE_URL } from './config'
 
-// 后端服务接口 - 用户、库存、实验室等业务
+// 后端服务接口 - 用户、库存、实验室、实验计划等业务
 const apiUrl = BACKEND_BASE_URL + '/adminapi/inventory/list'
 
 // MCP 服务接口 - AI 智能查询工具
 const mcpUrl = MCP_BASE_URL + '/tools/inventory-summary'
 ```
 
-#### 4. 内网/远程调试
-
-如果需要连接内网或远程服务器：
-
-```bash
-# .env.local
-VITE_BACKEND_BASE_URL=http://192.168.0.31:3000
-VITE_MCP_BASE_URL=http://192.168.0.31:3001
-```
-
-### 页面路由配置
-
-在 [src/app.config.ts](src/app.config.ts) 中配置页面路由和底部导航栏。
-
-### 微信语音识别插件配置
-
-在 `src/app.config.ts` 中已配置微信语音识别插件：
-
-```typescript
-plugins: {
-  wechatSI: {
-    version: '0.3.3',
-    provider: 'wx069ba97219f66d99'
-  }
-}
-```
-
 ## 📱 页面说明
 
-| 页面 | 路径 | 功能说明 | TabBar |
-|------|------|----------|:-----:|
-| 首页 | pages/index/index | 系统首页，展示数据统计与快捷入口 | ✅ |
-| AI 助手 | pages/ai-chat/ai-chat | AI 智能聊天助手，支持语音输入 | ✅ |
-| 库存管理 | pages/inventory/inventory | 库存列表（含统计）、搜索、筛选 | ✅ |
-| 库存详情 | pages/inventory/inventory-detail | 查看库存物品详细信息 | ❌ |
-| 出入库记录 | pages/inventory/inventory-record | **主要操作界面**：领用/归还物品 | ❌ |
-| 库存编辑 | pages/inventory/inventory-edit | 创建/编辑库存物品 | ❌ |
-| 协作 | pages/collaboration/collaboration | 多人协作管理 | ✅ |
-| 个人中心 | pages/profile/profile | 展示用户信息和菜单入口 | ✅ |
-| 登录 | pages/profile/login/login | 用户登录 | ❌ |
-| 注册 | pages/profile/register/register | 用户注册 | ❌ |
-| 设置 | pages/profile/setting/setting | 编辑个人资料、修改密码 | ❌ |
-| 实验室信息 | pages/profile/laboratory/laboratory | 查看/选择/编辑实验室信息 | ❌ |
-| 创建实验室 | pages/profile/create-lab/create-lab | 创建新实验室 | ❌ |
+### TabBar 页面（底部导航）
+
+| 页面 | 路径 | 功能说明 |
+|------|------|----------|
+| 首页 | pages/index/index | 系统首页，展示数据统计与快捷入口 |
+| AI 助手 | pages/ai-chat/ai-chat | AI 智能聊天助手，支持语音输入 |
+| 库存管理 | pages/inventory/inventory | 库存列表（含统计）、搜索、筛选 |
+| 计划 | pages/collaboration/collaboration | 实验计划 + 耗材共享协作 ⭐ |
+| 我的 | pages/profile/profile | 展示用户信息和菜单入口 |
+
+### 实验计划模块 ⭐ 新增
+
+| 页面 | 路径 | 功能说明 |
+|------|------|----------|
+| 计划列表 | pages/collaboration/experiment-plan/experiment-plan | 查看所有实验计划，状态自动判断 |
+| 创建计划 | pages/collaboration/experiment-plan/experiment-plan-create | 手动创建/AI 生成实验计划，核对耗材清单 |
+| 计划详情 | pages/collaboration/experiment-plan/experiment-plan-detail | 查看计划详情，取消实验并归还耗材 |
+
+### 耗材共享模块 ⭐ 新增
+
+| 页面 | 路径 | 功能说明 |
+|------|------|----------|
+| 协作页 | pages/collaboration/collaboration | 实验计划 + 耗材共享需求大厅 |
+| 发布共享 | pages/collaboration/share-publish/share-publish | 发布耗材需求/富余信息 |
+
+### 其他页面
+
+| 页面 | 路径 | 功能说明 |
+|------|------|----------|
+| 库存详情 | pages/inventory/inventory-detail | 查看库存物品详细信息 |
+| 出入库记录 | pages/inventory/inventory-record | **主要操作界面**：领用/归还物品 |
+| 库存编辑 | pages/inventory/inventory-edit | 创建/编辑库存物品 |
+| 登录 | pages/profile/login/login | 用户登录 |
+| 注册 | pages/profile/register/register | 用户注册 |
+| 设置 | pages/profile/setting/setting | 编辑个人资料、修改密码 |
+| 实验室信息 | pages/profile/laboratory/laboratory | 查看/选择/编辑实验室信息 |
+| 创建实验室 | pages/profile/create-lab/create-lab | 创建新实验室 |
 
 ## 🔌 API 接口
 
 > **服务架构**：
-> - **后端服务** (3000端口): 用户认证、库存管理、实验室管理等核心业务
+> - **后端服务** (3000端口): 用户认证、库存管理、实验计划、实验室管理等核心业务
 > - **MCP 服务** (3001端口): AI 智能查询工具（库存摘要、过期预警等）
-
+>
 > **响应格式**:
 > - 成功: `{ errCode: '0', data: {...} }`
 > - 失败: `{ errCode: '-1', errorInfo: '错误信息' }`
@@ -287,6 +306,22 @@ plugins: {
 - `DELETE /adminapi/inventory/delete/:id` - 删除库存物品
 - `GET /tools/inventory-summary` - **MCP 服务**: 库存统计摘要
 
+### 实验计划相关 (`experimentPlanApi.ts`) ⭐ 新增
+- `GET /adminapi/experiment-plan/list` - 获取实验计划列表（分页）
+- `GET /adminapi/experiment-plan/detail/:id` - 获取实验计划详情
+- `POST /adminapi/experiment-plan/add` - 创建实验计划
+  - 创建时自动扣减库存
+- `PUT /adminapi/experiment-plan/update/:id` - 更新实验计划
+- `DELETE /adminapi/experiment-plan/delete/:id` - 删除实验计划
+  - 取消时先归还耗材再删除
+
+### 耗材共享相关 (`shareRequestApi.ts`) ⭐ 新增
+- `GET /adminapi/share-request/list` - 获取需求列表
+- `GET /adminapi/share-request/my-shares` - 获取我的共享列表
+- `GET /adminapi/share-request/contact/:id` - 获取联系方式
+- `POST /adminapi/share-request/add` - 发布共享需求
+- `DELETE /adminapi/share-request/delete/:id` - 删除共享需求
+
 ### 出入库流水 (`transactionAPI.ts`)
 - `GET /adminapi/transaction/list` - 查询流水记录
 - `GET /adminapi/transaction/statistics` - 流水统计
@@ -304,7 +339,73 @@ plugins: {
 ### AI 智能助手
 - `POST /ai/chat` - AI 聊天接口
   - 支持自然语言库存查询
+  - 自动生成实验计划（返回结构化卡片数据）
   - 自动调用 MCP 工具获取数据
+
+## 🎯 核心功能流程
+
+### 实验计划管理流程
+
+```
+方式一：手动创建
+┌─────────────────┐
+│  计划列表页     │
+│  点击"新建计划" │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  创建/核对页     │
+│  手动填写信息   │
+│  从仓库选择耗材 │
+│  自动扣减库存   │
+└────────┬────────┘
+         ▼
+    保存计划 ✓
+
+方式二：AI 生成
+┌─────────────────┐
+│  AI 聊天页       │
+│  "下周三做        │
+│   Western Blot"  │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  AI 生成计划卡片 │
+│  显示耗材清单   │
+│  [取消] [去核对] │
+└────────┬────────┘
+         ▼
+    点击"去核对"
+         ▼
+┌─────────────────┐
+│  创建/核对页     │
+│  预填充 AI 数据  │
+│  核对无误保存   │
+└─────────────────�
+
+查看详情
+┌─────────────────┐
+│  计划详情页     │
+│  查看完整信息   │
+│  点击"取消实验" │
+└────────┬────────┘
+         ▼
+    确认取消
+         ▼
+┌─────────────────┐
+│  归还所有耗材   │
+│  删除计划       │
+└─────────────────┘
+```
+
+### 库存联动机制
+
+| 操作 | 库存变化 | 流水记录 |
+|------|----------|----------|
+| 创建计划 | 自动扣减 | 消耗出库（consume_out） |
+| 取消计划 | 自动归还 | 使用出库（use_out） |
+| 领用耗材 | 手动操作 | 使用出库（use_out） |
+| 归还耗材 | 手动操作 | 归还入库（return_in） |
 
 ## 🌐 服务架构说明
 
@@ -328,6 +429,8 @@ plugins: {
 **后端服务** (端口 3000):
 - 用户认证与授权
 - 库存 CRUD 操作
+- 实验计划管理 ⭐
+- 耗材共享管理 ⭐
 - 出入库流水管理
 - 实验室管理
 - AI 聊天接口
@@ -342,24 +445,6 @@ plugins: {
 - `/tools/check-item` - 检查耗材可用性
 - `/tools/purchase-suggestions` - 采购建议
 
-### MCP 工具调用流程
-
-```
-用户语音/文字输入
-       ↓
-AI 聊天接口 (/ai/chat)
-       ↓
-DeepSeek AI 解析意图
-       ↓
-调用 MCP 工具 (如 /tools/inventory-summary)
-       ↓
-返回结构化数据
-       ↓
-AI 生成自然语言回复
-       ↓
-展示给用户
-```
-
 ## 📄 许可证
 
 MIT License
@@ -371,87 +456,3 @@ MIT License
 ## 📞 联系方式
 
 如有问题，请通过 Issue 联系我们。
-
----
-
-## 💡 开发指南
-
-### 添加新页面
-
-1. 在 `src/pages/` 下创建页面目录
-2. 创建页面组件文件（如 `[page-name].vue` 和 `[page-name].scss`）
-3. 在 `src/app.config.ts` 的 `pages` 数组中添加路由
-4. 如需添加到 TabBar，在 `tabBar.list` 中配置
-
-### API 开发规范
-
-```typescript
-// 1. 在对应的 API 文件中定义接口
-import { BACKEND_BASE_URL } from './config'
-
-export const apiName = BACKEND_BASE_URL + '/path/to/api'
-
-// 2. 发起请求
-Taro.request({
-  url: apiUrl,
-  method: 'POST',
-  header: {
-    'Content-Type': 'application/json',
-    Authorization: Taro.getStorageSync('token') || ''
-  },
-  data: requestData,
-  success: (res) => {
-    if (res.statusCode === 200 && res.data.errCode === '0') {
-      // 成功处理
-    }
-  }
-})
-```
-
-### 导航规范
-
-```typescript
-// 跳转到新页面
-Taro.navigateTo({ url: '/pages/target-page/target-page' })
-
-// 返回上一页
-Taro.navigateBack()
-
-// 传递参数
-Taro.navigateTo({ url: '/pages/target-page/target-page?id=123&from=profile' })
-
-// 读取参数
-const instance = Taro.getCurrentInstance()
-const params = instance.router?.params
-```
-
-### 存储规范
-
-```typescript
-// 设置存储
-Taro.setStorageSync('key', value)
-
-// 获取存储
-const value = Taro.getStorageSync('key')
-
-// 删除存储
-Taro.removeStorageSync('key')
-```
-
-**常用存储键名**:
-- `token` - 认证令牌
-- `user_id` - 当前用户 ID
-- `userInfo` - 完整用户对象
-- `labName` - 当前实验室名称
-- `laboratoryInfo` - 实验室信息缓存
-
-### 样式规范
-
-- 设计宽度: **750rpx**
-- 主色调: `#1E90FF` (Dodger Blue)
-- 背景渐变: `#F0F5FA` → `#E8EEF5` → `#D9E6F2`
-- 毛玻璃效果: `backdrop-filter: blur(20rpx)`
-- 页面容器类: `[page-name]-page`
-- 区块类: `setting-section`
-- 列表项: `setting-item`
-- 按钮: `btn-primary`, `btn-secondary`

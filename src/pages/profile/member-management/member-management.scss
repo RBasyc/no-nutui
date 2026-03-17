@@ -1,0 +1,344 @@
+/* 成员管理页面样式 */
+.member-management-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding-bottom: 48rpx;
+}
+
+.page-header {
+    padding: 32rpx;
+    text-align: center;
+
+    .page-title {
+        font-size: 40rpx;
+        font-weight: bold;
+        color: white;
+    }
+}
+
+.tab-bar {
+    display: flex;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    margin: 0 32rpx 24rpx;
+    border-radius: 16rpx;
+    padding: 8rpx;
+    gap: 8rpx;
+
+    .tab-item {
+        flex: 1;
+        text-align: center;
+        padding: 16rpx;
+        border-radius: 12rpx;
+        transition: all 0.3s;
+
+        &.active {
+            background: #667eea;
+
+            .tab-text {
+                color: white;
+            }
+
+            .tab-count {
+                color: rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        .tab-text {
+            font-size: 28rpx;
+            color: #666;
+        }
+
+        .tab-count {
+            font-size: 24rpx;
+            color: #999;
+        }
+    }
+}
+
+.members-scroll {
+    max-height: 900rpx;
+    margin: 0 32rpx;
+    padding: 0 16rpx;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    border-radius: 16rpx;
+    padding: 24rpx;
+    margin-bottom: 16rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+
+    .member-info {
+        display: flex;
+        gap: 16rpx;
+        flex: 1;
+
+        .member-avatar {
+            width: 80rpx;
+            height: 80rpx;
+            border-radius: 50%;
+            background: #f0f0f0;
+            flex-shrink: 0;
+        }
+
+        .member-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6rpx;
+            flex: 1;
+
+            .member-name {
+                font-size: 32rpx;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .member-role {
+                font-size: 24rpx;
+                color: #667eea;
+            }
+
+            .apply-reason {
+                font-size: 24rpx;
+                color: #666;
+            }
+        }
+    }
+
+    .member-actions {
+        display: flex;
+        gap: 12rpx;
+        flex-shrink: 0;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80rpx 32rpx;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    border-radius: 16rpx;
+    margin: 0 16rpx;
+
+    .empty-icon {
+        display: block;
+        font-size: 120rpx;
+        margin-bottom: 24rpx;
+    }
+
+    .empty-text {
+        display: block;
+        font-size: 28rpx;
+        color: #666;
+    }
+}
+
+.loading-state {
+    text-align: center;
+    padding: 40rpx;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20rpx);
+    border-radius: 16rpx;
+    margin: 0 16rpx;
+
+    .loading-text {
+        font-size: 28rpx;
+        color: #999;
+    }
+}
+
+.logs-btn-wrapper {
+    padding: 0 32rpx;
+    margin-top: 24rpx;
+
+    .logs-btn {
+        width: 100%;
+    }
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 16rpx 24rpx;
+    border-radius: 12rpx;
+    font-size: 26rpx;
+    text-align: center;
+    min-width: 100rpx;
+
+    &.btn-primary {
+        background: #667eea;
+        color: white;
+    }
+
+    &.btn-secondary {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    &.btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+
+    &.btn-loading {
+        opacity: 0.6;
+    }
+
+    .loading-spinner {
+        width: 24rpx;
+        height: 24rpx;
+        border: 3rpx solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .modal-content {
+        width: 600rpx;
+        background: white;
+        border-radius: 24rpx;
+        overflow: hidden;
+        box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.2);
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32rpx;
+            border-bottom: 1rpx solid #e5e7eb;
+
+            .modal-title {
+                font-size: 32rpx;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .modal-close {
+                font-size: 40rpx;
+                color: #999;
+                line-height: 1;
+            }
+        }
+
+        .modal-body {
+            padding: 32rpx;
+
+            .member-summary {
+                background: rgba(102, 126, 234, 0.05);
+                padding: 24rpx;
+                border-radius: 16rpx;
+                margin-bottom: 24rpx;
+
+                .summary-name {
+                    display: block;
+                    font-size: 32rpx;
+                    font-weight: bold;
+                    color: #333;
+                    margin-bottom: 8rpx;
+                }
+
+                .summary-reason {
+                    display: block;
+                    font-size: 26rpx;
+                    color: #666;
+                }
+            }
+
+            .form-item {
+                margin-bottom: 24rpx;
+
+                .form-label {
+                    display: block;
+                    font-size: 28rpx;
+                    color: #333;
+                    margin-bottom: 16rpx;
+                    font-weight: 500;
+                }
+
+                .form-textarea {
+                    width: 100%;
+                    min-height: 160rpx;
+                    padding: 20rpx;
+                    background: rgba(255, 255, 255, 0.8);
+                    border: 1rpx solid #e5e7eb;
+                    border-radius: 12rpx;
+                    font-size: 28rpx;
+                    box-sizing: border-box;
+                }
+
+                .char-count {
+                    display: block;
+                    text-align: right;
+                    font-size: 24rpx;
+                    color: #999;
+                    margin-top: 8rpx;
+                }
+
+                .radio-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 16rpx;
+                    background: rgba(255, 255, 255, 0.8);
+                    border: 1rpx solid #e5e7eb;
+                    border-radius: 12rpx;
+                    margin-bottom: 12rpx;
+                    transition: all 0.2s;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+
+                    &.checked {
+                        background: rgba(102, 126, 234, 0.1);
+                        border-color: #667eea;
+                    }
+
+                    radio {
+                        margin-right: 16rpx;
+                    }
+
+                    .radio-text {
+                        font-size: 28rpx;
+                        color: #333;
+                    }
+                }
+            }
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 16rpx;
+            padding: 32rpx;
+            border-top: 1rpx solid #e5e7eb;
+
+            .btn {
+                flex: 1;
+            }
+        }
+    }
+}

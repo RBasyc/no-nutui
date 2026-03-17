@@ -94,6 +94,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
 import labApi from '../../../api/labapi'
+import labMemberApi from '../../../api/labMemberApi'
 import './create-lab.scss'
 
 // 来源页面
@@ -207,7 +208,7 @@ const handleFieldBlur = (field) => {
 }
 
 // 提交表单
-const handleSubmit = () => {
+const handleSubmit = async () => {
     // 验证必填字段
     handleFieldBlur('labName')
     handleFieldBlur('university')
@@ -219,93 +220,129 @@ const handleSubmit = () => {
 
     loading.value = true
 
-    // 提交数据到后端
-    const submitData = {
-        labName: formData.labName.trim(),
-        university: formData.university.trim(),
-        managerName: formData.managerName?.trim() || '',
-        managerContact: formData.managerContact?.trim() || '',
-        status: 'active'
-    }
-
-    Taro.request({
-        url: labApi.create,
-        method: 'POST',
-        header: {
-            'Content-Type': 'application/json',
-            Authorization: Taro.getStorageSync('token') || ''
-        },
-        data: submitData,
-        success: (res) => {
-            loading.value = false
-            if (res.statusCode === 200 || res.statusCode === 201) {
-                const data = res.data
-
-                if (data.errCode === '0') {
-                    // 创建成功后的处理
-                    Taro.setStorageSync('labName', formData.labName)
-                    Taro.setStorageSync('laboratoryInfo', formData)
-
-                    // 如果是从注册页来的，保存新创建的实验室信息
-                    if (fromPage.value === 'register') {
-                        Taro.setStorageSync('newlyCreatedLab', formData.labName)
-                        Taro.setStorageSync(
-                            'newlyCreatedLabUniversity',
-                            formData.university
-                        )
-                    }
-
-                    // 如果是从 laboratory 页面来的，也保存到临时存储
-                    if (fromPage.value === 'laboratory') {
-                        Taro.setStorageSync('newlyCreatedLab', formData.labName)
-                        Taro.setStorageSync(
-                            'newlyCreatedLabUniversity',
-                            formData.university
-                        )
-                    }
-
-                    Taro.showToast({
-                        title: '创建成功',
-                        icon: 'success'
-                    })
-
-                    setTimeout(() => {
-                        Taro.navigateBack()
-                    }, 1500)
-                } else {
-                    // 后端返回业务错误
-                    const errorMsg =
-                        data.errorInfo || data.errCode === '-1'
-                            ? '创建失败'
-                            : '创建失败'
-                    Taro.showToast({
-                        title: data.errorInfo || errorMsg,
-                        icon: 'none',
-                        duration: 2000
-                    })
-                }
-            } else {
-                // HTTP 状态码错误
-                const errorMsg = res.data?.errorInfo || `HTTP ${res.statusCode}`
-                Taro.showToast({
-                    title: errorMsg,
-                    icon: 'none',
-                    duration: 2000
-                })
+    try {
+        // 1. 创建实验室
+        const labRes = await Taro.request({
+            url: labApi.create,
+            method: 'POST',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            },
+            data: {
+                labName: formData.labName.trim(),
+                university: formData.university.trim(),
+                managerName: formData.managerName?.trim() || '',
+                managerContact: formData.managerContact?.trim() || '',
+                status: 'active'
             }
-        },
-        fail: (err) => {
-            loading.value = false
-            console.error('创建失败:', err)
-            const errorMsg = err.errMsg || '创建失败，请检查网络连接'
-            errorMessage.value = errorMsg
-            Taro.showToast({
-                title: errorMsg,
-                icon: 'none',
-                duration: 2000
-            })
+        })
+
+        if (labRes.statusCode !== 200 && labRes.statusCode !== 201) {
+            throw new Error('创建实验室失败')
         }
-    })
+
+        const labData = labRes.data
+
+        if (labData.errCode !== '0') {
+            throw new Error(labData.errorInfo || '创建失败')
+        }
+
+        const labId = labData.data?.id
+
+        if (!labId) {
+            throw new Error('实验室ID获取失败')
+        }
+
+        // 2. 申请加入实验室（创建者）
+        const applyRes = await Taro.request({
+            url: labMemberApi.apply,
+            method: 'POST',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            },
+            data: {
+                labId: labId,
+                reason: '实验室创建者'
+            }
+        })
+
+        if (applyRes.statusCode !== 200) {
+            throw new Error('申请加入实验室失败')
+        }
+
+        const applyData = applyRes.data
+
+        if (applyData.errCode !== '0') {
+            throw new Error(applyData.errorInfo || '申请失败')
+        }
+
+        const memberId = applyData.data?.memberId
+
+        // 3. 自动通过申请并设为管理员
+        const approveRes = await Taro.request({
+            url: labMemberApi.approve(memberId),
+            method: 'PUT',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            },
+            data: {
+                role: 'admin'
+            }
+        })
+
+        if (approveRes.statusCode !== 200) {
+            throw new Error('设置管理员失败')
+        }
+
+        if (approveRes.data.errCode !== '0') {
+            throw new Error(approveRes.data.errorInfo || '设置管理员失败')
+        }
+
+        // 4. 切换到新创建的实验室
+        const switchRes = await Taro.request({
+            url: labMemberApi.currentLab(labId),
+            method: 'PUT',
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (switchRes.statusCode === 200 && switchRes.data?.errCode === '0') {
+            // 更新 token
+            if (switchRes.data.token) {
+                Taro.setStorageSync('token', switchRes.data.token)
+            }
+
+            // 清除库存缓存
+            Taro.removeStorageSync('inventoryList')
+            Taro.removeStorageSync('inventoryData')
+
+            // 保存实验室信息
+            Taro.setStorageSync('currentLabId', labId)
+            Taro.setStorageSync('currentLabName', formData.labName)
+        }
+
+        Taro.showToast({
+            title: '创建成功',
+            icon: 'success'
+        })
+
+        setTimeout(() => {
+            Taro.navigateBack()
+        }, 1500)
+
+    } catch (error) {
+        console.error('创建实验室失败:', error)
+        Taro.showToast({
+            title: error.message || '创建失败',
+            icon: 'none'
+        })
+    } finally {
+        loading.value = false
+    }
 }
 
 // 取消操作

@@ -13,8 +13,12 @@ export default defineAppConfig({
     'pages/inventory/inventory-edit/inventory-edit',
     'pages/inventory/inventory-record/inventory-record',
     'pages/collaboration/collaboration',
-    'pages/share-publish/share-publish',
-    'pages/experiment-plan/experiment-plan'
+    'pages/collaboration/share-publish/share-publish',
+        'pages/collaboration/experiment-plan/experiment-plan',
+        'pages/collaboration/experiment-plan/experiment-plan-create',
+    'pages/collaboration/experiment-plan/experiment-plan-detail',
+    
+    
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -24,8 +28,8 @@ export default defineAppConfig({
   },
   plugins: {
     WechatSI: {
-      version: 'latest',
-      provider: process.env.TARO_APP_ID || 'wx069ba97219f66d99'
+      version: '0.3.3',
+      provider: 'wx069ba97219f66d99'
     }
   },
   tabBar: {

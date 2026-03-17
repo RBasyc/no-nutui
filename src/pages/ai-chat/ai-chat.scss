@@ -280,6 +280,89 @@
     }
 }
 
+// ========== 实验计划卡片 ==========
+.plan-card {
+    margin-top: 16rpx;
+    padding: 24rpx;
+    background: linear-gradient(135deg, rgba(30, 144, 255, 0.1) 0%, rgba(0, 191, 255, 0.05) 100%);
+    border: 2rpx solid rgba(30, 144, 255, 0.25);
+    border-radius: 20rpx;
+    box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.12);
+
+    .plan-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+        margin-bottom: 16rpx;
+
+        .plan-card-icon {
+            font-size: 40rpx;
+        }
+
+        .plan-card-title {
+            font-size: 28rpx;
+            font-weight: 700;
+            color: #1E90FF;
+        }
+    }
+
+    .plan-card-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+        margin-bottom: 20rpx;
+        padding-bottom: 16rpx;
+        border-bottom: 2rpx solid rgba(30, 144, 255, 0.15);
+
+        .plan-card-summary {
+            font-size: 26rpx;
+            color: #2F4F4F;
+            line-height: 1.5;
+        }
+
+        .plan-card-items-count {
+            font-size: 24rpx;
+            color: #1E90FF;
+            font-weight: 600;
+        }
+    }
+
+    .plan-card-actions {
+        display: flex;
+        gap: 16rpx;
+
+        .plan-card-btn {
+            flex: 1;
+            padding: 20rpx;
+            border-radius: 16rpx;
+            text-align: center;
+            font-size: 28rpx;
+            font-weight: 600;
+            transition: all 0.15s ease;
+
+            &:active {
+                transform: scale(0.95);
+            }
+
+            &.btn-cancel {
+                background: rgba(240, 245, 250, 0.8);
+                color: #666;
+                border: 2rpx solid rgba(0, 0, 0, 0.05);
+            }
+
+            &.btn-confirm {
+                background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+                color: #ffffff;
+                box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.2);
+            }
+
+            .btn-text {
+                font-size: 28rpx;
+            }
+        }
+    }
+}
+
 // ========== 消息时间 ==========
 .message-time {
     font-size: 20rpx;

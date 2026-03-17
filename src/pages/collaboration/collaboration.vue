@@ -23,7 +23,7 @@
                     <view class="plan-header">
                         <text class="plan-title">{{ plan.title }}</text>
                         <view class="plan-status" :class="plan.status">
-                            {{ getStatusText(plan.status) }}
+                            {{ plan.statusText }}
                         </view>
                     </view>
 
@@ -49,7 +49,7 @@
                         </view>
                     </view>
 
-                    <view v-if="plan.status === 'ongoing'" class="plan-progress">
+                    <view v-if="plan.status === 'in_progress'" class="plan-progress">
                         <view class="progress-bar">
                             <view class="progress-fill" :style="{ width: plan.progress + '%' }"></view>
                         </view>
@@ -355,6 +355,17 @@ const getStatusText = (status) => {
     return statusMap[status] || status
 }
 
+// 获取实验计划状态文本
+const getPlanStatusText = (status) => {
+    const statusMap = {
+        draft: '草稿',
+        in_progress: '进行中',
+        completed: '已完成',
+        cancelled: '已取消'
+    }
+    return statusMap[status] || status
+}
+
 // 加载实验计划列表
 const loadExperimentPlans = async () => {
     try {
@@ -379,6 +390,7 @@ const loadExperimentPlans = async () => {
                 experimentType: item.experimentType,
                 date: formatDate(item.experimentDate),
                 status: item.status,
+                statusText: getPlanStatusText(item.status),
                 progress: item.progress || 0,
                 itemsNeeded: item.itemsNeeded || []
             }))
@@ -521,15 +533,14 @@ useDidShow(() => {
 // 查看更多实验计划
 const handleViewMorePlans = () => {
     Taro.navigateTo({
-        url: '/pages/experiment-plan/experiment-plan'
+        url: '/pages/collaboration/experiment-plan/experiment-plan'
     })
 }
 
 // 实验计划卡片点击
 const handlePlanClick = (plan) => {
-    Taro.showToast({
-        title: `查看${plan.title}详情`,
-        icon: 'none'
+    Taro.navigateTo({
+        url: `/pages/collaboration/experiment-plan/experiment-plan-detail?id=${plan.id}`
     })
 }
 
@@ -624,7 +635,7 @@ const closeContactModal = () => {
 // 发布
 const handlePublish = () => {
     Taro.navigateTo({
-        url: '/pages/share-publish/share-publish'
+        url: '/pages/collaboration/share-publish/share-publish'
     })
 }
 
