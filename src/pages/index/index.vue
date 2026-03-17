@@ -42,31 +42,6 @@
             </view>
         </view>
 
-        <!-- AI 智能提醒卡片 -->
-        <view class="reminder-section">
-            <view class="reminder-card">
-                <view class="reminder-header" @tap="toggleReminder">
-                    <text class="ai-badge">🤖 AI 建议</text>
-                    <text class="reminder-tag">基于实验计划</text>
-                    <text class="expand-icon">{{
-                        aiReminderExpanded ? '▲' : '▼'
-                    }}</text>
-                </view>
-                <view
-                    class="reminder-content"
-                    :class="{ expanded: aiReminderExpanded }"
-                >
-                    "计划做3次Western Blot，每次用1块胶，20μL蛋白上样" →
-                    建议优先使用即将过期的 RIPA
-                    裂解液（库存5瓶，剩余21天），并补充 BCA 试剂盒。
-                </view>
-                <view class="reminder-meta" v-if="aiReminderExpanded">
-                    <text class="meta-time">⏳ 来自 张莹 实验室</text>
-                    <text class="expire-badge">⏰ 2条过期预警</text>
-                </view>
-            </view>
-        </view>
-
         <!-- 即将过期耗材列表 -->
         <view class="list-section">
             <view class="list-header">
@@ -143,19 +118,6 @@
                 <text class="empty-text">暂无需要采购的耗材</text>
             </view>
         </view>
-
-        <!-- 协作共享模块 -->
-        <view class="collaboration-section">
-            <view class="collaboration-card" @tap="handleCollaborationClick">
-                <view class="collaboration-header">
-                    <text class="collab-badge">🤝 协作共享</text>
-                    <text class="collab-tag">A组 有多余 trypsin</text>
-                </view>
-                <view class="collaboration-content">
-                    B组缺胰蛋白酶？A组富余3瓶，可共享。点击查看详情 →
-                </view>
-            </view>
-        </view>
     </view>
 </template>
 
@@ -170,9 +132,6 @@ const userInfo = ref({
     nickname: '',
     avatar: ''
 })
-
-// AI提醒展开状态
-const aiReminderExpanded = ref(false)
 
 // 数据统计
 const statsData = ref({
@@ -567,11 +526,6 @@ const handleActionClick = async (label) => {
     }
 }
 
-// 切换AI提醒展开状态
-const toggleReminder = () => {
-    aiReminderExpanded.value = !aiReminderExpanded.value
-}
-
 // 查看全部
 const handleViewAll = () => {
     Taro.switchTab({
@@ -592,12 +546,5 @@ const getExpiryClass = (days) => {
     if (days <= 7) return 'critical'
     if (days <= 15) return 'warning'
     return 'normal'
-}
-
-// 协作共享点击
-const handleCollaborationClick = () => {
-    Taro.switchTab({
-        url: '/pages/collaboration/collaboration'
-    })
 }
 </script>

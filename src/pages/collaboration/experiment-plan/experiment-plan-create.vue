@@ -280,9 +280,6 @@ const formData = reactive({
 // 标记是否来自 AI
 const isFromAI = ref(false)
 
-// 仓库数据缓存
-const inventoryItems = ref([])
-
 // 仓库搜索弹窗状态
 const showInventoryModal = ref(false)
 const searchKeyword = ref('')
@@ -453,34 +450,6 @@ const selectInventoryItem = (item) => {
 
     // 关闭弹窗
     closeInventoryModal()
-}
-
-// 加载仓库数据
-const loadInventoryItems = async () => {
-    try {
-        const token = Taro.getStorageSync('token') || ''
-        const res = await Taro.request({
-            url: inventoryAPI.list,
-            method: 'GET',
-            header: {
-                'Content-Type': 'application/json',
-                Authorization: token
-            }
-        })
-
-        if (res.statusCode === 200 && res.data.errCode === '0') {
-            // 确保返回的数据是数组
-            const data = res.data.data
-            inventoryItems.value = Array.isArray(data) ? data : []
-        } else {
-            // API调用失败，确保是空数组
-            inventoryItems.value = []
-        }
-    } catch (error) {
-        console.error('加载仓库数据失败:', error)
-        // 出错时确保是空数组
-        inventoryItems.value = []
-    }
 }
 
 // 从 URL 参数获取 AI 数据

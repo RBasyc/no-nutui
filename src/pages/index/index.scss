@@ -190,79 +190,6 @@
     }
 }
 
-/* AI 智能提醒 */
-.reminder-section {
-    padding: 16rpx 32rpx;
-
-    .reminder-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20rpx);
-        border-radius: 20rpx;
-        border: 2rpx solid rgba(30, 144, 255, 0.3);
-        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
-        overflow: hidden;
-
-        .reminder-header {
-            display: flex;
-            align-items: center;
-            padding: 24rpx;
-            border-bottom: 1rpx solid rgba(30, 144, 255, 0.15);
-
-            .ai-badge {
-                font-size: 28rpx;
-                font-weight: 700;
-                color: #1E90FF;
-                margin-right: 12rpx;
-            }
-
-            .reminder-tag {
-                flex: 1;
-                font-size: 22rpx;
-                color: #39FF14;
-                background: rgba(57, 255, 20, 0.1);
-                padding: 6rpx 16rpx;
-                border-radius: 12rpx;
-            }
-
-            .expand-icon {
-                font-size: 24rpx;
-                color: #1E90FF;
-            }
-        }
-
-        .reminder-content {
-            padding: 24rpx;
-            font-size: 28rpx;
-            color: #2F4F4F;
-            line-height: 1.6;
-            max-height: 80rpx;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-
-            &.expanded {
-                max-height: 200rpx;
-            }
-        }
-
-        .reminder-meta {
-            padding: 16rpx 24rpx;
-            background: rgba(30, 144, 255, 0.05);
-            display: flex;
-            justify-content: space-between;
-
-            .meta-time {
-                font-size: 22rpx;
-                color: #666;
-            }
-
-            .expire-badge {
-                font-size: 22rpx;
-                color: #FF8C00;
-            }
-        }
-    }
-}
-
 /* 列表区域 */
 .list-section {
     padding: 16rpx 32rpx;
@@ -392,50 +319,6 @@
             font-size: 28rpx;
             color: #666;
             text-align: center;
-        }
-    }
-}
-
-/* 协作共享模块 */
-.collaboration-section {
-    padding: 16rpx 32rpx;
-
-    .collaboration-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20rpx);
-        border-radius: 20rpx;
-        border: 2rpx solid rgba(30, 144, 255, 0.3);
-        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
-        overflow: hidden;
-
-        .collaboration-header {
-            display: flex;
-            align-items: center;
-            padding: 24rpx;
-            border-bottom: 1rpx solid rgba(30, 144, 255, 0.15);
-
-            .collab-badge {
-                font-size: 28rpx;
-                font-weight: 700;
-                color: #1E90FF;
-                margin-right: 12rpx;
-            }
-
-            .collab-tag {
-                flex: 1;
-                font-size: 22rpx;
-                color: #39FF14;
-                background: rgba(57, 255, 20, 0.1);
-                padding: 6rpx 16rpx;
-                border-radius: 12rpx;
-            }
-        }
-
-        .collaboration-content {
-            padding: 24rpx;
-            font-size: 28rpx;
-            color: #2F4F4F;
-            line-height: 1.6;
         }
     }
 }
