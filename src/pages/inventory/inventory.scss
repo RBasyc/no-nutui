@@ -76,6 +76,11 @@
                 background: rgba(57, 255, 20, 0.2);
                 border-color: rgba(57, 255, 20, 0.4);
             }
+
+            &.warning {
+                background: rgba(255, 165, 0, 0.2);
+                border-color: rgba(255, 165, 0, 0.4);
+            }
         }
     }
 }

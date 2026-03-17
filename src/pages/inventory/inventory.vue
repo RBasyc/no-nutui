@@ -10,6 +10,15 @@
                         <text class="btn-icon">🔃</text>
                         <text class="btn-text">{{ sortText }}</text>
                     </view>
+                    <!-- 流水管理 - 仅管理员可见 -->
+                    <view
+                        v-if="isAdmin"
+                        class="action-btn warning"
+                        @tap="handleTransactionRecords"
+                    >
+                        <text class="btn-icon">📋</text>
+                        <text class="btn-text">流水</text>
+                    </view>
                     <view class="action-btn primary" @tap="handleAddItem">
                         <text class="btn-icon">+</text>
                         <text class="btn-text">添加</text>
@@ -252,6 +261,19 @@ import {
 import drawQrcode from 'weapp-qrcode-canvas-2d'
 import './inventory.scss'
 import inventoryApi from '../../api/inventoryAPI'
+
+// 用户角色 - 管理员标识
+const isAdmin = ref(false)
+
+// 检查用户是否为管理员
+const checkAdminStatus = () => {
+    const currentLabRole = Taro.getStorageSync('currentLabRole')
+    const userInfo = Taro.getStorageSync('userInfo')
+    const role = currentLabRole || userInfo?.role || ''
+
+    // 检查是否为管理员
+    isAdmin.value = role === 'admin' || role === 'manager'
+}
 
 // 搜索值
 const searchValue = ref('')
@@ -530,6 +552,13 @@ const handleAddItem = () => {
     })
 }
 
+// 流水管理
+const handleTransactionRecords = () => {
+    Taro.navigateTo({
+        url: '/pages/inventory/transaction-records/transaction-records'
+    })
+}
+
 // 编辑耗材
 const handleEdit = (item) => {
     Taro.navigateTo({
@@ -760,10 +789,12 @@ usePageScroll((e) => {
 
 // 页面显示时刷新
 useDidShow(() => {
+    checkAdminStatus()
     loadInventoryList(true)
 })
 
 onMounted(() => {
+    checkAdminStatus()
     loadInventoryList(true)
 })
 </script>

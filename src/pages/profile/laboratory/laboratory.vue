@@ -514,22 +514,54 @@ const switchLab = async (lab) => {
         })
 
         if (res.statusCode === 200 && res.data?.errCode === '0') {
-            // 更新 token
-            if (res.data.data?.token) {
-                Taro.setStorageSync('token', res.data.data.token)
+            // 更新 token（从响应头或响应体中获取）
+            const newToken = res.data.data?.token || res.header?.['Authorization'] || res.header?.['authorization']
+            if (newToken) {
+                Taro.setStorageSync('token', newToken)
             }
 
-            // 清除库存缓存
+            // 更新用户信息中的实验室名称
+            const userInfo = Taro.getStorageSync('userInfo') || {}
+            if (res.data.data?.currentLabName) {
+                userInfo.labName = res.data.data.currentLabName
+                userInfo.laboratory = res.data.data.currentLabName
+                Taro.setStorageSync('userInfo', userInfo)
+            }
+
+            // 更新当前实验室信息
+            const currentLabName = res.data.data?.currentLabName || ''
+            const currentLabId = res.data.data?.currentLabId || ''
+            const currentLabRole = res.data.data?.role || ''
+
+            Taro.setStorageSync('currentLabName', currentLabName)
+            Taro.setStorageSync('currentLabId', currentLabId)
+            Taro.setStorageSync('labName', currentLabName) // 兼容旧字段
+            Taro.setStorageSync('currentLabRole', currentLabRole)
+
+            // 清除所有相关缓存
             Taro.removeStorageSync('inventoryList')
             Taro.removeStorageSync('inventoryData')
+            Taro.removeStorageSync('experimentPlanList')
+            Taro.removeStorageSync('shareRequestList')
+
+            // 清除协作页面刷新标志
+            Taro.removeStorageSync('shouldRefreshCollaboration')
 
             Taro.showToast({
-                title: '切换成功',
-                icon: 'success'
+                title: '切换成功，正在加载数据...',
+                icon: 'success',
+                duration: 1500
             })
 
             // 重新加载列表
             await loadMyLabs()
+
+            // 延迟后跳转到首页，确保数据加载
+            setTimeout(() => {
+                Taro.reLaunch({
+                    url: '/pages/index/index'
+                })
+            }, 1500)
         } else {
             throw new Error(res.data?.errorInfo || '切换失败')
         }
@@ -544,6 +576,25 @@ const switchLab = async (lab) => {
 
 // 显示申请弹窗
 const showApplyModal = (lab) => {
+    // 检查是否已经申请过或已是成员
+    if (isApplied(lab._id)) {
+        Taro.showToast({
+            title: '您已申请过该实验室，请等待审批',
+            icon: 'none',
+            duration: 2000
+        })
+        return
+    }
+
+    if (isMember(lab._id)) {
+        Taro.showToast({
+            title: '您已是该实验室成员',
+            icon: 'none',
+            duration: 2000
+        })
+        return
+    }
+
     selectedLabForApply.value = lab
     applyReason.value = ''
     isApplyModalVisible.value = true
@@ -586,13 +637,19 @@ const submitApply = async () => {
             // 重新加载列表
             await loadMyLabs()
         } else {
-            throw new Error(res.data?.errorInfo || '申请失败')
+            // 处理重复申请的错误
+            const errorMsg = res.data?.errorInfo || '申请失败'
+            if (errorMsg.includes('duplicate key') || errorMsg.includes('E11000')) {
+                throw new Error('您已经申请过该实验室，请勿重复申请')
+            }
+            throw new Error(errorMsg)
         }
     } catch (error) {
         console.error('申请加入失败:', error)
         Taro.showToast({
             title: error.message || '申请失败',
-            icon: 'none'
+            icon: 'none',
+            duration: 2500
         })
     } finally {
         submittingApply.value = false

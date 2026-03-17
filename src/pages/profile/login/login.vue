@@ -108,6 +108,7 @@
 import { ref, computed } from 'vue'
 import Taro from '@tarojs/taro'
 import userApi from '../../../api/userapi'
+import labMemberApi from '../../../api/labMemberApi'
 import './login.scss'
 
 // 表单数据
@@ -226,6 +227,9 @@ const handleLogin = async () => {
 
                 Taro.setStorageSync('user_id', res.data.userInfo._id)
 
+                // 加载用户的实验室信息并检测管理员身份
+                await loadUserLabInfo()
+
                 // 检查是否首次登录（没有手机号）
                 if (!res.data.userInfo.phone) {
                     Taro.showToast({
@@ -291,5 +295,43 @@ const handleRegister = () => {
     Taro.navigateTo({
         url: '/pages/profile/register/register'
     })
+}
+
+// 加载用户实验室信息并检测管理员身份
+const loadUserLabInfo = async () => {
+    try {
+        const res = await Taro.request({
+            url: labMemberApi.myLabs,
+            method: 'GET',
+            header: {
+                'Content-Type': 'application/json',
+                'Authorization': Taro.getStorageSync('token') || ''
+            }
+        })
+
+        if (res.statusCode === 200 && res.data?.errCode === '0') {
+            const items = res.data.data?.items || []
+
+            // 找到当前活跃的实验室
+            const activeLab = items.find((lab) => lab.isActive)
+
+            if (activeLab) {
+                // 保存当前实验室信息
+                Taro.setStorageSync('currentLabId', activeLab.labId)
+                Taro.setStorageSync('currentLabName', activeLab.labName)
+
+                // 保存用户在当前实验室的角色信息
+                Taro.setStorageSync('currentLabRole', activeLab.role)
+
+                console.log('当前实验室信息:', {
+                    labId: activeLab.labId,
+                    labName: activeLab.labName,
+                    role: activeLab.role
+                })
+            }
+        }
+    } catch (error) {
+        console.error('加载用户实验室信息失败:', error)
+    }
 }
 </script>

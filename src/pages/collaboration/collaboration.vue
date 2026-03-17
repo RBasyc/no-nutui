@@ -106,9 +106,9 @@
                             v-model="searchKeyword"
                             placeholder="搜索耗材名称、标题..."
                             class="search-input"
-                            @confirm="handleSearch"
+                            @input="handleSearchInput"
                         />
-                        <text v-if="searchKeyword" class="clear-icon" @tap="searchKeyword = ''; handleSearch()">✕</text>
+                        <text v-if="searchKeyword" class="clear-icon" @tap="clearSearch">✕</text>
                     </view>
                 </view>
 
@@ -293,6 +293,9 @@ const requestTypes = ref([
 
 // 搜索关键词
 const searchKeyword = ref('')
+
+// 防抖定时器
+let debounceTimer = null
 
 // 标签数据（只保留需求大厅和我的共享）
 const tabs = ref([
@@ -569,8 +572,22 @@ const handleRequestTypeChange = (value) => {
     loadRequestList()
 }
 
-// 搜索
-const handleSearch = () => {
+// 搜索输入（带防抖）
+const handleSearchInput = () => {
+    // 清除之前的定时器
+    if (debounceTimer) {
+        clearTimeout(debounceTimer)
+    }
+
+    // 设置新的定时器，400ms 后执行搜索
+    debounceTimer = setTimeout(() => {
+        loadRequestList()
+    }, 400)
+}
+
+// 清空搜索
+const clearSearch = () => {
+    searchKeyword.value = ''
     loadRequestList()
 }
 

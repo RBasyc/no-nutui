@@ -8,6 +8,11 @@
                 <view class="circle-deco-1"></view>
                 <view class="circle-deco-2"></view>
 
+                <!-- 实验室标识 -->
+                <view class="lab-badge">
+                    <text>Lab {{ currentLabName || '未加入' }}</text>
+                </view>
+
                 <view class="avatar-wrapper">
                     <image
                         v-if="userInfo.avatar"
@@ -62,6 +67,13 @@
                     <text class="menu-arrow">›</text>
                 </view>
                 <view class="menu-divider"></view>
+                <!-- 实验室审批功能 - 仅管理员可见 -->
+                <view v-if="currentLabRole === 'admin'" class="menu-item" @tap="handleMenuClick('member-management')">
+                    <text class="menu-icon">👥</text>
+                    <text class="menu-label">成员管理</text>
+                    <text class="menu-arrow">›</text>
+                </view>
+                <view v-if="currentLabRole === 'admin'" class="menu-divider"></view>
                 <view class="menu-item" @tap="handleMenuClick('help')">
                     <text class="menu-icon">❓</text>
                     <text class="menu-label">帮助</text>
@@ -104,11 +116,17 @@ const userInfo = ref({
     role: 'user'
 })
 
+// 当前实验室名称
+const currentLabName = ref('')
+
+// 当前实验室角色
+const currentLabRole = ref('')
+
 // 角色中文映射
 const roleMap = {
     admin: '管理员',
-    manager: '管理者',
-    user: '普通用户'
+    manager: '管理员',
+    member: '成员'
 }
 
 // 是否已登录
@@ -124,7 +142,16 @@ const firstChar = computed(() => {
 
 // 角色文本
 const roleText = computed(() => {
-    return roleMap[userInfo.value.role] || '未知角色'
+    // 优先使用当前实验室的角色
+    const role = currentLabRole.value || userInfo.value.role
+
+    // 如果有明确的角色映射，使用映射
+    if (role && roleMap[role]) {
+        return roleMap[role]
+    }
+
+    // 默认显示"成员"而不是"普通用户"
+    return '成员'
 })
 
 // 获取用户信息
@@ -132,10 +159,27 @@ const getUserInfo = () => {
     try {
         const storedUserInfo = Taro.getStorageSync('userInfo')
         if (storedUserInfo) {
-            userInfo.value = storedUserInfo
+            userInfo.value = { ...storedUserInfo }
+        }
+
+        // 获取当前实验室名称
+        const labName = Taro.getStorageSync('currentLabName') || Taro.getStorageSync('labName')
+        if (labName) {
+            currentLabName.value = labName
+            // 同步更新 userInfo 中的 labName
+            if (userInfo.value) {
+                userInfo.value.labName = labName
+            }
+        } else {
+            currentLabName.value = ''
+        }
+
+        // 获取当前实验室角色
+        const role = Taro.getStorageSync('currentLabRole')
+        if (role) {
+            currentLabRole.value = role
         }
     } catch (e) {
-        console.error('获取用户信息失败:', e)
     }
 }
 
@@ -158,7 +202,6 @@ const handleLogin = () => {
 
 // 菜单点击
 const handleMenuClick = (type) => {
-    console.log('点击菜单:', type)
 
     switch (type) {
         case 'settings':
@@ -169,6 +212,20 @@ const handleMenuClick = (type) => {
         case 'laboratory':
             Taro.navigateTo({
                 url: '/pages/profile/laboratory/laboratory?from=profile'
+            })
+            break
+        case 'member-management':
+            // 获取当前实验室ID并传递
+            const currentLabId = Taro.getStorageSync('currentLabId')
+            if (!currentLabId) {
+                Taro.showToast({
+                    title: '未找到实验室信息',
+                    icon: 'none'
+                })
+                return
+            }
+            Taro.navigateTo({
+                url: `/pages/profile/member-management/member-management?labId=${currentLabId}`
             })
             break
         default:
@@ -208,7 +265,6 @@ const handleLogout = () => {
                         })
                     }, 1500)
                 } catch (e) {
-                    console.error('退出登录失败:', e)
                 }
             }
         }

@@ -514,9 +514,7 @@ const handleActionClick = async (label) => {
             })
             break
         case '采购清单':
-            Taro.navigateTo({
-                url: '/pages/purchase/purchase'
-            })
+            handleExportPurchaseList()
             break
         case '统计分析':
             Taro.navigateTo({

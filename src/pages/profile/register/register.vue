@@ -593,6 +593,25 @@ const loadLabList = async () => {
 
         if (res.statusCode === 200 && res.data && res.data.errCode === '0') {
             labList.value = res.data.data || []
+
+            // 如果还没有选择实验室，自动选择测试实验室
+            if (!selectedLab.value && labList.value.length > 0) {
+                // 查找名为"测试实验室"的实验室
+                const testLab = labList.value.find(lab =>
+                    lab.labName.includes('测试') || lab.labName.toLowerCase().includes('test')
+                )
+
+                if (testLab) {
+                    selectedLab.value = testLab
+                    formData.value.labName = testLab.labName
+                    console.log('自动选择测试实验室:', testLab.labName)
+                } else {
+                    // 如果没有找到测试实验室，选择第一个实验室
+                    selectedLab.value = labList.value[0]
+                    formData.value.labName = labList.value[0].labName
+                    console.log('自动选择第一个实验室:', labList.value[0].labName)
+                }
+            }
         } else {
             labList.value = []
         }

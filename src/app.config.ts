@@ -7,18 +7,20 @@ export default defineAppConfig({
     'pages/profile/register/register',
     'pages/profile/setting/setting',
     'pages/profile/laboratory/laboratory',
-    'pages/profile/create-lab/create-lab',
+        'pages/profile/create-lab/create-lab',
+    'pages/profile/member-management/member-management',
     'pages/inventory/inventory',
     'pages/inventory/inventory-detail/inventory-detail',
     'pages/inventory/inventory-edit/inventory-edit',
     'pages/inventory/inventory-record/inventory-record',
+    'pages/inventory/transaction-records/transaction-records',
     'pages/collaboration/collaboration',
     'pages/collaboration/share-publish/share-publish',
         'pages/collaboration/experiment-plan/experiment-plan',
         'pages/collaboration/experiment-plan/experiment-plan-create',
     'pages/collaboration/experiment-plan/experiment-plan-detail',
-    
-    
+
+
   ],
   window: {
     backgroundTextStyle: 'light',

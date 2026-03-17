@@ -14,19 +14,36 @@
                 @tap="switchTab(tab.value)"
             >
                 <text class="tab-text">{{ tab.label }}</text>
-                <text v-if="tab.count > 0" class="tab-count">({{ tab.count }})</text>
+                <text v-if="tab.count > 0" class="tab-count"
+                    >({{ tab.count }})</text
+                >
             </view>
         </view>
 
         <!-- 成员列表 -->
         <scroll-view scrollY class="members-scroll">
-            <view v-for="member in members" :key="member.id" class="member-item">
+            <view
+                v-for="member in members"
+                :key="member.id"
+                class="member-item"
+            >
                 <view class="member-info">
-                    <image class="member-avatar" :src="member.userAvatar || '/assets/default-avatar.png'" />
+                    <image
+                        class="member-avatar"
+                        :src="member.userAvatar || '/assets/default-avatar.png'"
+                    />
                     <view class="member-details">
                         <text class="member-name">{{ member.userName }}</text>
-                        <text class="member-role">{{ getRoleText(member.role) }}</text>
-                        <text v-if="member.applicationReason && activeTab === 'pending'" class="apply-reason">
+                        <text class="member-role">{{
+                            getRoleText(member.role)
+                        }}</text>
+                        <text
+                            v-if="
+                                member.applicationReason &&
+                                activeTab === 'pending'
+                            "
+                            class="apply-reason"
+                        >
                             申请理由: {{ member.applicationReason }}
                         </text>
                     </view>
@@ -35,17 +52,25 @@
                 <view class="member-actions">
                     <!-- 待审批操作 -->
                     <template v-if="activeTab === 'pending'">
-                        <view class="btn btn-primary" @tap="approveMember(member)">
+                        <view
+                            class="btn btn-primary"
+                            @tap="approveMember(member)"
+                        >
                             <text>通过</text>
                         </view>
-                        <view class="btn btn-danger" @tap="rejectMember(member)">
+                        <view
+                            class="btn btn-danger"
+                            @tap="rejectMember(member)"
+                        >
                             <text>拒绝</text>
                         </view>
                     </template>
 
                     <!-- 正式成员操作 -->
                     <template v-if="activeTab === 'active'">
+                        <!-- 只有一个管理员时，不显示修改角色按钮 -->
                         <picker
+                            v-if="!(adminCount === 1 && member.role === 'admin')"
                             mode="selector"
                             :range="roleOptions"
                             @change="onRoleChange($event, member)"
@@ -54,8 +79,20 @@
                                 <text>修改角色</text>
                             </view>
                         </picker>
-                        <view class="btn btn-danger" @tap="removeMember(member)">
+                        <!-- 只有一个管理员时，不显示移除按钮 -->
+                        <view
+                            v-if="!(adminCount === 1 && member.role === 'admin')"
+                            class="btn btn-danger"
+                            @tap="removeMember(member)"
+                        >
                             <text>移除</text>
+                        </view>
+                        <!-- 最后一个管理员时的提示 -->
+                        <view
+                            v-if="adminCount === 1 && member.role === 'admin'"
+                            class="btn btn-disabled"
+                        >
+                            <text>唯一管理员</text>
                         </view>
                     </template>
                 </view>
@@ -81,7 +118,11 @@
         </view>
 
         <!-- 审批弹窗 -->
-        <view v-if="showApproveModal" class="modal-overlay" @tap="hideApproveModal">
+        <view
+            v-if="showApproveModal"
+            class="modal-overlay"
+            @tap="hideApproveModal"
+        >
             <view class="modal-content" @tap.stop>
                 <view class="modal-header">
                     <text class="modal-title">审批通过申请</text>
@@ -90,8 +131,13 @@
 
                 <view class="modal-body">
                     <view class="member-summary">
-                        <text class="summary-name">{{ selectedMember?.userName }}</text>
-                        <text v-if="selectedMember?.applicationReason" class="summary-reason">
+                        <text class="summary-name">{{
+                            selectedMember?.userName
+                        }}</text>
+                        <text
+                            v-if="selectedMember?.applicationReason"
+                            class="summary-reason"
+                        >
                             {{ selectedMember.applicationReason }}
                         </text>
                     </view>
@@ -99,9 +145,18 @@
                     <view class="form-item">
                         <text class="form-label">分配角色</text>
                         <radio-group @change="onRoleSelect">
-                            <label class="radio-item" v-for="role in roleOptions" :key="role">
-                                <radio :value="role" :checked="selectedRole === role" />
-                                <text class="radio-text">{{ getRoleText(role) }}</text>
+                            <label
+                                class="radio-item"
+                                v-for="role in roleOptions"
+                                :key="role"
+                            >
+                                <radio
+                                    :value="role"
+                                    :checked="selectedRole === role"
+                                />
+                                <text class="radio-text">{{
+                                    getRoleText(role)
+                                }}</text>
                             </label>
                         </radio-group>
                     </view>
@@ -124,7 +179,11 @@
         </view>
 
         <!-- 拒绝弹窗 -->
-        <view v-if="showRejectModal" class="modal-overlay" @tap="hideRejectModal">
+        <view
+            v-if="showRejectModal"
+            class="modal-overlay"
+            @tap="hideRejectModal"
+        >
             <view class="modal-content" @tap.stop>
                 <view class="modal-header">
                     <text class="modal-title">拒绝申请</text>
@@ -133,7 +192,9 @@
 
                 <view class="modal-body">
                     <view class="member-summary">
-                        <text class="summary-name">{{ selectedMember?.userName }}</text>
+                        <text class="summary-name">{{
+                            selectedMember?.userName
+                        }}</text>
                     </view>
 
                     <view class="form-item">
@@ -144,7 +205,9 @@
                             placeholder="请输入拒绝理由（可选）"
                             maxlength="500"
                         />
-                        <text class="char-count">{{ rejectReason.length }}/500</text>
+                        <text class="char-count"
+                            >{{ rejectReason.length }}/500</text
+                        >
                     </view>
                 </view>
 
@@ -170,6 +233,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import Taro, { useDidShow } from '@tarojs/taro'
 import labMemberApi from '../../../api/labMemberApi'
+import './member-management.scss'
 
 // 状态管理
 const activeTab = ref('pending')
@@ -180,6 +244,7 @@ const tabs = reactive([
 
 const members = ref([])
 const loading = ref(false)
+const adminCount = ref(0) // 管理员数量
 
 const showApproveModal = ref(false)
 const showRejectModal = ref(false)
@@ -236,12 +301,19 @@ const loadMembers = async () => {
 
         if (res.statusCode === 200 && res.data?.errCode === '0') {
             members.value = res.data.data?.items || []
+
+            // 统计管理员数量（仅在正式成员标签时统计）
+            if (activeTab.value === 'active') {
+                adminCount.value = members.value.filter(m => m.role === 'admin').length
+            }
         } else {
             members.value = []
+            adminCount.value = 0
         }
     } catch (error) {
         console.error('获取成员列表失败:', error)
         members.value = []
+        adminCount.value = 0
     } finally {
         loading.value = false
     }
@@ -388,7 +460,9 @@ const onRoleChange = (e, member) => {
 
     Taro.showModal({
         title: '确认修改角色',
-        content: `确定要将 ${member.userName} 的角色修改为 ${getRoleText(newRole)} 吗？`,
+        content: `确定要将 ${member.userName} 的角色修改为 ${getRoleText(
+            newRole
+        )} 吗？`,
         success: async (res) => {
             if (res.confirm) {
                 try {
@@ -403,7 +477,10 @@ const onRoleChange = (e, member) => {
                         }
                     })
 
-                    if (response.statusCode === 200 && response.data?.errCode === '0') {
+                    if (
+                        response.statusCode === 200 &&
+                        response.data?.errCode === '0'
+                    ) {
                         Taro.showToast({
                             title: '角色修改成功',
                             icon: 'success'
@@ -443,7 +520,10 @@ const removeMember = (member) => {
                         }
                     })
 
-                    if (response.statusCode === 200 && response.data?.errCode === '0') {
+                    if (
+                        response.statusCode === 200 &&
+                        response.data?.errCode === '0'
+                    ) {
                         Taro.showToast({
                             title: '已移除成员',
                             icon: 'success'
@@ -481,15 +561,21 @@ onMounted(() => {
     const params = instance.router?.params
     labId.value = params?.labId || ''
 
+    // 如果 URL 参数中没有 labId，尝试从本地存储获取
     if (!labId.value) {
-        Taro.showToast({
-            title: '缺少实验室ID',
-            icon: 'none'
-        })
-        setTimeout(() => {
-            Taro.navigateBack()
-        }, 1500)
-        return
+        const currentLabId = Taro.getStorageSync('currentLabId')
+        if (currentLabId) {
+            labId.value = currentLabId
+        } else {
+            Taro.showToast({
+                title: '缺少实验室ID',
+                icon: 'none'
+            })
+            setTimeout(() => {
+                Taro.navigateBack()
+            }, 1500)
+            return
+        }
     }
 
     loadMembers()
@@ -497,330 +583,3 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-.member-management-page {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding-bottom: 32rpx;
-}
-
-.page-header {
-    padding: 32rpx;
-    text-align: center;
-
-    .page-title {
-        font-size: 40rpx;
-        font-weight: bold;
-        color: white;
-    }
-}
-
-.tab-bar {
-    display: flex;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20rpx);
-    margin: 0 32rpx 24rpx;
-    border-radius: 16rpx;
-    padding: 8rpx;
-    gap: 8rpx;
-
-    .tab-item {
-        flex: 1;
-        text-align: center;
-        padding: 16rpx;
-        border-radius: 12rpx;
-        transition: all 0.3s;
-
-        &.active {
-            background: #667eea;
-
-            .tab-text {
-                color: white;
-            }
-
-            .tab-count {
-                color: rgba(255, 255, 255, 0.8);
-            }
-        }
-
-        .tab-text {
-            font-size: 28rpx;
-            color: #666;
-        }
-
-        .tab-count {
-            font-size: 24rpx;
-            color: #999;
-        }
-    }
-}
-
-.members-scroll {
-    max-height: 900rpx;
-    margin: 0 32rpx;
-    padding: 0 16rpx;
-}
-
-.member-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20rpx);
-    border-radius: 16rpx;
-    padding: 24rpx;
-    margin-bottom: 16rpx;
-
-    .member-info {
-        display: flex;
-        gap: 16rpx;
-        flex: 1;
-
-        .member-avatar {
-            width: 80rpx;
-            height: 80rpx;
-            border-radius: 50%;
-            background: #f0f0f0;
-        }
-
-        .member-details {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 8rpx;
-
-            .member-name {
-                font-size: 32rpx;
-                font-weight: bold;
-                color: #333;
-            }
-
-            .member-role {
-                font-size: 24rpx;
-                color: #667eea;
-            }
-
-            .apply-reason {
-                font-size: 24rpx;
-                color: #666;
-            }
-        }
-    }
-
-    .member-actions {
-        display: flex;
-        gap: 12rpx;
-    }
-}
-
-.empty-state {
-    text-align: center;
-    padding: 80rpx 32rpx;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20rpx);
-    border-radius: 16rpx;
-    margin: 0 16rpx;
-
-    .empty-icon {
-        display: block;
-        font-size: 120rpx;
-        margin-bottom: 24rpx;
-    }
-
-    .empty-text {
-        display: block;
-        font-size: 28rpx;
-        color: #666;
-    }
-}
-
-.loading-state {
-    text-align: center;
-    padding: 40rpx;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20rpx);
-    border-radius: 16rpx;
-    margin: 0 16rpx;
-
-    .loading-text {
-        font-size: 28rpx;
-        color: #999;
-    }
-}
-
-.logs-btn-wrapper {
-    padding: 0 32rpx;
-    margin-top: 24rpx;
-
-    .logs-btn {
-        width: 100%;
-    }
-}
-
-.btn {
-    padding: 16rpx 24rpx;
-    border-radius: 12rpx;
-    font-size: 26rpx;
-    text-align: center;
-    min-width: 100rpx;
-
-    &.btn-primary {
-        background: #667eea;
-        color: white;
-    }
-
-    &.btn-secondary {
-        background: #e5e7eb;
-        color: #374151;
-    }
-
-    &.btn-danger {
-        background: #ef4444;
-        color: white;
-    }
-
-    &.btn-loading {
-        opacity: 0.6;
-    }
-
-    .loading-spinner {
-        width: 24rpx;
-        height: 24rpx;
-        border: 3rpx solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-// 弹窗样式
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-
-    .modal-content {
-        width: 600rpx;
-        background: white;
-        border-radius: 24rpx;
-        overflow: hidden;
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 32rpx;
-            border-bottom: 1rpx solid #e5e7eb;
-
-            .modal-title {
-                font-size: 32rpx;
-                font-weight: bold;
-                color: #333;
-            }
-
-            .modal-close {
-                font-size: 40rpx;
-                color: #999;
-            }
-        }
-
-        .modal-body {
-            padding: 32rpx;
-
-            .member-summary {
-                background: rgba(102, 126, 234, 0.05);
-                padding: 24rpx;
-                border-radius: 16rpx;
-                margin-bottom: 24rpx;
-
-                .summary-name {
-                    display: block;
-                    font-size: 32rpx;
-                    font-weight: bold;
-                    color: #333;
-                    margin-bottom: 8rpx;
-                }
-
-                .summary-reason {
-                    display: block;
-                    font-size: 26rpx;
-                    color: #666;
-                }
-            }
-
-            .form-item {
-                margin-bottom: 24rpx;
-
-                .form-label {
-                    display: block;
-                    font-size: 28rpx;
-                    color: #333;
-                    margin-bottom: 16rpx;
-                }
-
-                .form-textarea {
-                    width: 100%;
-                    min-height: 160rpx;
-                    padding: 20rpx;
-                    background: rgba(255, 255, 255, 0.8);
-                    border: 1rpx solid #e5e7eb;
-                    border-radius: 12rpx;
-                    font-size: 28rpx;
-                }
-
-                .char-count {
-                    display: block;
-                    text-align: right;
-                    font-size: 24rpx;
-                    color: #999;
-                    margin-top: 8rpx;
-                }
-
-                .radio-item {
-                    display: flex;
-                    align-items: center;
-                    padding: 16rpx;
-                    background: rgba(255, 255, 255, 0.8);
-                    border-radius: 12rpx;
-                    margin-bottom: 12rpx;
-
-                    &:last-child {
-                        margin-bottom: 0;
-                    }
-
-                    radio {
-                        margin-right: 16rpx;
-                    }
-
-                    .radio-text {
-                        font-size: 28rpx;
-                        color: #333;
-                    }
-                }
-            }
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 16rpx;
-            padding: 32rpx;
-            border-top: 1rpx solid #e5e7eb;
-
-            .btn {
-                flex: 1;
-            }
-        }
-    }
-}
-</style>
