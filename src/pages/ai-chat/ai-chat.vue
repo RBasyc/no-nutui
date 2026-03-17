@@ -88,19 +88,46 @@
                         class="plan-card"
                     >
                         <view class="plan-card-header">
-                            <text class="plan-card-icon">📋</text>
-                            <text class="plan-card-title">实验计划已生成</text>
+                            <text class="plan-card-icon">{{
+                                message.aiData.planCreated ? '✅' : '📋'
+                            }}</text>
+                            <text class="plan-card-title">{{
+                                message.aiData.planCreated
+                                    ? '实验计划已创建'
+                                    : '实验计划已生成'
+                            }}</text>
                         </view>
                         <view class="plan-card-info">
-                            <text class="plan-card-summary">{{ message.aiData.summary || '实验计划' }}</text>
-                            <text class="plan-card-items-count">共 {{ message.aiData.parsed_items?.length || 0 }} 项耗材</text>
+                            <text class="plan-card-summary">{{
+                                message.aiData.planTitle ||
+                                message.aiData.summary ||
+                                '实验计划'
+                            }}</text>
+                            <text class="plan-card-items-count"
+                                >共 {{ message.aiData.parsed_items?.length || 0 }} 项耗材</text
+                            >
                         </view>
                         <view class="plan-card-actions">
-                            <view class="plan-card-btn btn-cancel" @tap="handleCancelPlan(message.id)">
+                            <view
+                                v-if="!message.aiData.planCreated"
+                                class="plan-card-btn btn-cancel"
+                                @tap="handleCancelPlan(message.id)"
+                            >
                                 <text class="btn-text">取消</text>
                             </view>
-                            <view class="plan-card-btn btn-confirm" @tap="handleGoToVerify(message.aiData)">
+                            <view
+                                v-if="!message.aiData.planCreated"
+                                class="plan-card-btn btn-confirm"
+                                @tap="handleGoToVerify(message.aiData)"
+                            >
                                 <text class="btn-text">去核对</text>
+                            </view>
+                            <view
+                                v-if="message.aiData.planCreated"
+                                class="plan-card-btn btn-confirm"
+                                @tap="handleViewPlanDetail(message.aiData.planId)"
+                            >
+                                <text class="btn-text">查看详情</text>
                             </view>
                         </view>
                     </view>
@@ -171,7 +198,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useDidShow } from '@tarojs/taro'
 import Taro from '@tarojs/taro'
 import './ai-chat.scss'
@@ -890,6 +917,30 @@ const handleGoToVerify = (aiData: any) => {
     }
 }
 
+// 查看实验计划详情
+const handleViewPlanDetail = (planId: string) => {
+    if (!planId) {
+        Taro.showToast({
+            title: '无效的计划ID',
+            icon: 'none'
+        })
+        return
+    }
+
+    try {
+        // 导航到实验计划详情页面
+        Taro.navigateTo({
+            url: `/pages/collaboration/experiment-plan/experiment-plan-detail?id=${planId}`
+        })
+    } catch (error) {
+        console.error('导航失败:', error)
+        Taro.showToast({
+            title: '打开详情失败',
+            icon: 'none'
+        })
+    }
+}
+
 // 获取用户信息
 const getUserInfo = () => {
     try {
@@ -926,4 +977,29 @@ useDidShow(() => {
         scrollToTop()
     }
 })
+
+// 监听实验计划创建完成事件
+onMounted(() => {
+    Taro.eventCenter.on('experimentPlanCreated', handleExperimentPlanCreated)
+})
+
+// 移除事件监听
+onUnmounted(() => {
+    Taro.eventCenter.off('experimentPlanCreated', handleExperimentPlanCreated)
+})
+
+// 处理实验计划创建完成
+const handleExperimentPlanCreated = (data: { planId: string; title: string }) => {
+    console.log('收到实验计划创建事件:', data)
+
+    // 找到对应的实验计划消息并更新状态
+    messages.value.forEach((msg) => {
+        if (msg.type === 'ai' && msg.aiData?.type === 'experiment_plan') {
+            // 标记为已创建
+            msg.aiData.planCreated = true
+            msg.aiData.planId = data.planId
+            msg.aiData.planTitle = data.title
+        }
+    })
+}
 </script>

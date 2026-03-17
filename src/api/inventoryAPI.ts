@@ -4,6 +4,7 @@ const inventoryApi = {
   // 后端服务接口 (端口 3000)
   list: BACKEND_BASE_URL + '/adminapi/inventory/list',
   search: BACKEND_BASE_URL + '/adminapi/inventory/search',
+  batchMatch: BACKEND_BASE_URL + '/adminapi/inventory/batch-match', // ✅ 新增
   getByCode: BACKEND_BASE_URL + '/adminapi/inventory/by-code',
   alerts: BACKEND_BASE_URL + '/adminapi/inventory/alerts',
   detail: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/detail/${id}`,

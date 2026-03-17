@@ -555,6 +555,10 @@
         align-items: center;
         gap: 8rpx;
         margin-top: 4rpx;
+
+        &.unmatched {
+            gap: 12rpx;
+        }
     }
 
     .stock-dot {
@@ -585,6 +589,14 @@
         &.insufficient {
             color: #F44336;
         }
+    }
+
+    .retry-match-btn {
+        font-size: 22rpx;
+        color: #1E90FF;
+        text-decoration: underline;
+        margin-left: auto;
+        cursor: pointer;
     }
 }
 

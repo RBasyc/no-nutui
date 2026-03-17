@@ -110,6 +110,18 @@
                                         >{{ item.stockInfo.text }}</text
                                     >
                                 </view>
+                                <!-- 未匹配到库存的提示 -->
+                                <view v-else class="stock-hint unmatched">
+                                    <text class="stock-dot insufficient"></text>
+                                    <text class="stock-text insufficient"
+                                        >未匹配到库存</text
+                                    >
+                                    <text
+                                        class="retry-match-btn"
+                                        @tap.stop="handleRetryMatch(index)"
+                                        >重新匹配</text
+                                    >
+                                </view>
                             </view>
 
                             <!-- 右侧：数量控制和删除 -->
@@ -260,7 +272,7 @@ import './experiment-plan-create.scss'
 // 表单数据
 const formData = reactive({
     title: '',
-    experimentDate: '',
+    experimentDate: new Date().toISOString().split('T')[0], // 默认今天
     description: '',
     itemsNeeded: []
 })
@@ -372,21 +384,24 @@ const searchInventoryItems = async () => {
 const selectInventoryItem = (item) => {
     if (replacingItemIndex >= 0) {
         // 替换模式
+        const quantity = parseInt(item.quantity) || 0
+
         formData.itemsNeeded[replacingItemIndex] = {
             ...formData.itemsNeeded[replacingItemIndex],
             name: item.name,
             unit: item.unit || '',
             specification: item.specification || '',
             category: item.category || '其他',
-            inventoryId: String(item.id || item._id),  // 转换为字符串
-            stockQuantity: item.quantity, // 保存原始库存数量
+            inventoryId: String(item.id || item._id), // 转换为字符串
+            stockQuantity: quantity, // 保存原始库存数量
             stockInfo: {
-                status: item.quantity > 0 ? 'sufficient' : 'insufficient',
+                status: quantity > 0 ? 'sufficient' : 'insufficient',
                 text:
-                    item.quantity > 0
-                        ? `库存: ${item.quantity}${item.unit || ''}`
+                    quantity > 0
+                        ? `库存: ${quantity}${item.unit || ''}`
                         : '库存不足'
-            }
+            },
+            matched: true // 标记为已匹配
         }
 
         Taro.showToast({
@@ -394,6 +409,8 @@ const selectInventoryItem = (item) => {
             icon: 'success',
             duration: 1000
         })
+
+        closeInventoryModal()
     } else {
         // 新增模式
         // 检查是否已经添加过该耗材
@@ -480,70 +497,132 @@ onMounted(async () => {
             if (aiData.type === 'experiment_plan') {
                 // 直接使用 AI 返回的字段
                 formData.title = aiData.title || aiData.summary || '实验计划'
-                formData.experimentDate = aiData.date || ''
+                formData.experimentDate = aiData.date || new Date().toISOString().split('T')[0] // 默认今天
                 formData.description = aiData.content || aiData.summary || ''
 
-                // 解析耗材清单：确保数据格式正确并与仓库联动
+                // 解析耗材清单：使用后端批量匹配接口
                 if (
                     Array.isArray(aiData.parsed_items) &&
                     aiData.parsed_items.length > 0
                 ) {
-                    // 先加载仓库数据以便匹配
-                    await loadInventoryItems()
+                    try {
+                        // 准备请求数据
+                        const itemsToMatch = aiData.parsed_items.map((item) => ({
+                            name: item.name || '',
+                            quantity: item.quantity || item.quantity_str || 1,
+                            unit: item.unit || '',
+                            specification: item.specification || ''
+                        }))
 
-                    // 确保 inventoryItems.value 是数组
-                    const inventoryList = Array.isArray(inventoryItems.value)
-                        ? inventoryItems.value
-                        : []
-
-                    formData.itemsNeeded = await Promise.all(
-                        aiData.parsed_items.map(async (item, index) => {
-                            const itemName = item.name || `耗材${index + 1}`
-
-                            // 尝试在仓库中找到匹配的耗材
-                            const matchedInventory = inventoryList.find(
-                                (inv) =>
-                                    inv.name === itemName ||
-                                    inv.name.includes(itemName) ||
-                                    itemName.includes(inv.name)
-                            )
-
-                            return {
-                                name: itemName,
-                                quantity:
-                                    parseInt(item.quantity) ||
-                                    parseInt(item.quantity_str) ||
-                                    1,
-                                unit: matchedInventory?.unit || item.unit || '',
-                                specification:
-                                    matchedInventory?.specification ||
-                                    item.specification ||
-                                    '',
-                                category:
-                                    matchedInventory?.category ||
-                                    item.category ||
-                                    '其他',
-                                inventoryId: matchedInventory?.id, // 如果匹配到仓库中的耗材，保存ID
-                                stockInfo: matchedInventory
-                                    ? {
-                                          status:
-                                              matchedInventory.quantity > 0
-                                                  ? 'sufficient'
-                                                  : 'insufficient',
-                                          text:
-                                              matchedInventory.quantity > 0
-                                                  ? `库存: ${
-                                                        matchedInventory.quantity
-                                                    }${
-                                                        matchedInventory.unit ||
-                                                        ''
-                                                    }`
-                                                  : '库存不足'
-                                      }
-                                    : null
+                        // 调用后端批量匹配接口
+                        const token = Taro.getStorageSync('token') || ''
+                        const matchRes = await Taro.request({
+                            url: inventoryAPI.batchMatch,
+                            method: 'POST',
+                            header: {
+                                'Content-Type': 'application/json',
+                                Authorization: token
+                            },
+                            data: {
+                                items: itemsToMatch
                             }
                         })
-                    )
+
+                        if (matchRes.statusCode === 200 && matchRes.data.errCode === '0') {
+                            const matchData = matchRes.data.data
+                            const matchResults = matchData.results || []
+
+                            console.log(`📊 后端匹配完成:`, matchData.summary)
+
+                            // 根据匹配结果构建耗材列表
+                            formData.itemsNeeded = matchResults.map((result, index) => {
+                                const originalItem = aiData.parsed_items[index]
+
+                                if (result.matched && result.inventory) {
+                                    // 匹配成功
+                                    const inv = result.inventory
+                                    const quantity =
+                                        parseInt(originalItem.quantity) ||
+                                        parseInt(originalItem.quantity_str) ||
+                                        1
+
+                                    return {
+                                        name: result.originalName,
+                                        quantity,
+                                        unit: inv.unit || originalItem.unit || '',
+                                        specification:
+                                            inv.specification || originalItem.specification || '',
+                                        category: inv.category || originalItem.category || '其他',
+                                        inventoryId: inv.id,
+                                        stockQuantity: inv.quantity,
+                                        stockInfo: {
+                                            status:
+                                                inv.quantity > 0
+                                                    ? 'sufficient'
+                                                    : 'insufficient',
+                                            text:
+                                                inv.quantity > 0
+                                                    ? `库存: ${inv.quantity}${inv.unit || ''}`
+                                                    : '库存不足'
+                                        },
+                                        matched: true
+                                    }
+                                } else {
+                                    // 匹配失败
+                                    return {
+                                        name: result.originalName,
+                                        quantity:
+                                            parseInt(originalItem.quantity) ||
+                                            parseInt(originalItem.quantity_str) ||
+                                            1,
+                                        unit: originalItem.unit || '',
+                                        specification: originalItem.specification || '',
+                                        category: originalItem.category || '其他',
+                                        inventoryId: null,
+                                        stockQuantity: 0,
+                                        stockInfo: null,
+                                        matched: false
+                                    }
+                                }
+                            })
+
+                            // 显示匹配结果提示
+                            if (matchData.summary.unmatched > 0) {
+                                Taro.showToast({
+                                    title: `已匹配 ${matchData.summary.matched}/${matchData.summary.total} 项耗材`,
+                                    icon: 'none',
+                                    duration: 2000
+                                })
+                            }
+                        } else {
+                            throw new Error(matchRes.data?.errorInfo || '批量匹配失败')
+                        }
+                    } catch (error) {
+                        console.error('❌ 批量匹配失败:', error)
+
+                        // 降级方案：显示错误但不阻止用户继续
+                        Taro.showToast({
+                            title: '耗材匹配失败，请手动选择',
+                            icon: 'none',
+                            duration: 2000
+                        })
+
+                        // 使用原始数据（无库存信息）
+                        formData.itemsNeeded = aiData.parsed_items.map((item, index) => ({
+                            name: item.name || `耗材${index + 1}`,
+                            quantity:
+                                parseInt(item.quantity) ||
+                                parseInt(item.quantity_str) ||
+                                1,
+                            unit: item.unit || '',
+                            specification: item.specification || '',
+                            category: item.category || '其他',
+                            inventoryId: null,
+                            stockQuantity: 0,
+                            stockInfo: null,
+                            matched: false
+                        }))
+                    }
                 } else {
                     // 如果没有解析到耗材，创建空的耗材列表
                     formData.itemsNeeded = []
@@ -604,6 +683,19 @@ const handleDecreaseQty = (index) => {
     }
 }
 
+// 重新匹配耗材（打开库存选择弹窗）
+const handleRetryMatch = (index) => {
+    replacingItemIndex = index
+    showInventoryModal.value = true
+    searchKeyword.value = ''
+    searchResults.value = []
+
+    Taro.showToast({
+        title: '请从库存列表中选择',
+        icon: 'none'
+    })
+}
+
 // 删除耗材项
 const handleDeleteItem = (index) => {
     formData.itemsNeeded.splice(index, 1)
@@ -620,6 +712,14 @@ const handleSubmit = async () => {
     if (!formData.title.trim()) {
         Taro.showToast({
             title: '请输入计划标题',
+            icon: 'none'
+        })
+        return
+    }
+
+    if (!formData.experimentDate) {
+        Taro.showToast({
+            title: '请选择实验日期',
             icon: 'none'
         })
         return
@@ -648,26 +748,43 @@ const handleSubmit = async () => {
     try {
         const token = Taro.getStorageSync('token') || ''
 
-        // 先扣减所有耗材的库存
-        const deductPromises = formData.itemsNeeded.map(async (item) => {
-            if (!item.inventoryId) return
+        // 先扣减所有耗材的库存（只扣减有inventoryId的耗材）
+        const deductPromises = formData.itemsNeeded
+            .filter(item => item.inventoryId) // 过滤掉没有inventoryId的项
+            .map(async (item) => {
+                try {
+                    const result = await Taro.request({
+                        url: inventoryAPI.quantity(item.inventoryId),
+                        method: 'PUT',
+                        header: {
+                            'Content-Type': 'application/json',
+                            Authorization: token
+                        },
+                        data: {
+                            quantity: parseInt(item.quantity),
+                            operation: 'subtract',
+                            reason: '创建实验计划'
+                        }
+                    })
 
-            await Taro.request({
-                url: inventoryAPI.quantity(item.inventoryId),
-                method: 'PUT',
-                header: {
-                    'Content-Type': 'application/json',
-                    Authorization: token
-                },
-                data: {
-                    quantity: parseInt(item.quantity),
-                    operation: 'subtract',
-                    reason: '创建实验计划'
+                    // 检查扣减是否成功
+                    if (!(result.statusCode === 200 && result.data.errCode === '0')) {
+                        console.warn(`耗材 ${item.name} 扣减失败:`, result.data?.errorInfo)
+                        throw new Error(`${item.name} 扣减失败: ${result.data?.errorInfo || '未知错误'}`)
+                    }
+
+                    console.log(`✅ ${item.name} 扣减成功: -${item.quantity}${item.unit || ''}`)
+                    return { success: true, item: item.name }
+                } catch (error) {
+                    console.error(`❌ ${item.name} 扣减异常:`, error)
+                    throw error
                 }
             })
-        })
 
-        await Promise.all(deductPromises)
+        // 等待所有扣减操作完成
+        const deductResults = await Promise.all(deductPromises)
+
+        console.log('📦 库存扣减完成:', deductResults)
 
         // 然后保存实验计划
         const res = await Taro.request({
@@ -686,6 +803,14 @@ const handleSubmit = async () => {
                 icon: 'success',
                 duration: 1500
             })
+
+            // 通知 AI 聊天页面更新卡片状态
+            if (isFromAI.value) {
+                Taro.eventCenter.trigger('experimentPlanCreated', {
+                    planId: res.data.data._id,
+                    title: formData.title
+                })
+            }
 
             setTimeout(() => {
                 Taro.navigateBack()
