@@ -1,4 +1,4 @@
-import { BACKEND_BASE_URL, MCP_BASE_URL } from './config'
+import { BACKEND_BASE_URL } from './config'
 
 const inventoryApi = {
   // 后端服务接口 (端口 3000)
@@ -12,10 +12,7 @@ const inventoryApi = {
   update: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/update/${id}`,
   quantity: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/quantity/${id}`,
   delete: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/delete/${id}`,
-  stats: BACKEND_BASE_URL + '/adminapi/inventory/stats',
-
-  // MCP 服务接口 (端口 3001)
-  summary: MCP_BASE_URL + '/tools/inventory-summary'
+  stats: BACKEND_BASE_URL + '/adminapi/inventory/stats'
 }
 
 export default inventoryApi

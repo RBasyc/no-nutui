@@ -6,4 +6,4 @@
 export const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || 'http://106.52.20.209:3000'
 
 // MCP 服务地址 (端口 3001) - AI 工具接口
-export const MCP_BASE_URL = import.meta.env.VITE_MCP_BASE_URL || 'http://106.52.20.209:3000'
+export const MCP_BASE_URL = import.meta.env.VITE_MCP_BASE_URL || 'http://106.52.20.209:3001'

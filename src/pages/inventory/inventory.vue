@@ -433,35 +433,20 @@ const loadInventoryList = async (refresh = false) => {
 // 加载统计数据
 const loadStatsData = async () => {
     try {
-        // 尝试从多个地方获取实验室名称
-        const userInfo = Taro.getStorageSync('userInfo')
-        let labName = userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
-
-        // 如果 userInfo 中没有，尝试从单独的存储中获取
-        if (!labName) {
-            labName = Taro.getStorageSync('labName') || ''
-        }
-
-        if (!labName) {
-            console.warn('未找到实验室名称，跳过统计')
-            return
-        }
-
         const res = await Taro.request({
-            url: inventoryApi.summary,
+            url: inventoryApi.alerts,
             method: 'GET',
-            data: { labName },
             header: {
-                'Content-Type': 'application/json'
+                Authorization: Taro.getStorageSync('token') || ''
             }
         })
 
-        if (res.statusCode === 200 && res.data.success) {
-            const data = res.data.data
+        if (res.statusCode === 200 && res.data.errCode === '0') {
+            const summary = res.data.data.summary
             statsData.value = {
-                totalItems: data.totalItems || 0,
-                expiring: data.expiringSoon || 0,
-                lowStock: data.lowStock || 0
+                totalItems: summary.expiring_soon + summary.expired + summary.low_stock + summary.out_of_stock,
+                expiring: summary.expiring_soon + summary.expired,
+                lowStock: summary.low_stock + summary.out_of_stock
             }
         }
     } catch (error) {
@@ -787,14 +772,14 @@ usePageScroll((e) => {
     showBackTop.value = scrollTop > 300
 })
 
-// 页面显示时刷新
+// 页面显示时刷新（包括首次加载和从其他页面返回时）
 useDidShow(() => {
     checkAdminStatus()
     loadInventoryList(true)
 })
 
 onMounted(() => {
-    checkAdminStatus()
-    loadInventoryList(true)
+    // 首次加载时的初始化（如果需要）
+    // useDidShow 会在页面首次显示时触发，所以这里不需要重复加载
 })
 </script>

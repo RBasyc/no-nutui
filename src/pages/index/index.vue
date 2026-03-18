@@ -15,16 +15,16 @@
 
         <!-- 数据统计卡片 -->
         <view class="stats-cards">
-            <view class="stat-card" @tap="handleStatClick('total')">
-                <text class="stat-value">{{ statsData.totalStock }}</text>
+            <view class="stat-card">
+                <text class="stat-value">{{ statsData.totalItems }}</text>
                 <text class="stat-label">总库存</text>
             </view>
-            <view class="stat-card warning" @tap="handleStatClick('expiring')">
-                <text class="stat-value">{{ statsData.expiringCount }}</text>
+            <view class="stat-card warning">
+                <text class="stat-value">{{ statsData.expiring }}</text>
                 <text class="stat-label">即将过期</text>
             </view>
-            <view class="stat-card danger" @tap="handleStatClick('lowstock')">
-                <text class="stat-value">{{ statsData.lowStockCount }}</text>
+            <view class="stat-card danger">
+                <text class="stat-value">{{ statsData.lowStock }}</text>
                 <text class="stat-label">库存不足</text>
             </view>
         </view>
@@ -135,9 +135,9 @@ const userInfo = ref({
 
 // 数据统计
 const statsData = ref({
-    totalStock: 128,
-    expiringCount: 12,
-    lowStockCount: 5
+    totalItems: 128,
+    expiring: 12,
+    lowStock: 5
 })
 
 // 快捷操作
@@ -169,50 +169,8 @@ const getUserInfo = () => {
     }
 }
 
-// 加载统计数据
-const loadStatsData = async () => {
-    try {
-        // 尝试从多个地方获取实验室名称
-        const userInfo = Taro.getStorageSync('userInfo')
-        let labName =
-            userInfo?.labName || userInfo?.laboratory || userInfo?.lab || ''
-
-        // 如果 userInfo 中没有，尝试从单独的存储中获取
-        if (!labName) {
-            labName = Taro.getStorageSync('labName') || ''
-        }
-
-        if (!labName) {
-            console.warn('未找到实验室名称，跳过统计')
-            return
-        }
-
-        const res = await Taro.request({
-            url: inventoryApi.summary,
-            method: 'GET',
-            data: { labName },
-            header: {
-                'Content-Type': 'application/json',
-                Authorization: Taro.getStorageSync('token') || ''
-            }
-        })
-
-        if (res.statusCode === 200 && res.data.success) {
-            const data = res.data.data
-            statsData.value = {
-                totalStock: data.totalItems || 0,
-                expiringCount: data.expiringSoon || 0,
-                lowStockCount: data.lowStock || 0
-            }
-        }
-    } catch (error) {
-        console.error('加载统计数据失败:', error)
-        // 统计数据加载失败不影响主功能
-    }
-}
-
-// 加载即将过期耗材列表
-const loadExpiringItems = async () => {
+// 统一加载所有数据（只调用一次 alerts 接口）
+const loadAllData = async () => {
     try {
         const res = await Taro.request({
             url: inventoryApi.alerts,
@@ -225,14 +183,21 @@ const loadExpiringItems = async () => {
 
         if (res.statusCode === 200 && res.data.errCode === '0') {
             const allAlertItems = res.data.data.items || []
+            const summary = res.data.data.summary
 
-            // 筛选即将过期和已过期的耗材
+            // 1. 更新统计数据
+            statsData.value = {
+                totalItems: summary.expiring_soon + summary.expired + summary.low_stock + summary.out_of_stock,
+                expiring: summary.expiring_soon + summary.expired,
+                lowStock: summary.low_stock + summary.out_of_stock
+            }
+
+            // 2. 处理即将过期耗材列表
             const expiringSoonItems = allAlertItems.filter(
                 (item) =>
                     item.status === 'expiring_soon' || item.status === 'expired'
             )
 
-            // 计算剩余天数并排序
             const now = new Date()
             const itemsWithDays = expiringSoonItems.map((item) => {
                 let days = null
@@ -261,23 +226,20 @@ const loadExpiringItems = async () => {
                 }
             })
 
-            // 按剩余天数排序（天数少的在前）
             itemsWithDays.sort((a, b) => {
                 if (a.days === null) return 1
                 if (b.days === null) return -1
                 return a.days - b.days
             })
 
-            // 取前4个
-            expiringItems.value = itemsWithDays.slice(0, 4).map((item) => {
-                // 根据分类设置图标
-                const categoryIcons = {
-                    试剂: '🧪',
-                    耗材: '💊',
-                    仪器: '⚙️',
-                    其他: '📦'
-                }
+            const categoryIcons = {
+                试剂: '🧪',
+                耗材: '💊',
+                仪器: '⚙️',
+                其他: '📦'
+            }
 
+            expiringItems.value = itemsWithDays.slice(0, 4).map((item) => {
                 return {
                     icon: categoryIcons[item.category] || '📦',
                     name: item.name,
@@ -288,49 +250,16 @@ const loadExpiringItems = async () => {
                     id: item._id || item.id
                 }
             })
-        }
-    } catch (error) {
-        console.error('加载即将过期耗材失败:', error)
-        // 加载失败时显示空列表
-        expiringItems.value = []
-    }
-}
 
-// 加载待处理采购清单
-const loadPurchaseItems = async () => {
-    try {
-        const res = await Taro.request({
-            url: inventoryApi.alerts,
-            method: 'GET',
-            header: {
-                'Content-Type': 'application/json',
-                Authorization: Taro.getStorageSync('token') || ''
-            }
-        })
-
-        if (res.statusCode === 200 && res.data.errCode === '0') {
-            const allAlertItems = res.data.data.items || []
-
-            // 筛选库存不足和缺货的耗材
+            // 3. 处理采购清单
             const lowStockItems = allAlertItems.filter(
                 (item) =>
                     item.status === 'low_stock' || item.status === 'out_of_stock'
             )
 
-            // 计算建议采购量并排序
             const itemsWithSuggestion = lowStockItems.map((item) => {
-                // 建议采购量 = 最大库存 - 当前库存
-                // 如果没有最大库存，则使用最小库存的2倍作为建议量
                 const maxQty = item.maxQuantity || item.minQuantity * 2
                 const suggestQty = Math.max(0, maxQty - item.quantity)
-
-                // 根据分类设置图标
-                const categoryIcons = {
-                    试剂: '🧪',
-                    耗材: '💊',
-                    仪器: '⚙️',
-                    其他: '📦'
-                }
 
                 return {
                     icon: categoryIcons[item.category] || '📦',
@@ -345,22 +274,26 @@ const loadPurchaseItems = async () => {
                 }
             })
 
-            // 按库存短缺程度排序（缺货的在前，然后按建议采购量降序）
             itemsWithSuggestion.sort((a, b) => {
                 if (a.status === '缺货' && b.status !== '缺货') return -1
                 if (a.status !== '缺货' && b.status === '缺货') return 1
                 return b.suggestQty - a.suggestQty
             })
 
-            // 取前4个
             purchaseItems.value = itemsWithSuggestion.slice(0, 4)
         }
     } catch (error) {
-        console.error('加载采购清单失败:', error)
+        console.error('加载数据失败:', error)
         // 加载失败时显示空列表
+        expiringItems.value = []
         purchaseItems.value = []
     }
 }
+
+// 兼容旧接口（如果其他地方调用）
+const loadStatsData = loadAllData
+const loadExpiringItems = loadAllData
+const loadPurchaseItems = loadAllData
 
 // 导出采购清单（保存为 XLS 文件）
 const handleExportPurchaseList = async () => {
@@ -435,20 +368,15 @@ const handleExportPurchaseList = async () => {
     }
 }
 
-// 页面加载时获取用户信息和统计数据
+// 页面加载时获取用户信息
 onMounted(() => {
     getUserInfo()
-    loadStatsData()
-    loadExpiringItems()
-    loadPurchaseItems()
 })
 
-// 页面显示时刷新统计数据（包括从其他页面返回时）
+// 页面显示时刷新数据（包括首次加载和从其他页面返回时）
 useDidShow(() => {
     getUserInfo()
-    loadStatsData()
-    loadExpiringItems()
-    loadPurchaseItems()
+    loadAllData()
 })
 
 // 统计卡片点击

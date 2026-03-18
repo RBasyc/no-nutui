@@ -37,18 +37,18 @@
 
             <!-- 数据统计卡片 -->
             <view class="stats-card" v-if="isLoggedIn">
-                <view class="stat-item">
-                    <text class="stat-value">128</text>
+                <view class="stat-item" @tap="handleStatClick('inventory')">
+                    <text class="stat-value">{{ statsData.totalItems }}</text>
                     <text class="stat-label">库存</text>
                 </view>
                 <view class="stat-divider"></view>
-                <view class="stat-item">
-                    <text class="stat-value">56</text>
-                    <text class="stat-label">协作</text>
+                <view class="stat-item" @tap="handleStatClick('lab')">
+                    <text class="stat-value">{{ statsData.labCount }}</text>
+                    <text class="stat-label">实验室</text>
                 </view>
                 <view class="stat-divider"></view>
-                <view class="stat-item">
-                    <text class="stat-value">89</text>
+                <view class="stat-item" @tap="handleStatClick('plan')">
+                    <text class="stat-value">{{ statsData.planCount }}</text>
                     <text class="stat-label">计划</text>
                 </view>
             </view>
@@ -80,17 +80,6 @@
                     <text class="menu-arrow">›</text>
                 </view>
                 <view v-if="currentLabRole === 'admin'" class="menu-divider"></view>
-                <view class="menu-item" @tap="handleMenuClick('help')">
-                    <text class="menu-icon">❓</text>
-                    <text class="menu-label">帮助</text>
-                    <text class="menu-arrow">›</text>
-                </view>
-                <view class="menu-divider"></view>
-                <view class="menu-item" @tap="handleMenuClick('about')">
-                    <text class="menu-icon">ℹ️</text>
-                    <text class="menu-label">关于</text>
-                    <text class="menu-arrow">›</text>
-                </view>
             </view>
 
             <!-- 登录提示（未登录状态） -->
@@ -114,6 +103,9 @@ import { ref, computed, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
 import { useDidShow } from '@tarojs/taro'
 import './profile.scss'
+import inventoryApi from '../../api/inventoryAPI'
+import labMemberApi from '../../api/labMemberApi'
+import experimentPlanApi from '../../api/experimentPlanApi'
 
 // 用户信息
 const userInfo = ref({
@@ -127,6 +119,13 @@ const currentLabName = ref('')
 
 // 当前实验室角色
 const currentLabRole = ref('')
+
+// 统计数据
+const statsData = ref({
+    totalItems: 0,
+    labCount: 0,
+    planCount: 0
+})
 
 // 角色中文映射
 const roleMap = {
@@ -160,6 +159,25 @@ const roleText = computed(() => {
     return '成员'
 })
 
+// 统计卡片点击
+const handleStatClick = (type) => {
+    switch (type) {
+        case 'inventory':
+            Taro.switchTab({
+                url: '/pages/inventory/inventory'
+            })
+            break
+        case 'lab':
+            handleMenuClick('laboratory')
+            break
+        case 'plan':
+            Taro.switchTab({
+                url: '/pages/collaboration/collaboration'
+            })
+            break
+    }
+}
+
 // 获取用户信息
 const getUserInfo = () => {
     try {
@@ -189,14 +207,68 @@ const getUserInfo = () => {
     }
 }
 
+// 加载统计数据
+const loadStatsData = async () => {
+    try {
+        // 并行加载三个接口
+        const [inventoryRes, labsRes, plansRes] = await Promise.all([
+            // 1. 获取库存统计
+            Taro.request({
+                url: inventoryApi.alerts,
+                method: 'GET',
+                header: {
+                    Authorization: Taro.getStorageSync('token') || ''
+                }
+            }).catch(() => null),
+
+            // 2. 获取实验室数量
+            Taro.request({
+                url: labMemberApi.myLabs,
+                method: 'GET',
+                header: {
+                    Authorization: Taro.getStorageSync('token') || ''
+                }
+            }).catch(() => null),
+
+            // 3. 获取实验计划数量
+            Taro.request({
+                url: experimentPlanApi.list,
+                method: 'GET',
+                header: {
+                    Authorization: Taro.getStorageSync('token') || ''
+                }
+            }).catch(() => null)
+        ])
+
+        // 处理库存数据
+        if (inventoryRes?.statusCode === 200 && inventoryRes.data.errCode === '0') {
+            const summary = inventoryRes.data.data.summary
+            statsData.value.totalItems = summary.expiring_soon + summary.expired + summary.low_stock + summary.out_of_stock
+        }
+
+        // 处理实验室数量
+        if (labsRes?.statusCode === 200 && labsRes.data.errCode === '0') {
+            statsData.value.labCount = labsRes.data.data?.items?.length || 0
+        }
+
+        // 处理实验计划数量
+        if (plansRes?.statusCode === 200 && plansRes.data.errCode === '0') {
+            statsData.value.planCount = plansRes.data.data?.total || 0
+        }
+    } catch (error) {
+        console.error('加载统计数据失败:', error)
+    }
+}
+
 // 页面加载时获取用户信息
 onMounted(() => {
     getUserInfo()
 })
 
-// 页面显示时重新获取用户信息
+// 页面显示时重新获取用户信息和统计数据（包括首次加载和从其他页面返回时）
 useDidShow(() => {
     getUserInfo()
+    loadStatsData()
 })
 
 // 跳转到登录页
