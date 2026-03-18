@@ -21,10 +21,10 @@ export default defineConfig<'vite'>(async (merge, { command, mode }) => {
       "@tarojs/plugin-generator"
     ],
     defineConstants: {
-      'process.env.TARO_APP_ID': JSON.stringify(process.env.TARO_APP_ID || 'wxXXXXXXXXXXXXXXXX'),
-      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'http://localhost:3000'),
-      'import.meta.env.VITE_BACKEND_BASE_URL': JSON.stringify(process.env.VITE_BACKEND_BASE_URL || 'http://localhost:3000'),
-      'import.meta.env.VITE_MCP_BASE_URL': JSON.stringify(process.env.VITE_MCP_BASE_URL || 'http://localhost:3001'),
+      'process.env.TARO_APP_ID': JSON.stringify(process.env.TARO_APP_ID || 'wx069ba97219f66d99'),
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'http://106.52.20.209:3000'),
+      'import.meta.env.VITE_BACKEND_BASE_URL': JSON.stringify(process.env.VITE_BACKEND_BASE_URL || 'http://106.52.20.209:3000'),
+      'import.meta.env.VITE_MCP_BASE_URL': JSON.stringify(process.env.VITE_MCP_BASE_URL || 'http://106.52.20.209:3000'),
     },
     copy: {
       patterns: [

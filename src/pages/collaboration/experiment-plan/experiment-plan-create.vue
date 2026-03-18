@@ -266,6 +266,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import Taro, { getCurrentInstance } from '@tarojs/taro'
+import { BACKEND_BASE_URL } from '../../../api/config'
 import inventoryAPI from '../../../api/inventoryAPI'
 import './experiment-plan-create.scss'
 
@@ -757,7 +758,7 @@ const handleSubmit = async () => {
 
         // 然后保存实验计划
         const res = await Taro.request({
-            url: 'http://localhost:3000/adminapi/experiment-plan/add',
+            url: `${BACKEND_BASE_URL}/adminapi/experiment-plan/add`,
             method: 'POST',
             header: {
                 'Content-Type': 'application/json',

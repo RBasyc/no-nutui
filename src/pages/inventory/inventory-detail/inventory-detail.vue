@@ -189,6 +189,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
+import { BACKEND_BASE_URL } from '../../../api/config'
 import drawQrcode from 'weapp-qrcode-canvas-2d'
 import './inventory-detail.scss'
 
@@ -214,7 +215,7 @@ const loadItemDetail = async () => {
         }
 
         const res = await Taro.request({
-            url: `http://localhost:3000/adminapi/inventory/detail/${itemId}`,
+            url: `${BACKEND_BASE_URL}/adminapi/inventory/detail/${itemId}`,
             method: 'GET',
             header: {
                 'Content-Type': 'application/json',

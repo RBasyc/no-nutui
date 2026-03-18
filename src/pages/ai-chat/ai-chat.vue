@@ -202,7 +202,7 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useDidShow } from '@tarojs/taro'
 import Taro from '@tarojs/taro'
 import './ai-chat.scss'
-import { API_BASE_URL } from '../../api/config'
+import { BACKEND_BASE_URL } from '../../api/config'
 
 // 声明微信插件类型
 declare const requirePlugin: (name: string) => any
@@ -573,7 +573,7 @@ const processUserMessage = async (text: string) => {
 
         // 调用后端 AI API
         const response = await Taro.request({
-            url: `${API_BASE_URL}/ai/chat`,
+            url: `${BACKEND_BASE_URL}/ai/chat`,
             method: 'POST',
             header: {
                 'Content-Type': 'application/json',

@@ -1,11 +1,11 @@
-import { API_BASE_URL } from './config'
+import { BACKEND_BASE_URL } from './config'
 
 const userApi = {
-    login: API_BASE_URL + '/user/login',
-    register: API_BASE_URL + '/user/register',
-    checkNickname: API_BASE_URL + '/user/check-nickname',
-    updateProfile: API_BASE_URL + '/user/update-profile',
-    upload: API_BASE_URL + '/upload/image',
+    login: BACKEND_BASE_URL + '/user/login',
+    register: BACKEND_BASE_URL + '/user/register',
+    checkNickname: BACKEND_BASE_URL + '/user/check-nickname',
+    updateProfile: BACKEND_BASE_URL + '/user/update-profile',
+    upload: BACKEND_BASE_URL + '/upload/image',
 }
 
 export default userApi

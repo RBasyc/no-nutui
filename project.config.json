@@ -3,6 +3,7 @@
   "projectname": "no-nutui",
   "description": "test",
   "appid": "wxcd3a4639dd600ebc",
+  "lazyCodeLoading": "requiredComponents",
   "plugins": {
     "WechatSI": {
       "version": "0.3.3",
@@ -15,7 +16,7 @@
     "enhance": false,
     "compileHotReLoad": false,
     "postcss": false,
-    "minified": false,
+    "minified": true,
     "compileWorklet": false,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,

@@ -239,7 +239,13 @@ const handleSubmit = async () => {
         })
 
         if (labRes.statusCode !== 200 && labRes.statusCode !== 201) {
-            throw new Error('创建实验室失败')
+            const errorMsg = labRes.data?.errorInfo || '创建实验室失败'
+            console.error('创建实验室失败:', {
+                statusCode: labRes.statusCode,
+                data: labRes.data,
+                errorMsg
+            })
+            throw new Error(errorMsg)
         }
 
         const labData = labRes.data
@@ -248,60 +254,34 @@ const handleSubmit = async () => {
             throw new Error(labData.errorInfo || '创建失败')
         }
 
-        const labId = labData.data?.id
+        const labId = labData.data?._id
 
         if (!labId) {
             throw new Error('实验室ID获取失败')
         }
 
-        // 2. 申请加入实验室（创建者）
-        const applyRes = await Taro.request({
-            url: labMemberApi.apply,
+        // 2. 直接将创建者设为管理员
+        const adminRes = await Taro.request({
+            url: labMemberApi.addAdmin,
             method: 'POST',
             header: {
                 'Content-Type': 'application/json',
                 Authorization: Taro.getStorageSync('token') || ''
             },
             data: {
-                labId: labId,
-                reason: '实验室创建者'
+                labId: labId
             }
         })
 
-        if (applyRes.statusCode !== 200) {
-            throw new Error('申请加入实验室失败')
-        }
-
-        const applyData = applyRes.data
-
-        if (applyData.errCode !== '0') {
-            throw new Error(applyData.errorInfo || '申请失败')
-        }
-
-        const memberId = applyData.data?.memberId
-
-        // 3. 自动通过申请并设为管理员
-        const approveRes = await Taro.request({
-            url: labMemberApi.approve(memberId),
-            method: 'PUT',
-            header: {
-                'Content-Type': 'application/json',
-                Authorization: Taro.getStorageSync('token') || ''
-            },
-            data: {
-                role: 'admin'
-            }
-        })
-
-        if (approveRes.statusCode !== 200) {
+        if (adminRes.statusCode !== 200) {
             throw new Error('设置管理员失败')
         }
 
-        if (approveRes.data.errCode !== '0') {
-            throw new Error(approveRes.data.errorInfo || '设置管理员失败')
+        if (adminRes.data.errCode !== '0') {
+            throw new Error(adminRes.data.errorInfo || '设置管理员失败')
         }
 
-        // 4. 切换到新创建的实验室
+        // 3. 切换到新创建的实验室
         const switchRes = await Taro.request({
             url: labMemberApi.currentLab(labId),
             method: 'PUT',

@@ -66,6 +66,7 @@
 import { ref, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
 import { useDidShow } from '@tarojs/taro'
+import { BACKEND_BASE_URL } from '../../../api/config'
 import './experiment-plan.scss'
 
 // 计划列表数据
@@ -81,7 +82,7 @@ const loadPlans = async () => {
 
         // 检查后端 API 是否存在
         const res = await Taro.request({
-            url: 'http://localhost:3000/adminapi/experiment-plan/list',
+            url: `${BACKEND_BASE_URL}/adminapi/experiment-plan/list`,
             method: 'GET',
             header: {
                 Authorization: token

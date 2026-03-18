@@ -165,10 +165,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import Taro from '@tarojs/taro'
+import { BACKEND_BASE_URL } from '../../api/config'
 import './statistics.scss'
-
-// API base URL
-const BACKEND_BASE_URL = 'http://localhost:3000'
 
 // Loading state
 const loading = ref(true)

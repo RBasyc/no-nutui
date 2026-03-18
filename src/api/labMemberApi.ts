@@ -3,7 +3,9 @@
  * Handles all lab member-related API endpoints
  */
 
-const API_BASE_URL = 'http://localhost:3000/adminapi/lab-member'
+import { BACKEND_BASE_URL } from './config'
+
+const API_BASE_URL = `${BACKEND_BASE_URL}/adminapi/lab-member`
 
 const labMemberApi = {
   /**
@@ -76,7 +78,13 @@ const labMemberApi = {
    * Get member logs (admin only)
    * GET /adminapi/lab-member/:labId/logs
    */
-  logs: (labId: string): string => `${API_BASE_URL}/${labId}/logs`
+  logs: (labId: string): string => `${API_BASE_URL}/${labId}/logs`,
+
+  /**
+   * Add user as lab admin directly (for lab creator)
+   * POST /adminapi/lab-member/add-admin
+   */
+  addAdmin: `${API_BASE_URL}/add-admin`
 }
 
 export default labMemberApi

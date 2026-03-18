@@ -2,12 +2,7 @@
 interface ImportMetaEnv {
   readonly VITE_BACKEND_BASE_URL?: string
   readonly VITE_MCP_BASE_URL?: string
-  readonly VITE_API_BASE_URL?: string
   readonly TARO_APP_ID?: string
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv
 }
 
 // 微信小程序插件类型声明
@@ -40,6 +35,11 @@ declare namespace WechatSI {
 declare global {
   // eslint-disable-next-line no-var
   var requirePlugin: (name: string) => any
+
+  // 扩展 ImportMeta 接口
+  interface ImportMeta {
+    readonly env: ImportMetaEnv
+  }
 }
 
 export {}
