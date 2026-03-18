@@ -67,6 +67,12 @@
                     <text class="menu-arrow">›</text>
                 </view>
                 <view class="menu-divider"></view>
+                <view class="menu-item" @tap="handleMenuClick('statistics')">
+                    <text class="menu-icon">📊</text>
+                    <text class="menu-label">数据统计</text>
+                    <text class="menu-arrow">›</text>
+                </view>
+                <view class="menu-divider"></view>
                 <!-- 实验室审批功能 - 仅管理员可见 -->
                 <view v-if="currentLabRole === 'admin'" class="menu-item" @tap="handleMenuClick('member-management')">
                     <text class="menu-icon">👥</text>
@@ -226,6 +232,11 @@ const handleMenuClick = (type) => {
             }
             Taro.navigateTo({
                 url: `/pages/profile/member-management/member-management?labId=${currentLabId}`
+            })
+            break
+        case 'statistics':
+            Taro.navigateTo({
+                url: '/pages/statistics/statistics'
             })
             break
         default:

@@ -518,7 +518,7 @@ const handleActionClick = async (label) => {
             break
         case '统计分析':
             Taro.navigateTo({
-                url: '/pages/inventory/inventory'
+                url: '/pages/statistics/statistics'
             })
             break
     }

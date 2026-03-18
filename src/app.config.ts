@@ -1,7 +1,7 @@
 export default defineAppConfig({
     pages: [
-    'pages/index/index',
     'pages/profile/login/login',
+    'pages/index/index',
     'pages/ai-chat/ai-chat',
     'pages/profile/profile',
     'pages/profile/register/register',
@@ -19,6 +19,7 @@ export default defineAppConfig({
         'pages/collaboration/experiment-plan/experiment-plan',
         'pages/collaboration/experiment-plan/experiment-plan-create',
     'pages/collaboration/experiment-plan/experiment-plan-detail',
+    'pages/statistics/statistics',
 
 
   ],
