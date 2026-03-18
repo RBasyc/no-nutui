@@ -232,8 +232,8 @@ const handleSubmit = async () => {
             data: {
                 labName: formData.labName.trim(),
                 university: formData.university.trim(),
-                managerName: formData.managerName?.trim() || '',
-                managerContact: formData.managerContact?.trim() || '',
+                managerName: String(formData.managerName || '').trim() || '',
+                managerContact: String(formData.managerContact || '').trim() || '',
                 status: 'active'
             }
         })
@@ -296,13 +296,24 @@ const handleSubmit = async () => {
                 Taro.setStorageSync('token', switchRes.data.token)
             }
 
+            // 更新用户信息中的实验室名称
+            const userInfo = Taro.getStorageSync('userInfo') || {}
+            userInfo.labName = formData.labName
+            userInfo.laboratory = formData.labName
+            Taro.setStorageSync('userInfo', userInfo)
+
             // 清除库存缓存
             Taro.removeStorageSync('inventoryList')
             Taro.removeStorageSync('inventoryData')
 
+            // 清除协作页面刷新标志
+            Taro.removeStorageSync('shouldRefreshCollaboration')
+
             // 保存实验室信息
             Taro.setStorageSync('currentLabId', labId)
             Taro.setStorageSync('currentLabName', formData.labName)
+            Taro.setStorageSync('labName', formData.labName) // 兼容旧字段
+            Taro.setStorageSync('currentLabRole', 'admin')
         }
 
         Taro.showToast({
@@ -330,10 +341,27 @@ const handleCancel = () => {
     Taro.navigateBack()
 }
 
-// 页面加载时获取来源参数
+// 页面加载时获取来源参数和用户信息
 onMounted(() => {
     const instance = Taro.getCurrentInstance()
     const params = instance.router?.params
     fromPage.value = params?.from || ''
+
+    // 自动填充当前用户信息
+    try {
+        const userInfo = Taro.getStorageSync('userInfo')
+        if (userInfo) {
+            // 填充负责人姓名
+            if (userInfo.nickName) {
+                formData.managerName = String(userInfo.nickName)
+            }
+            // 填充联系方式
+            if (userInfo.phone) {
+                formData.managerContact = String(userInfo.phone)
+            }
+        }
+    } catch (e) {
+        console.error('获取用户信息失败:', e)
+    }
 })
 </script>

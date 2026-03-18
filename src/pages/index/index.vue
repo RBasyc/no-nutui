@@ -445,6 +445,7 @@ onMounted(() => {
 
 // 页面显示时刷新统计数据（包括从其他页面返回时）
 useDidShow(() => {
+    getUserInfo()
     loadStatsData()
     loadExpiringItems()
     loadPurchaseItems()
