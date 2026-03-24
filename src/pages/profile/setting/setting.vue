@@ -255,7 +255,7 @@ const uploadAvatar = (filePath) => {
     Taro.showLoading({ title: '上传中...', mask: true })
 
     Taro.uploadFile({
-        url: userApi.upload,
+        url: userApi.uploadAvatar,
         filePath: filePath,
         name: 'file',
         header: {
@@ -271,9 +271,9 @@ const uploadAvatar = (filePath) => {
                     if (data.errCode === '0' || data.code === '0') {
                         formData.avatar =
                             data.data?.url || data.data?.path || filePath
-                        console.log('上传成功，头像URL:', formData.avatar)
+                        console.log('头像上传成功，旧头像已删除:', formData.avatar)
                         Taro.showToast({
-                            title: '上传成功',
+                            title: '头像更新成功',
                             icon: 'success'
                         })
                     } else {
