@@ -75,27 +75,57 @@
                     class="item-row"
                 >
                     <view class="item-card">
-                        <!-- 主要内容区域 -->
-                        <view class="item-main">
-                            <!-- 左侧：耗材信息 -->
-                            <view
-                                class="item-left"
-                                @tap="handleReplaceFromInventory(index)"
-                            >
-                                <view class="item-header">
-                                    <text class="item-name">{{
-                                        item.name
-                                    }}</text>
-                                    <view class="item-badge">
-                                        <text class="badge-text">可更换</text>
-                                    </view>
-                                </view>
+                        <!-- 第一行：耗材名称 + 删除按钮 -->
+                        <view class="item-first-row">
+                            <view class="item-name-section">
+                                <text class="item-name">{{ item.name }}</text>
                                 <text
                                     v-if="item.specification"
                                     class="item-spec"
                                     >{{ item.specification }}</text
                                 >
-                                <view v-if="item.stockInfo" class="stock-hint">
+                            </view>
+                            <view
+                                class="delete-btn"
+                                @tap.stop="handleDeleteItem(index)"
+                            >
+                                <text class="delete-icon">🗑️</text>
+                            </view>
+                        </view>
+
+                        <!-- 第二行：数量控制 + 提示和可更换按钮 -->
+                        <view class="item-second-row">
+                            <!-- 数量控制 -->
+                            <view class="qty-control" @tap.stop>
+                                <view
+                                    class="qty-btn decrease"
+                                    @tap.stop="handleDecreaseQty(index)"
+                                >
+                                    <text class="btn-icon">-</text>
+                                </view>
+                                <input
+                                    class="qty-input"
+                                    type="digit"
+                                    :value="item.quantity"
+                                    @input.stop="handleQtyInput($event, index)"
+                                    @blur.stop="handleQtyBlur(index)"
+                                    @tap.stop
+                                    placeholder="数量"
+                                />
+                                <text v-if="item.unit" class="qty-unit">{{
+                                    item.unit
+                                }}</text>
+                                <view
+                                    class="qty-btn increase"
+                                    @tap.stop="handleIncreaseQty(index)"
+                                >
+                                    <text class="btn-icon">+</text>
+                                </view>
+                            </view>
+
+                            <!-- 库存提示和可更换按钮 -->
+                            <view class="item-actions" @tap.stop>
+                                <view class="stock-info">
                                     <text
                                         :class="[
                                             'stock-dot',
@@ -110,51 +140,11 @@
                                         >{{ item.stockInfo.text }}</text
                                     >
                                 </view>
-                                <!-- 未匹配到库存的提示 -->
-                                <view v-else class="stock-hint unmatched">
-                                    <text class="stock-dot insufficient"></text>
-                                    <text class="stock-text insufficient"
-                                        >未匹配到库存</text
-                                    >
-                                    <text
-                                        class="retry-match-btn"
-                                        @tap.stop="handleRetryMatch(index)"
-                                        >重新匹配</text
-                                    >
-                                </view>
-                            </view>
-
-                            <!-- 右侧：数量控制和删除 -->
-                            <view class="item-right">
-                                <view class="qty-control">
-                                    <view
-                                        class="qty-btn decrease"
-                                        @tap="handleDecreaseQty(index)"
-                                    >
-                                        <text class="btn-icon">-</text>
-                                    </view>
-                                    <view class="qty-display">
-                                        <text class="qty-value">{{
-                                            item.quantity
-                                        }}</text>
-                                        <text
-                                            v-if="item.unit"
-                                            class="qty-unit"
-                                            >{{ item.unit }}</text
-                                        >
-                                    </view>
-                                    <view
-                                        class="qty-btn increase"
-                                        @tap="handleIncreaseQty(index)"
-                                    >
-                                        <text class="btn-icon">+</text>
-                                    </view>
-                                </view>
                                 <view
-                                    class="delete-btn"
-                                    @tap="handleDeleteItem(index)"
+                                    class="change-btn"
+                                    @tap.stop="handleReplaceFromInventory(index)"
                                 >
-                                    <text class="delete-icon">🗑️</text>
+                                    <text class="change-text">可更换</text>
                                 </view>
                             </view>
                         </view>
@@ -653,17 +643,56 @@ const handleDecreaseQty = (index) => {
     }
 }
 
-// 重新匹配耗材（打开库存选择弹窗）
-const handleRetryMatch = (index) => {
-    replacingItemIndex = index
-    showInventoryModal.value = true
-    searchKeyword.value = ''
-    searchResults.value = []
+// Toast duration constants
+const TOAST_DURATION = {
+    SHORT: 1500,
+    LONG: 2000
+}
 
-    Taro.showToast({
-        title: '请从库存列表中选择',
-        icon: 'none'
-    })
+// Unified quantity validation with stock limit check
+const validateQuantity = (item, showToastOnError = false) => {
+    const stockQty = parseInt(item.stockQuantity) || 0
+
+    if (!item.quantity || item.quantity < 1) {
+        item.quantity = 1
+        if (showToastOnError) {
+            Taro.showToast({
+                title: '数量已重置为1',
+                icon: 'none',
+                duration: TOAST_DURATION.SHORT
+            })
+        }
+    } else if (item.quantity > stockQty) {
+        item.quantity = stockQty
+        if (showToastOnError) {
+            Taro.showToast({
+                title: `库存不足，已调整为最大库存 ${stockQty}`,
+                icon: 'none',
+                duration: TOAST_DURATION.LONG
+            })
+        }
+    }
+}
+
+const handleQtyInput = (event, index) => {
+    const item = formData.itemsNeeded[index]
+    const value = event.detail.value
+
+    // Allow temporary empty input during typing
+    if (value === '') {
+        item.quantity = ''
+        return
+    }
+
+    const qty = parseInt(value)
+    if (!isNaN(qty) && qty >= 0) {
+        item.quantity = qty
+    }
+}
+
+const handleQtyBlur = (index) => {
+    const item = formData.itemsNeeded[index]
+    validateQuantity(item, true)
 }
 
 // 删除耗材项

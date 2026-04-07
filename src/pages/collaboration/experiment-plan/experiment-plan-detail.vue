@@ -1,14 +1,5 @@
 <template>
     <view class="experiment-detail-page">
-        <!-- 顶部导航栏 -->
-        <view class="page-header">
-            <view class="header-back" @tap="handleBack">
-                <text class="back-icon">←</text>
-            </view>
-            <view class="header-title">实验详情</view>
-            <view class="header-placeholder"></view>
-        </view>
-
         <!-- 加载状态 -->
         <view v-if="loading" class="loading-container">
             <view class="loading-spinner"></view>
@@ -100,12 +91,10 @@
             <view class="footer-placeholder"></view>
         </scroll-view>
 
-        <!-- 底部操作栏 -->
-        <view v-if="planData && canCancel" class="footer-actions">
-            <view class="cancel-btn" @tap="handleCancelExperiment">
-                <text class="cancel-icon">✕</text>
-                <text class="cancel-text">取消实验</text>
-            </view>
+        <!-- 浮动取消实验按钮 -->
+        <view v-if="planData && canCancel" class="floating-cancel-btn" @tap="handleCancelExperiment">
+            <text class="cancel-icon">✕</text>
+            <text class="cancel-text">取消实验</text>
         </view>
 
         <!-- 取消确认弹窗 -->

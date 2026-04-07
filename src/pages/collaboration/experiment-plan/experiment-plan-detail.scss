@@ -7,53 +7,6 @@
     flex-direction: column;
 }
 
-/* 顶部导航栏 */
-.page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24rpx 32rpx;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20rpx);
-    border-bottom: 2rpx solid rgba(30, 144, 255, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-
-    .header-back {
-        width: 64rpx;
-        height: 64rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-
-        &:active {
-            background: rgba(0, 0, 0, 0.05);
-            transform: scale(0.95);
-        }
-
-        .back-icon {
-            font-size: 36rpx;
-            color: #2F4F4F;
-            font-weight: 700;
-        }
-    }
-
-    .header-title {
-        font-size: 36rpx;
-        font-weight: 700;
-        color: #2F4F4F;
-        flex: 1;
-        text-align: center;
-    }
-
-    .header-placeholder {
-        width: 64rpx;
-    }
-}
-
 /* 加载状态 */
 .loading-container {
     flex: 1;
@@ -87,7 +40,7 @@
 /* 详情内容区 */
 .detail-content {
     flex: 1;
-    padding: 24rpx 32rpx 180rpx;
+    padding: 24rpx 32rpx 140rpx;
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -309,53 +262,41 @@
 
 /* 底部占位 */
 .footer-placeholder {
-    height: 180rpx;
+    height: 120rpx;
 }
 
-/* 底部操作栏 */
-.footer-actions {
+/* 浮动取消实验按钮 */
+.floating-cancel-btn {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 24rpx 32rpx;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20rpx);
-    border-top: 2rpx solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+    bottom: 40rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 24rpx 48rpx;
+    background: linear-gradient(135deg, #F44336 0%, #E53935 100%);
+    border-radius: 48rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12rpx;
+    box-shadow: 0 8rpx 24rpx rgba(244, 67, 54, 0.4);
     z-index: 99;
-    width: 100%;
-    box-sizing: border-box;
+    transition: all 0.2s ease;
 
-    .cancel-btn {
-        width: 100%;
-        padding: 28rpx;
-        background: linear-gradient(135deg, #F44336 0%, #E53935 100%);
-        border-radius: 48rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12rpx;
-        box-shadow: 0 8rpx 24rpx rgba(244, 67, 54, 0.3);
-        transition: all 0.3s ease;
-        box-sizing: border-box;
+    &:active {
+        transform: translateX(-50%) scale(0.95);
+        box-shadow: 0 4rpx 12rpx rgba(244, 67, 54, 0.3);
+    }
 
-        &:active {
-            transform: scale(0.98);
-            box-shadow: 0 4rpx 12rpx rgba(244, 67, 54, 0.2);
-        }
+    .cancel-icon {
+        font-size: 32rpx;
+        color: #ffffff;
+        font-weight: 700;
+    }
 
-        .cancel-icon {
-            font-size: 32rpx;
-            color: #ffffff;
-            font-weight: 700;
-        }
-
-        .cancel-text {
-            font-size: 28rpx;
-            color: #ffffff;
-            font-weight: 600;
-        }
+    .cancel-text {
+        font-size: 28rpx;
+        color: #ffffff;
+        font-weight: 600;
     }
 }
 

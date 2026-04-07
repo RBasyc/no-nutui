@@ -42,63 +42,7 @@
     margin: 0 auto;
     position: relative;
     z-index: 1;
-}
-
-/* 顶部导航 - 科技实验室风格 */
-.page-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24rpx 32rpx;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20rpx);
-    border-bottom: 2rpx solid rgba(30, 144, 255, 0.2);
-    box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.1);
-}
-
-.nav-back {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    font-size: 28rpx;
-    color: #1E90FF;
-    font-weight: 600;
-}
-
-.back-icon {
-    font-size: 36rpx;
-}
-
-.nav-title {
-    font-size: 32rpx;
-    font-weight: 600;
-    color: #1e2b3c;
-}
-
-.nav-actions {
-    display: flex;
-    gap: 16rpx;
-}
-
-.action-btn {
-    width: 64rpx;
-    height: 64rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(30, 144, 255, 0.1);
-    border-radius: 50%;
-    border: 2rpx solid rgba(30, 144, 255, 0.3);
-    transition: all 0.15s ease;
-
-    &:active {
-        background: rgba(30, 144, 255, 0.2);
-        transform: scale(0.95);
-    }
-}
-
-.action-icon {
-    font-size: 32rpx;
+    padding: 24rpx 32rpx 140rpx;
 }
 
 /* 主卡片 - 科技实验室风格 */
@@ -372,6 +316,34 @@
 .btn-text {
     font-size: 24rpx;
     font-weight: 600;
+}
+
+/* 浮动编辑按钮 */
+.floating-edit-btn {
+    position: fixed;
+    bottom: 40rpx;
+    right: 32rpx;
+    width: 112rpx;
+    height: 112rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1E90FF 0%, #63A4FF 100%);
+    border-radius: 50%;
+    box-shadow: 0 8rpx 24rpx rgba(30, 144, 255, 0.4);
+    z-index: 99;
+    transition: all 0.2s ease;
+
+    &:active {
+        transform: scale(0.95);
+        box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.3);
+    }
+
+    .edit-icon {
+        font-size: 48rpx;
+        color: #ffffff;
+        font-weight: 700;
+    }
 }
 
 /* 加载状态 */

@@ -1,20 +1,12 @@
 <template>
     <view class="detail-page">
-        <view class="detail-container" v-if="itemData">
-            <!-- 顶部导航 -->
-            <view class="page-nav">
-                <view class="nav-back" @tap="handleBack">
-                    <text class="back-icon">←</text>
-                    <text class="back-text">返回</text>
-                </view>
-                <view class="nav-title">耗材详情</view>
-                <view class="nav-actions">
-                    <view class="action-btn" @tap="handleEdit">
-                        <text class="action-icon">✏️</text>
-                    </view>
-                </view>
-            </view>
+        <!-- 加载状态 -->
+        <view v-if="!itemData" class="loading-state">
+            <text>加载中...</text>
+        </view>
 
+        <!-- 详情内容 -->
+        <view v-else class="detail-container">
             <!-- 耗材主信息卡片 -->
             <view class="main-card">
                 <view class="card-header">
@@ -136,16 +128,12 @@
                     <text class="btn-icon">📱</text>
                     <text class="btn-text">二维码</text>
                 </view>
-                <view class="btn-primary" @tap="handleEdit">
-                    <text class="btn-icon">✏️</text>
-                    <text class="btn-text">编辑</text>
-                </view>
             </view>
         </view>
 
-        <!-- 加载状态 -->
-        <view v-else class="loading-state">
-            <text>加载中...</text>
+        <!-- 浮动编辑按钮 -->
+        <view class="floating-edit-btn" @tap="handleEdit">
+            <text class="edit-icon">✏️</text>
         </view>
 
         <!-- 二维码弹窗 -->
