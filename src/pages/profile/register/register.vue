@@ -113,6 +113,49 @@
                     }}</text>
                 </view>
 
+                <!-- 手机号输入 -->
+                <view class="form-group">
+                    <text class="form-label">手机号</text>
+                    <view
+                        class="input-wrapper"
+                        :class="{
+                            'input-error': errors.phone,
+                            'input-focused': focused.phone,
+                            'input-success': phoneValid
+                        }"
+                    >
+                        <text class="input-icon">📱</text>
+                        <input
+                            v-model="formData.phone"
+                            type="tel"
+                            placeholder="请输入手机号"
+                            class="form-input"
+                            :disabled="loading"
+                            maxlength="11"
+                            @focus="focused.phone = true"
+                            @blur="handlePhoneBlur"
+                            @input="handlePhoneInput"
+                        />
+                        <text
+                            v-if="phoneValid && !checkingPhone"
+                            class="success-icon"
+                            >✓</text
+                        >
+                        <view
+                            v-if="checkingPhone"
+                            class="checking-icon"
+                        ></view>
+                    </view>
+                    <text v-if="errors.phone" class="error-text">{{
+                        errors.phone
+                    }}</text>
+                    <text
+                        v-if="phoneValid && !checkingPhone"
+                        class="success-text"
+                        >手机号可用</text
+                    >
+                </view>
+
                 <!-- 注册按钮 -->
                 <view
                     class="register-btn"
@@ -152,6 +195,7 @@ import './register.scss'
 // 表单数据
 const formData = ref({
     nickname: '',
+    phone: '',
     password: '',
     confirmPassword: ''
 })
@@ -159,6 +203,7 @@ const formData = ref({
 // 错误信息
 const errors = ref({
     nickname: '',
+    phone: '',
     password: '',
     confirmPassword: ''
 })
@@ -166,6 +211,7 @@ const errors = ref({
 // 焦点状态
 const focused = ref({
     nickname: false,
+    phone: false,
     password: false,
     confirmPassword: false
 })
@@ -175,11 +221,14 @@ const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const checkingNickname = ref(false)
+const checkingPhone = ref(false)
 const nicknameValid = ref(false)
+const phoneValid = ref(false)
 const loadingText = ref('注册')
 
-// 昵称检查定时器
+// 昵称和手机号检查定时器
 let checkTimer = null
+let phoneCheckTimer = null
 
 // 检查昵称是否存在
 const checkNicknameExists = async (nickname) => {
@@ -216,6 +265,41 @@ const checkNicknameExists = async (nickname) => {
     }
 }
 
+// 检查手机号是否存在
+const checkPhoneExists = async (phone) => {
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+        phoneValid.value = false
+        return
+    }
+
+    checkingPhone.value = true
+    errors.value.phone = ''
+
+    try {
+        const res = await Taro.request({
+            url: userApi.checkPhone,
+            method: 'GET',
+            data: { phone }
+        })
+
+        if (res.statusCode === 200 && res.data) {
+            if (res.data.errCode === '0') {
+                // 手机号可用
+                phoneValid.value = true
+                errors.value.phone = ''
+            } else if (res.data.errCode === '10002') {
+                // 手机号已存在
+                phoneValid.value = false
+                errors.value.phone = '该手机号已被注册，请更换'
+            }
+        }
+    } catch (error) {
+        console.error('检查手机号失败:', error)
+    } finally {
+        checkingPhone.value = false
+    }
+}
+
 // 昵称输入处理（带防抖）
 const handleNicknameInput = () => {
     // 清除之前的定时器
@@ -244,6 +328,37 @@ const handleNicknameInput = () => {
     }, 500)
 }
 
+// 手机号输入处理（带防抖）
+const handlePhoneInput = () => {
+    // 清除之前的定时器
+    if (phoneCheckTimer) {
+        clearTimeout(phoneCheckTimer)
+    }
+
+    phoneValid.value = false
+
+    const phoneValue = formData.value.phone
+    const phone = phoneValue ? String(phoneValue).trim() : ''
+
+    if (!phone) {
+        errors.value.phone = ''
+        return
+    }
+
+    // 验证手机号格式
+    if (!/^1[3-9]\d{9}$/.test(phone)) {
+        errors.value.phone = '请输入正确的手机号格式'
+        return
+    }
+
+    errors.value.phone = ''
+
+    // 防抖：500ms 后检查手机号
+    phoneCheckTimer = setTimeout(() => {
+        checkPhoneExists(phone)
+    }, 500)
+}
+
 // 表单验证
 const handleNicknameBlur = () => {
     focused.value.nickname = false
@@ -255,6 +370,18 @@ const handleNicknameBlur = () => {
     handleNicknameInput()
     // 返回验证结果
     return nicknameValid.value && !errors.value.nickname
+}
+
+const handlePhoneBlur = () => {
+    focused.value.phone = false
+    // 如果手机号已经验证通过，不需要重新验证
+    if (phoneValid.value) {
+        return true
+    }
+    // 否则触发输入验证
+    handlePhoneInput()
+    // 返回验证结果
+    return phoneValid.value && !errors.value.phone
 }
 
 const handlePasswordBlur = () => {
@@ -299,12 +426,15 @@ const handleConfirmPasswordBlur = () => {
 const isFormValid = computed(() => {
     return (
         formData.value.nickname &&
+        formData.value.phone &&
         formData.value.password &&
         formData.value.confirmPassword &&
         !errors.value.nickname &&
+        !errors.value.phone &&
         !errors.value.password &&
         !errors.value.confirmPassword &&
-        nicknameValid.value
+        nicknameValid.value &&
+        phoneValid.value
     )
 })
 
@@ -323,25 +453,30 @@ const handleRegister = async () => {
     console.log('表单数据:', formData.value)
     console.log('错误信息:', errors.value)
     console.log('昵称验证状态:', nicknameValid.value)
+    console.log('手机号验证状态:', phoneValid.value)
 
     // 清除所有之前的错误提示
     errors.value.nickname = ''
+    errors.value.phone = ''
     errors.value.password = ''
     errors.value.confirmPassword = ''
 
     // 触发所有验证
     const isNicknameValid = handleNicknameBlur()
+    const isPhoneValid = handlePhoneBlur()
     const isPasswordValid = handlePasswordBlur()
     const isConfirmPasswordValid = handleConfirmPasswordBlur()
 
     console.log('验证结果:', {
         isNicknameValid,
+        isPhoneValid,
         isPasswordValid,
         isConfirmPasswordValid
     })
 
     if (
         !isNicknameValid ||
+        !isPhoneValid ||
         !isPasswordValid ||
         !isConfirmPasswordValid
     ) {
@@ -350,6 +485,8 @@ const handleRegister = async () => {
         // 显示第一个错误提示
         if (errors.value.nickname) {
             Taro.showToast({ title: errors.value.nickname, icon: 'none' })
+        } else if (errors.value.phone) {
+            Taro.showToast({ title: errors.value.phone, icon: 'none' })
         } else if (errors.value.password) {
             Taro.showToast({ title: errors.value.password, icon: 'none' })
         } else if (errors.value.confirmPassword) {
@@ -357,8 +494,6 @@ const handleRegister = async () => {
                 title: errors.value.confirmPassword,
                 icon: 'none'
             })
-        } else if (errors.value.labName) {
-            Taro.showToast({ title: errors.value.labName, icon: 'none' })
         }
         return
     }
@@ -378,6 +513,7 @@ const handleRegister = async () => {
             method: 'POST',
             data: {
                 nickName: formData.value.nickname,
+                phone: formData.value.phone,
                 password: formData.value.password
             },
             header: {
@@ -405,10 +541,16 @@ const handleRegister = async () => {
                 // 业务逻辑错误
                 console.error('注册失败:', res.data)
 
-                // 处理昵称已存在的错误
+                // 处理昵称或手机号已存在的错误
                 if (res.data.errCode === '10001') {
-                    errors.value.nickname = '该昵称已被使用，请更换'
-                    nicknameValid.value = false
+                    const errorInfo = res.data.errorInfo || ''
+                    if (errorInfo.includes('手机号')) {
+                        errors.value.phone = '该手机号已被使用，请更换'
+                        phoneValid.value = false
+                    } else {
+                        errors.value.nickname = '该昵称已被使用，请更换'
+                        nicknameValid.value = false
+                    }
                 }
 
                 Taro.showToast({

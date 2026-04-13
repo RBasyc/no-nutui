@@ -230,29 +230,17 @@ const handleLogin = async () => {
                 // 加载用户的实验室信息并检测管理员身份
                 await loadUserLabInfo()
 
-                // 检查是否首次登录（没有手机号）
-                if (!res.data.userInfo.phone) {
-                    Taro.showToast({
-                        title: '首次登录请完善信息',
-                        icon: 'success'
+                // 登录成功，直接跳转到首页
+                Taro.showToast({
+                    title: '登录成功',
+                    icon: 'success',
+                    duration: 1500
+                })
+                setTimeout(() => {
+                    Taro.switchTab({
+                        url: '/pages/index/index'
                     })
-                    setTimeout(() => {
-                        Taro.navigateTo({
-                            url: '/pages/profile/setting/setting'
-                        })
-                    }, 1500)
-                } else {
-                    Taro.showToast({
-                        title: '登录成功',
-                        icon: 'success',
-                        duration: 1500
-                    })
-                    setTimeout(() => {
-                        Taro.switchTab({
-                            url: '/pages/index/index'
-                        })
-                    }, 1500)
-                }
+                }, 1500)
             } else {
                 Taro.showToast({
                     title: '登录失败：数据格式错误',
