@@ -55,6 +55,12 @@
 
             <!-- 功能菜单 -->
             <view class="menu-section" v-if="isLoggedIn">
+                <view class="menu-item" @tap="handleMenuClick('settings')">
+                    <text class="menu-icon">⚙️</text>
+                    <text class="menu-label">个人信息</text>
+                    <text class="menu-arrow">›</text>
+                </view>
+                <view class="menu-divider"></view>
                 <view class="menu-item" @tap="handleMenuClick('laboratory')">
                     <text class="menu-icon">💬</text>
                     <text class="menu-label">实验室</text>
@@ -276,6 +282,11 @@ const handleLogin = () => {
 const handleMenuClick = (type) => {
 
     switch (type) {
+        case 'settings':
+            Taro.navigateTo({
+                url: '/pages/profile/setting/setting'
+            })
+            break
         case 'laboratory':
             Taro.navigateTo({
                 url: '/pages/profile/laboratory/laboratory?from=profile'

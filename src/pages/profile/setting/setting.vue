@@ -36,46 +36,12 @@
                 }}</text>
             </view>
 
-            <!-- 真实姓名 -->
+            <!-- 手机号（只读，不可编辑） -->
             <view class="setting-item">
-                <text class="item-label"
-                    >真实姓名 <text class="required">*</text></text
-                >
-                <input
-                    v-model="formData.realName"
-                    class="item-input"
-                    placeholder="请输入真实姓名"
-                    maxlength="50"
-                    @blur="handleFieldBlur('realName')"
-                />
-            </view>
-
-            <!-- 手机号 -->
-            <view class="setting-item">
-                <text class="item-label"
-                    >手机号 <text class="required">*</text></text
-                >
-                <input
-                    v-model="formData.phone"
-                    type="number"
-                    class="item-input"
-                    placeholder="请输入手机号"
-                    maxlength="11"
-                    @blur="handleFieldBlur('phone')"
-                />
-            </view>
-
-            <!-- 邮箱 -->
-            <view class="setting-item">
-                <text class="item-label"
-                    >邮箱 <text class="required">*</text></text
-                >
-                <input
-                    v-model="formData.email"
-                    class="item-input"
-                    placeholder="请输入邮箱"
-                    @blur="handleFieldBlur('email')"
-                />
+                <text class="item-label">手机号</text>
+                <text class="item-value">{{
+                    formData.phone || '未设置'
+                }}</text>
             </view>
 
             <!-- 角色 -->
@@ -89,14 +55,6 @@
                 <text class="item-label">注册时间</text>
                 <text class="item-value">{{
                     formatDate(formData.createdAt)
-                }}</text>
-            </view>
-
-            <!-- 最后登录 -->
-            <view class="setting-item">
-                <text class="item-label">最后登录</text>
-                <text class="item-value">{{
-                    formatDate(formData.lastLogin)
                 }}</text>
             </view>
         </view>
@@ -141,13 +99,9 @@ import userApi from '../../../api/userapi'
 const formData = reactive({
     avatar: '',
     nickName: '',
-    realName: '',
     phone: '',
-    email: '',
     role: '',
-    status: '',
-    createdAt: null,
-    lastLogin: null
+    createdAt: null
 })
 
 // 错误信息
@@ -155,13 +109,6 @@ const errorMessage = ref('')
 
 // 加载状态
 const loading = ref(false)
-
-// 表单验证错误
-const errors = reactive({
-    realName: '',
-    phone: '',
-    email: ''
-})
 
 // 角色文本映射
 const roleText = computed(() => {
@@ -180,62 +127,6 @@ const formatDate = (date) => {
     return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${String(
         d.getHours()
     ).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
-// 字段失焦验证
-const handleFieldBlur = (field) => {
-    const value = formData[field]
-
-    // 确保值是字符串类型
-    const stringValue = value != null ? String(value) : ''
-
-    switch (field) {
-        case 'realName':
-            if (!stringValue || !stringValue.trim()) {
-                errors.realName = '请输入真实姓名'
-                errorMessage.value = '请输入真实姓名'
-            } else if (stringValue.length < 2) {
-                errors.realName = '真实姓名至少2个字符'
-                errorMessage.value = '真实姓名至少2个字符'
-            } else if (stringValue.length > 50) {
-                errors.realName = '真实姓名最多50个字符'
-                errorMessage.value = '真实姓名最多50个字符'
-            } else {
-                errors.realName = ''
-                errorMessage.value = ''
-            }
-            break
-
-        case 'phone':
-            if (!stringValue || !stringValue.trim()) {
-                errors.phone = '请输入手机号'
-                errorMessage.value = '请输入手机号'
-            } else if (!/^1[3-9]\d{9}$/.test(stringValue)) {
-                errors.phone = '手机号格式不正确'
-                errorMessage.value = '手机号格式不正确'
-            } else {
-                errors.phone = ''
-                errorMessage.value = ''
-            }
-            break
-
-        case 'email':
-            if (!stringValue || !stringValue.trim()) {
-                errors.email = '请输入邮箱'
-                errorMessage.value = '请输入邮箱'
-            } else if (
-                !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
-                    stringValue
-                )
-            ) {
-                errors.email = '邮箱格式不正确'
-                errorMessage.value = '邮箱格式不正确'
-            } else {
-                errors.email = ''
-                errorMessage.value = ''
-            }
-            break
-    }
 }
 
 // 选择头像 - 使用微信小程序新版头像选择
@@ -312,24 +203,10 @@ const handleChangePassword = () => {
         title: '修改密码功能开发中',
         icon: 'none'
     })
-    // TODO: 实现修改密码页面
-    // Taro.navigateTo({
-    //     url: '/pages/change-password/change-password'
-    // })
 }
 
-// 提交表单
+// 提交表单（只更新头像）
 const handleSubmit = () => {
-    // 验证所有字段
-    handleFieldBlur('realName')
-    handleFieldBlur('phone')
-    handleFieldBlur('email')
-
-    // 检查是否有错误
-    if (errors.realName || errors.phone || errors.email) {
-        return
-    }
-
     loading.value = true
     const userId = Taro.getStorageSync('user_id')
 
@@ -342,9 +219,7 @@ const handleSubmit = () => {
         data: {
             _id: userId,
             avatar: formData.avatar,
-            realName: formData.realName,
-            phone: formData.phone,
-            email: formData.email
+            phone: formData.phone  // 手机号也传递，虽然通常不会改变
         },
         success: (res) => {
             loading.value = false
@@ -393,21 +268,14 @@ const handleReset = () => {
     if (userInfo) {
         Object.assign(formData, {
             avatar: userInfo.avatar || '',
-            realName: userInfo.realName || '',
-            phone: userInfo.phone || '',
-            email: userInfo.email || ''
+            phone: userInfo.phone || ''
         })
     }
 
-    // 清空错误
-    errors.realName = ''
-    errors.phone = ''
-    errors.email = ''
-    errorMessage.value = ''
-
     Taro.showToast({
         title: '已重置',
-        icon: 'success'
+        icon: 'success',
+        duration: 1500
     })
 }
 
@@ -418,13 +286,9 @@ onMounted(() => {
         Object.assign(formData, {
             avatar: userInfo.avatar || '',
             nickName: userInfo.nickName || '',
-            realName: userInfo.realName || '',
             phone: userInfo.phone || '',
-            email: userInfo.email || '',
             role: userInfo.role || 'user',
-            status: userInfo.status || 'active',
-            createdAt: userInfo.createdAt || null,
-            lastLogin: userInfo.lastLogin || null
+            createdAt: userInfo.createdAt || null
         })
     }
 })

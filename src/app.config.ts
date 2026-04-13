@@ -5,6 +5,7 @@ export default defineAppConfig({
     'pages/ai-chat/ai-chat',
     'pages/profile/profile',
     'pages/profile/register/register',
+    'pages/profile/setting/setting',
     'pages/profile/laboratory/laboratory',
         'pages/profile/create-lab/create-lab',
     'pages/profile/member-management/member-management',
