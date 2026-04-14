@@ -53,31 +53,31 @@
 
             <!-- 有AI建议时显示 -->
             <view v-else-if="aiAlertData.summary" class="ai-alert-content">
+                <!-- 概况总结 -->
                 <view class="ai-alert-summary">
                     <text class="summary-text">{{ aiAlertData.summary }}</text>
                 </view>
 
-                <!-- 预警列表 -->
-                <view v-if="aiAlertData.alerts && aiAlertData.alerts.length > 0" class="ai-alerts-list">
+                <!-- 前3个最紧急的预警 -->
+                <view v-if="aiAlertData.topAlerts && aiAlertData.topAlerts.length > 0" class="ai-alerts-list">
                     <view
-                        v-for="(alert, index) in aiAlertData.alerts.slice(0, 3)"
+                        v-for="(alert, index) in aiAlertData.topAlerts"
                         :key="index"
                         class="ai-alert-item"
                     >
                         <text class="alert-icon">{{ getAlertIcon(alert.type) }}</text>
                         <view class="alert-info">
                             <text class="alert-item-name">{{ alert.itemName }}</text>
-                            <text class="alert-severity" :class="getSeverityClass(alert.severity)">{{ alert.severity }}</text>
+                            <text class="alert-info-text">{{ alert.info }}</text>
                         </view>
-                        <text class="alert-suggestion">{{ alert.suggestion }}</text>
                     </view>
                 </view>
 
-                <!-- 综合建议 -->
+                <!-- 综合建议（包含行动建议） -->
                 <view v-if="aiAlertData.recommendations && aiAlertData.recommendations.length > 0" class="ai-recommendations">
-                    <text class="recommendations-title">💡 综合建议</text>
+                    <text class="recommendations-title">💡 行动建议</text>
                     <view
-                        v-for="(rec, index) in aiAlertData.recommendations.slice(0, 2)"
+                        v-for="(rec, index) in aiAlertData.recommendations"
                         :key="index"
                         class="recommendation-item"
                     >
@@ -219,7 +219,7 @@ const purchaseItems = ref([])
 const aiAlertData = ref({
     summary: '',
     priority: '',
-    alerts: [],
+    topAlerts: [],
     recommendations: []
 })
 const aiAlertLoading = ref(false)
@@ -445,8 +445,12 @@ useDidShow(() => {
 
 // 加载AI智能预警
 const loadAiAlert = async () => {
+    const startTime = Date.now()
+    console.log('⏱️ 开始加载AI预警...')
+
     try {
         aiAlertLoading.value = true
+
         const res = await Taro.request({
             url: inventoryApi.aiAlert,
             method: 'GET',
@@ -458,7 +462,12 @@ const loadAiAlert = async () => {
 
         if (res.statusCode === 200 && res.data.errCode === '0') {
             aiAlertData.value = res.data.data
-            console.log('AI预警数据:', aiAlertData.value)
+
+            // 显示性能数据
+            if (res.data.data.execution) {
+                const { totalDuration, breakdown } = res.data.data.execution
+                console.log(`⚡ 后端性能: 总耗时 ${totalDuration}ms (数据收集${breakdown.dataCollection}ms + AI生成${breakdown.aiGeneration}ms)`)
+            }
         } else {
             console.error('AI预警接口返回错误:', res.data.errorInfo)
         }
@@ -470,6 +479,9 @@ const loadAiAlert = async () => {
         })
     } finally {
         aiAlertLoading.value = false
+        const totalTime = Date.now() - startTime
+        console.log(`✅ AI预警加载完成！前端总耗时: ${totalTime}ms`)
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     }
 }
 
