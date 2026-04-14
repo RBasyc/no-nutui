@@ -491,7 +491,8 @@ const getAlertIcon = (type) => {
         expired: '🔴',
         expiring: '⚠️',
         low_stock: '📉',
-        out_of_stock: '❌'
+        out_of_stock: '❌',
+        high_consumption: '📈'
     }
     return iconMap[type] || '⚡'
 }
