@@ -1,0 +1,201 @@
+{
+  "id": "2026-04-13-155306",
+  "generated_at": "2026-04-13T07:53:06.5822812Z",
+  "language": "zh",
+  "pages": [
+    {
+      "slug": "1-xiang-mu-gai-shu-labzhi-guan-shi-yan-shi-ku-cun-guan-li-xi-tong",
+      "title": "项目概述：Lab智管实验室库存管理系统",
+      "file": "1-xiang-mu-gai-shu-labzhi-guan-shi-yan-shi-ku-cun-guan-li-xi-tong.md",
+      "section": "快速入门",
+      "level": "Beginner"
+    },
+    {
+      "slug": "2-huan-jing-da-jian-yu-xiang-mu-qi-dong",
+      "title": "环境搭建与项目启动",
+      "file": "2-huan-jing-da-jian-yu-xiang-mu-qi-dong.md",
+      "section": "快速入门",
+      "level": "Beginner"
+    },
+    {
+      "slug": "3-xiang-mu-mu-lu-jie-gou-yu-wen-jian-zu-zhi",
+      "title": "项目目录结构与文件组织",
+      "file": "3-xiang-mu-mu-lu-jie-gou-yu-wen-jian-zu-zhi.md",
+      "section": "快速入门",
+      "level": "Beginner"
+    },
+    {
+      "slug": "4-huan-jing-bian-liang-yu-duo-huan-jing-pei-zhi",
+      "title": "环境变量与多环境配置",
+      "file": "4-huan-jing-bian-liang-yu-duo-huan-jing-pei-zhi.md",
+      "section": "快速入门",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "5-zheng-ti-jia-gou-taro-4-vue-3-typescript-kua-duan-fang-an",
+      "title": "整体架构：Taro 4 + Vue 3 + TypeScript 跨端方案",
+      "file": "5-zheng-ti-jia-gou-taro-4-vue-3-typescript-kua-duan-fang-an.md",
+      "section": "深度解析",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "6-ying-yong-ru-kou-lu-you-pei-zhi-yu-tabbar-she-ji",
+      "title": "应用入口、路由配置与 TabBar 设计",
+      "file": "6-ying-yong-ru-kou-lu-you-pei-zhi-yu-tabbar-she-ji.md",
+      "section": "深度解析",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "7-api-jie-kou-ceng-jia-gou-yu-tong-qing-qiu-mo-shi",
+      "title": "API 接口层架构与统一请求模式",
+      "file": "7-api-jie-kou-ceng-jia-gou-yu-tong-qing-qiu-mo-shi.md",
+      "section": "深度解析",
+      "group": "API 层与网络通信",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "8-shuang-fu-wu-jia-gou-zhu-ye-wu-jie-kou-yu-ai-jie-kou-fen-chi",
+      "title": "双服务架构：主业务接口与 AI 接口分离",
+      "file": "8-shuang-fu-wu-jia-gou-zhu-ye-wu-jie-kou-yu-ai-jie-kou-fen-chi.md",
+      "section": "深度解析",
+      "group": "API 层与网络通信",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "9-token-ren-zheng-yu-ben-di-huan-cun-ce-lue",
+      "title": "Token 认证与本地缓存策略",
+      "file": "9-token-ren-zheng-yu-ben-di-huan-cun-ce-lue.md",
+      "section": "深度解析",
+      "group": "API 层与网络通信",
+      "level": "Beginner"
+    },
+    {
+      "slug": "10-shou-ye-yi-biao-pan-shu-ju-tong-ji-yu-jing-yu-kuai-jie-cao-zuo",
+      "title": "首页仪表盘：数据统计、预警与快捷操作",
+      "file": "10-shou-ye-yi-biao-pan-shu-ju-tong-ji-yu-jing-yu-kuai-jie-cao-zuo.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "11-ku-cun-guan-li-lie-biao-sou-suo-fen-lei-yu-pai-xu",
+      "title": "库存管理：列表、搜索、分类与排序",
+      "file": "11-ku-cun-guan-li-lie-biao-sou-suo-fen-lei-yu-pai-xu.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Advanced"
+    },
+    {
+      "slug": "12-chu-ru-ku-cao-zuo-ling-yong-gui-huan-liu-cheng-yu-fang-fu-ku-cun-yan-zheng",
+      "title": "出入库操作：领用/归还流程与防负库存验证",
+      "file": "12-chu-ru-ku-cao-zuo-ling-yong-gui-huan-liu-cheng-yu-fang-fu-ku-cun-yan-zheng.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Advanced"
+    },
+    {
+      "slug": "13-ai-zhi-neng-zhu-shou-dui-hua-jiao-hu-yu-shi-yan-ji-hua-zi-dong-sheng-cheng",
+      "title": "AI 智能助手：对话交互与实验计划自动生成",
+      "file": "13-ai-zhi-neng-zhu-shou-dui-hua-jiao-hu-yu-shi-yan-ji-hua-zi-dong-sheng-cheng.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Advanced"
+    },
+    {
+      "slug": "14-shi-yan-ji-hua-guan-li-chuang-jian-he-dui-zhuang-tai-pan-duan-yu-ku-cun-lian-dong",
+      "title": "实验计划管理：创建、核对、状态判断与库存联动",
+      "file": "14-shi-yan-ji-hua-guan-li-chuang-jian-he-dui-zhuang-tai-pan-duan-yu-ku-cun-lian-dong.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "15-hao-cai-gong-xiang-xie-zuo-xu-qiu-da-ting-yu-gong-xiang-fa-bu",
+      "title": "耗材共享协作：需求大厅与共享发布",
+      "file": "15-hao-cai-gong-xiang-xie-zuo-xu-qiu-da-ting-yu-gong-xiang-fa-bu.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "16-shu-ju-tong-ji-gai-lan-zhi-biao-fen-lei-bing-tu-yu-qu-shi-canvas-tu-biao",
+      "title": "数据统计：概览指标、分类饼图与趋势 Canvas 图表",
+      "file": "16-shu-ju-tong-ji-gai-lan-zhi-biao-fen-lei-bing-tu-yu-qu-shi-canvas-tu-biao.md",
+      "section": "深度解析",
+      "group": "核心功能模块",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "17-yong-hu-ren-zheng-deng-lu-zhu-ce-yu-biao-dan-shi-shi-xiao-yan",
+      "title": "用户认证：登录、注册与表单实时校验",
+      "file": "17-yong-hu-ren-zheng-deng-lu-zhu-ce-yu-biao-dan-shi-shi-xiao-yan.md",
+      "section": "深度解析",
+      "group": "用户与实验室体系",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "18-ge-ren-zhong-xin-yu-xin-xi-she-zhi",
+      "title": "个人中心与信息设置",
+      "file": "18-ge-ren-zhong-xin-yu-xin-xi-she-zhi.md",
+      "section": "深度解析",
+      "group": "用户与实验室体系",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "19-shi-yan-shi-xin-xi-guan-li-cha-kan-bian-ji-yu-chuang-jian",
+      "title": "实验室信息管理：查看、编辑与创建",
+      "file": "19-shi-yan-shi-xin-xi-guan-li-cha-kan-bian-ji-yu-chuang-jian.md",
+      "section": "深度解析",
+      "group": "用户与实验室体系",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "20-shi-yan-shi-cheng-yuan-guan-li-shen-qing-shen-pi-yu-jiao-se-quan-xian-kong-zhi",
+      "title": "实验室成员管理：申请、审批与角色权限控制",
+      "file": "20-shi-yan-shi-cheng-yuan-guan-li-shen-qing-shen-pi-yu-jiao-se-quan-xian-kong-zhi.md",
+      "section": "深度解析",
+      "group": "用户与实验室体系",
+      "level": "Advanced"
+    },
+    {
+      "slug": "21-ui-she-ji-ti-xi-mao-bo-li-feng-ge-jian-bian-se-yu-750rpx-xiang-ying-shi-bu-ju",
+      "title": "UI 设计体系：毛玻璃风格、渐变色与 750rpx 响应式布局",
+      "file": "21-ui-she-ji-ti-xi-mao-bo-li-feng-ge-jian-bian-se-yu-750rpx-xiang-ying-shi-bu-ju.md",
+      "section": "深度解析",
+      "group": "前端工程化",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "22-ye-mian-dao-hang-mo-shi-yu-can-shu-chuan-di",
+      "title": "页面导航模式与参数传递",
+      "file": "22-ye-mian-dao-hang-mo-shi-yu-can-shu-chuan-di.md",
+      "section": "深度解析",
+      "group": "前端工程化",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "23-biao-dan-yan-zheng-yu-cuo-wu-chu-li-zui-jia-shi-jian",
+      "title": "表单验证与错误处理最佳实践",
+      "file": "23-biao-dan-yan-zheng-yu-cuo-wu-chu-li-zui-jia-shi-jian.md",
+      "section": "深度解析",
+      "group": "前端工程化",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "24-dai-ma-gui-fan-eslint-stylelint-husky-commitlint",
+      "title": "代码规范：ESLint + Stylelint + Husky + Commitlint",
+      "file": "24-dai-ma-gui-fan-eslint-stylelint-husky-commitlint.md",
+      "section": "深度解析",
+      "group": "前端工程化",
+      "level": "Beginner"
+    },
+    {
+      "slug": "25-taro-kuang-jia-pei-zhi-yu-gou-jian-you-hua-xiang-jie",
+      "title": "Taro 框架配置与构建优化详解",
+      "file": "25-taro-kuang-jia-pei-zhi-yu-gou-jian-you-hua-xiang-jie.md",
+      "section": "深度解析",
+      "group": "前端工程化",
+      "level": "Beginner"
+    }
+  ]
+}

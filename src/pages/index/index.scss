@@ -96,62 +96,6 @@
     }
 }
 
-/* 数据统计卡片 */
-.stats-cards {
-    display: flex;
-    justify-content: space-between;
-    padding: 24rpx 32rpx;
-    gap: 16rpx;
-
-    .stat-card {
-        flex: 1;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20rpx);
-        border-radius: 20rpx;
-        padding: 28rpx 16rpx;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border: 2rpx solid rgba(30, 144, 255, 0.25);
-        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
-        transition: all 0.15s ease;
-
-        &:active {
-            transform: scale(0.98);
-        }
-
-        .stat-value {
-            font-size: 44rpx;
-            font-weight: 700;
-            background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8rpx;
-        }
-
-        .stat-label {
-            font-size: 24rpx;
-            color: #2F4F4F;
-            font-weight: 500;
-        }
-
-        &.warning .stat-value {
-            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        &.danger .stat-value {
-            background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-    }
-}
-
 /* 快捷操作区域 */
 .quick-actions {
     display: flex;
@@ -319,6 +263,317 @@
             font-size: 28rpx;
             color: #666;
             text-align: center;
+        }
+    }
+}
+
+/* AI智能预警卡片 */
+.ai-alert-card {
+    margin: 24rpx 32rpx;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.9) 100%);
+    backdrop-filter: blur(20rpx);
+    border-radius: 24rpx;
+    border: 2rpx solid rgba(30, 144, 255, 0.2);
+    box-shadow: 0 8rpx 24rpx rgba(30, 144, 255, 0.12);
+    overflow: hidden;
+
+    // 顶部渐变装饰
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6rpx;
+        background: linear-gradient(90deg, #1E90FF 0%, #00CED1 50%, #1E90FF 100%);
+    }
+
+    .ai-alert-header {
+        display: flex;
+        align-items: center;
+        padding: 24rpx 32rpx;
+        border-bottom: 2rpx solid rgba(30, 144, 255, 0.1);
+        position: relative;
+
+        .ai-alert-icon {
+            font-size: 40rpx;
+            margin-right: 16rpx;
+        }
+
+        .ai-alert-title {
+            flex: 1;
+            font-size: 32rpx;
+            font-weight: 700;
+            color: #1E90FF;
+        }
+
+        .ai-alert-priority {
+            padding: 8rpx 20rpx;
+            border-radius: 20rpx;
+            font-size: 24rpx;
+            font-weight: 600;
+
+            &.high {
+                background: linear-gradient(135deg, #FFE5E5 0%, #FFD1D1 100%);
+                color: #D32F2F;
+            }
+
+            &.medium {
+                background: linear-gradient(135deg, #FFF4E5 0%, #FFE5CC 100%);
+                color: #F57C00;
+            }
+
+            &.low {
+                background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+                color: #388E3C;
+            }
+        }
+    }
+
+    .ai-alert-loading {
+        padding: 60rpx 32rpx;
+        text-align: center;
+        font-size: 28rpx;
+        color: #999;
+    }
+
+    .ai-alert-content {
+        padding: 24rpx 32rpx;
+
+        .ai-alert-summary {
+            background: linear-gradient(135deg, rgba(30, 144, 255, 0.08) 0%, rgba(30, 144, 255, 0.04) 100%);
+            border-radius: 16rpx;
+            padding: 24rpx;
+            margin-bottom: 24rpx;
+            border-left: 4rpx solid #1E90FF;
+
+            .summary-text {
+                font-size: 28rpx;
+                color: #333;
+                line-height: 1.6;
+                font-weight: 500;
+            }
+        }
+
+        .ai-alerts-list {
+            margin-bottom: 24rpx;
+
+            .ai-alert-item {
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 16rpx;
+                padding: 20rpx;
+                margin-bottom: 16rpx;
+                border: 2rpx solid rgba(30, 144, 255, 0.1);
+
+                .alert-icon {
+                    font-size: 32rpx;
+                    margin-right: 12rpx;
+                }
+
+                .alert-info {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 12rpx;
+
+                    .alert-item-name {
+                        font-size: 28rpx;
+                        font-weight: 600;
+                        color: #333;
+                        flex: 1;
+                    }
+
+                    .alert-severity {
+                        font-size: 24rpx;
+                        padding: 4rpx 12rpx;
+                        border-radius: 12rpx;
+                        font-weight: 600;
+
+                        &.critical {
+                            background: #FFEBEE;
+                            color: #D32F2F;
+                        }
+
+                        &.important {
+                            background: #FFF3E0;
+                            color: #F57C00;
+                        }
+
+                        &.normal {
+                            background: #E3F2FD;
+                            color: #1976D2;
+                        }
+                    }
+                }
+
+                .alert-suggestion {
+                    font-size: 26rpx;
+                    color: #666;
+                    line-height: 1.5;
+                }
+            }
+        }
+
+        .ai-recommendations {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
+            border-radius: 16rpx;
+            padding: 24rpx;
+            border-left: 4rpx solid #4CAF50;
+
+            .recommendations-title {
+                font-size: 28rpx;
+                font-weight: 700;
+                color: #2E7D32;
+                margin-bottom: 16rpx;
+                display: block;
+            }
+
+            .recommendation-item {
+                display: flex;
+                margin-bottom: 16rpx;
+                line-height: 1.6;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
+                .recommendation-bullet {
+                    font-size: 26rpx;
+                    font-weight: 700;
+                    color: #4CAF50;
+                    margin-right: 12rpx;
+                    flex-shrink: 0;
+                }
+
+                .recommendation-text {
+                    flex: 1;
+                    font-size: 26rpx;
+                    color: #555;
+                }
+            }
+        }
+    }
+
+    .ai-alert-empty {
+        padding: 60rpx 32rpx;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .empty-icon {
+            font-size: 80rpx;
+            margin-bottom: 20rpx;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 28rpx;
+            color: #999;
+            margin-bottom: 24rpx;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+            color: white;
+            padding: 16rpx 40rpx;
+            border-radius: 24rpx;
+            font-size: 28rpx;
+            font-weight: 600;
+            box-shadow: 0 4rpx 12rpx rgba(30, 144, 255, 0.3);
+        }
+    }
+
+    /* 骨架屏样式 */
+    .ai-alert-skeleton {
+        padding: 24rpx 32rpx;
+
+        .skeleton-line {
+            height: 28rpx;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            border-radius: 8rpx;
+            animation: shimmer 1.5s infinite;
+
+            &.skeleton-line-long {
+                width: 100%;
+            }
+
+            &.skeleton-line-medium {
+                width: 80%;
+                margin-top: 16rpx;
+            }
+
+            &.skeleton-line-short {
+                width: 60%;
+            }
+
+            &.skeleton-line-tiny {
+                width: 40%;
+                margin-top: 12rpx;
+            }
+        }
+
+        .skeleton-priority {
+            width: 100rpx;
+            height: 40rpx;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            border-radius: 20rpx;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-summary {
+            background: rgba(30, 144, 255, 0.05);
+            border-radius: 16rpx;
+            padding: 24rpx;
+            margin-bottom: 24rpx;
+            border-left: 4rpx solid rgba(30, 144, 255, 0.3);
+        }
+
+        .skeleton-alerts {
+            margin-bottom: 24rpx;
+
+            .skeleton-alert-item {
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 16rpx;
+                padding: 20rpx;
+                margin-bottom: 16rpx;
+                border: 2rpx solid rgba(30, 144, 255, 0.1);
+                display: flex;
+                align-items: center;
+
+                .skeleton-alert-icon {
+                    width: 32rpx;
+                    height: 32rpx;
+                    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                    background-size: 200% 100%;
+                    border-radius: 50%;
+                    margin-right: 12rpx;
+                    animation: shimmer 1.5s infinite;
+                }
+
+                .skeleton-alert-content {
+                    flex: 1;
+                }
+            }
+        }
+
+        .skeleton-recommendations {
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: 16rpx;
+            padding: 24rpx;
+            border-left: 4rpx solid rgba(76, 175, 80, 0.3);
+        }
+    }
+
+    /* 骨架屏闪烁动画 */
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
         }
     }
 }

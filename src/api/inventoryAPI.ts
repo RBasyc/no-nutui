@@ -12,7 +12,8 @@ const inventoryApi = {
   update: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/update/${id}`,
   quantity: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/quantity/${id}`,
   delete: (id: string) => BACKEND_BASE_URL + `/adminapi/inventory/delete/${id}`,
-  stats: BACKEND_BASE_URL + '/adminapi/inventory/stats'
+  stats: BACKEND_BASE_URL + '/adminapi/inventory/stats',
+  aiAlert: BACKEND_BASE_URL + '/adminapi/inventory-alert' // ✅ AI智能预警
 }
 
 export default inventoryApi
