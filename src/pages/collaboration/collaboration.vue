@@ -76,7 +76,7 @@
                     :class="{ active: currentTab === tab.value }"
                     @tap="handleTabChange(tab.value)"
                 >
-                    <text class="tab-icon">{{ tab.icon }}</text>
+                    <text class="tab-icon" :class="tab.icon"></text>
                     <text class="tab-label">{{ tab.label }}</text>
                     <text v-if="tab.badge" class="tab-badge">{{ tab.badge }}</text>
                 </view>
@@ -93,7 +93,7 @@
                         :class="{ active: currentRequestType === type.value }"
                         @tap="handleRequestTypeChange(type.value)"
                     >
-                        <text class="type-tab-icon">{{ type.icon }}</text>
+                        <text class="type-tab-icon" :class="type.icon"></text>
                         <text class="type-tab-label">{{ type.label }}</text>
                     </view>
                 </view>
@@ -196,7 +196,7 @@
                 <view class="share-header">
                     <text class="share-title">我发布的共享</text>
                     <view class="publish-btn" @tap="handlePublish">
-                        <text>➕ 发布新共享</text>
+                        <text class="iconfont icon-tianjia"> 发布新共享</text>
                     </view>
                 </view>
 
@@ -286,9 +286,9 @@ const selectedContact = ref('')
 // 需求类型切换（我需要/我富余）
 const currentRequestType = ref('all')
 const requestTypes = ref([
-    { value: 'all', label: '全部', icon: '📋' },
-    { value: 'request', label: '我需要', icon: '📥' },
-    { value: 'share', label: '我富余', icon: '📤' }
+    { value: 'all', label: '全部', icon: 'iconfont icon-wendang' },
+    { value: 'request', label: '我需要', icon: 'iconfont icon-dingdan' },
+    { value: 'share', label: '我富余', icon: 'iconfont icon-tubiaozhutu' }
 ])
 
 // 搜索关键词
@@ -299,8 +299,8 @@ let debounceTimer = null
 
 // 标签数据（只保留需求大厅和我的共享）
 const tabs = ref([
-    { value: 'requests', label: '需求大厅', icon: '📋', badge: null },
-    { value: 'my-share', label: '我的共享', icon: '📤' }
+    { value: 'requests', label: '需求大厅', icon: 'iconfont icon-wendang', badge: null },
+    { value: 'my-share', label: '我的共享', icon: 'iconfont icon-tubiaozhutu' }
 ])
 
 // 实验计划数据

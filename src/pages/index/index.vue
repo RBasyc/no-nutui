@@ -16,17 +16,23 @@
         <!-- AI智能预警卡片 -->
         <view class="ai-alert-card">
             <view class="ai-alert-header">
-                <text class="ai-alert-icon">🤖</text>
+                <text class="ai-alert-icon iconfont icon-jiqiren"></text>
                 <text class="ai-alert-title">AI智能预警</text>
-                <view v-if="aiAlertData.priority && !aiAlertLoading" class="ai-alert-priority" :class="getPriorityClass(aiAlertData.priority)">
-                    <text>{{ aiAlertData.priority }}优先级</text>
+                <view class="header-right">
+                    <view v-if="aiAlertData.priority && !aiAlertLoading && !aiAlertRefreshing" class="ai-alert-priority" :class="getPriorityClass(aiAlertData.priority)">
+                        <text>{{ aiAlertData.priority }}优先级</text>
+                    </view>
+                    <!-- 骨架屏优先级标签 -->
+                    <view v-if="aiAlertLoading || aiAlertRefreshing" class="skeleton-priority"></view>
+                    <!-- 刷新按钮 - 始终显示 -->
+                    <view class="refresh-btn-icon" @tap="handleRefreshAlert" :class="{ 'refreshing': aiAlertRefreshing }">
+                        <text class="refresh-icon">{{ aiAlertRefreshing ? '⟳' : '↻' }}</text>
+                    </view>
                 </view>
-                <!-- 骨架屏优先级标签 -->
-                <view v-if="aiAlertLoading" class="skeleton-priority"></view>
             </view>
 
             <!-- 骨架屏加载状态 -->
-            <view v-if="aiAlertLoading" class="ai-alert-skeleton">
+            <view v-if="aiAlertLoading || aiAlertRefreshing" class="ai-alert-skeleton">
                 <!-- 摘要骨架 -->
                 <view class="skeleton-summary">
                     <view class="skeleton-line skeleton-line-long"></view>
@@ -75,7 +81,7 @@
 
                 <!-- 综合建议（包含行动建议） -->
                 <view v-if="aiAlertData.recommendations && aiAlertData.recommendations.length > 0" class="ai-recommendations">
-                    <text class="recommendations-title">💡 行动建议</text>
+                    <text class="recommendations-title iconfont icon-tianjia"> 行动建议</text>
                     <view
                         v-for="(rec, index) in aiAlertData.recommendations"
                         :key="index"
@@ -89,7 +95,7 @@
 
             <!-- 无数据或出错时 -->
             <view v-else class="ai-alert-empty">
-                <text class="empty-icon">📊</text>
+                <text class="empty-icon iconfont icon-tubiaozhutu"></text>
                 <text class="empty-text">点击刷新获取AI预警建议</text>
                 <view class="refresh-btn" @tap="loadAiAlert">
                     <text>刷新</text>
@@ -105,7 +111,7 @@
                 class="action-item"
                 @tap="handleActionClick(action.label)"
             >
-                <text class="action-icon">{{ action.icon }}</text>
+                <text class="action-icon" :class="action.icon"></text>
                 <text class="action-label">{{ action.label }}</text>
             </view>
         </view>
@@ -125,7 +131,7 @@
                     class="list-item"
                     @tap="handleItemClick(item)"
                 >
-                    <text class="item-icon">{{ item.icon }}</text>
+                    <text class="item-icon" :class="item.icon"></text>
                     <view class="item-info">
                         <text class="item-name">{{ item.name }}</text>
                         <view class="item-desc">
@@ -168,7 +174,7 @@
                     class="list-item purchase-item"
                     @tap="handleItemClick(item)"
                 >
-                    <text class="item-icon">{{ item.icon }}</text>
+                    <text class="item-icon" :class="item.icon"></text>
                     <view class="item-info">
                         <text class="item-name">{{ item.name }}</text>
                         <view class="item-desc">
@@ -203,10 +209,10 @@ const userInfo = ref({
 
 // 快捷操作
 const quickActions = ref([
-    { icon: '📱', label: '快捷扫码' },
-    { icon: '✏️', label: '手动登记' },
-    { icon: '📋', label: '采购清单' },
-    { icon: '📊', label: '统计分析' }
+    { icon: 'iconfont icon-saoma', label: '快捷扫码' },
+    { icon: 'iconfont icon-bianji', label: '手动登记' },
+    { icon: 'iconfont icon-dingdan', label: '采购清单' },
+    { icon: 'iconfont icon-tubiaozhutu', label: '统计分析' }
 ])
 
 // 即将过期耗材
@@ -223,6 +229,7 @@ const aiAlertData = ref({
     recommendations: []
 })
 const aiAlertLoading = ref(false)
+const aiAlertRefreshing = ref(false)  // 刷新中状态
 
 // 获取用户信息
 const getUserInfo = () => {
@@ -295,15 +302,15 @@ const loadAllData = async () => {
             })
 
             const categoryIcons = {
-                试剂: '🧪',
-                耗材: '💊',
-                仪器: '⚙️',
-                其他: '📦'
+                试剂: 'iconfont icon-shiji',
+                耗材: 'iconfont icon-imagevector',
+                仪器: 'iconfont icon-jianceqi',
+                其他: 'iconfont icon-qita'
             }
 
             expiringItems.value = itemsWithDays.slice(0, 4).map((item) => {
                 return {
-                    icon: categoryIcons[item.category] || '📦',
+                    icon: categoryIcons[item.category] || 'iconfont icon-qita',
                     name: item.name,
                     code: item.code,
                     stock: item.quantity,
@@ -324,7 +331,7 @@ const loadAllData = async () => {
                 const suggestQty = Math.max(0, maxQty - item.quantity)
 
                 return {
-                    icon: categoryIcons[item.category] || '📦',
+                    icon: categoryIcons[item.category] || 'iconfont icon-qita',
                     name: item.name,
                     code: item.code,
                     suggestQty: suggestQty,
@@ -443,13 +450,22 @@ useDidShow(() => {
     loadAllData()
 })
 
-// 加载AI智能预警
+// 加载AI智能预警（优先从缓存读取，1.5秒骨架屏）
 const loadAiAlert = async () => {
     const startTime = Date.now()
     console.log('⏱️ 开始加载AI预警...')
 
     try {
         aiAlertLoading.value = true
+
+        // 先显示骨架屏1.5秒
+        setTimeout(() => {
+            if (Date.now() - startTime < 1500) {
+                // 1.5秒后才隐藏骨架屏
+                return
+            }
+            aiAlertLoading.value = false
+        }, 1500)
 
         const res = await Taro.request({
             url: inventoryApi.aiAlert,
@@ -468,20 +484,74 @@ const loadAiAlert = async () => {
                 const { totalDuration, breakdown } = res.data.data.execution
                 console.log(`⚡ 后端性能: 总耗时 ${totalDuration}ms (数据收集${breakdown.dataCollection}ms + AI生成${breakdown.aiGeneration}ms)`)
             }
+
+            // 显示是否来自缓存
+            if (res.data.data.isCached !== undefined) {
+                console.log(`💾 数据来源: ${res.data.data.isCached ? '缓存（今日已生成）' : '新生成'}`)
+            }
         } else {
             console.error('AI预警接口返回错误:', res.data.errorInfo)
         }
     } catch (error) {
         console.error('加载AI预警失败:', error)
-        Taro.showToast({
-            title: 'AI预警加载失败',
-            icon: 'none'
-        })
+        // 不显示错误提示，静默失败
     } finally {
         aiAlertLoading.value = false
         const totalTime = Date.now() - startTime
         console.log(`✅ AI预警加载完成！前端总耗时: ${totalTime}ms`)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    }
+}
+
+// 手动刷新AI预警
+const handleRefreshAlert = async () => {
+    // 防止重复点击
+    if (aiAlertRefreshing.value || aiAlertLoading.value) {
+        return
+    }
+
+    console.log('🔄 用户手动刷新AI预警...')
+
+    try {
+        aiAlertRefreshing.value = true
+        aiAlertLoading.value = true  // 同时设置loading状态以显示骨架屏
+
+        const res = await Taro.request({
+            url: inventoryApi.aiAlert + '/refresh',
+            method: 'POST',
+            header: {
+                'Content-Type': 'application/json',
+                Authorization: Taro.getStorageSync('token') || ''
+            },
+            data: {}
+        })
+
+        if (res.statusCode === 200 && res.data.errCode === '0') {
+            aiAlertData.value = res.data.data
+
+            Taro.showToast({
+                title: 'AI预警已刷新',
+                icon: 'success',
+                duration: 1500
+            })
+
+            console.log('✅ AI预警刷新成功')
+        } else {
+            console.error('刷新失败:', res.data.errorInfo)
+            Taro.showToast({
+                title: res.data.errorInfo || '刷新失败',
+                icon: 'none'
+            })
+        }
+    } catch (error) {
+        console.error('刷新AI预警失败:', error)
+        Taro.showToast({
+            title: '刷新失败',
+            icon: 'none'
+        })
+    } finally {
+        aiAlertRefreshing.value = false
+        aiAlertLoading.value = false  // 重置loading状态
     }
 }
 

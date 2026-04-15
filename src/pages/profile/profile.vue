@@ -56,7 +56,7 @@
             <!-- 功能菜单 -->
             <view class="menu-section" v-if="isLoggedIn">
                 <view class="menu-item" @tap="handleMenuClick('settings')">
-                    <text class="menu-icon">⚙️</text>
+                    <text class="menu-icon iconfont icon-guanli"></text>
                     <text class="menu-label">个人信息</text>
                     <text class="menu-arrow">›</text>
                 </view>

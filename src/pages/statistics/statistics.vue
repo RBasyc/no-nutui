@@ -21,7 +21,7 @@
                     class="metric-card"
                     :style="{ borderLeftColor: metric.color }"
                 >
-                    <text class="metric-icon">{{ metric.icon }}</text>
+                    <text class="metric-icon" :class="metric.icon"></text>
                     <view class="metric-info">
                         <text class="metric-value">{{
                             getAnimatedValue(metric.key, metric.value)
@@ -522,7 +522,7 @@ const fetchAllStatistics = async () => {
             overviewMetrics.value = [
                 {
                     key: 'total',
-                    icon: '📦',
+                    icon: 'iconfont icon-imagevector',
                     label: '总物品数',
                     value: data.totalItems,
                     color: '#1E90FF'

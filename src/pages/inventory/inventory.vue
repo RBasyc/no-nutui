@@ -7,7 +7,7 @@
                 <view class="header-title">库存管理</view>
                 <view class="header-actions">
                     <view class="action-btn" @tap="handleSort">
-                        <text class="btn-icon">🔃</text>
+                        <text class="btn-icon iconfont icon-paixu"></text>
                         <text class="btn-text">{{ sortText }}</text>
                     </view>
                     <!-- 流水管理 - 仅管理员可见 -->
@@ -16,7 +16,7 @@
                         class="action-btn warning"
                         @tap="handleTransactionRecords"
                     >
-                        <text class="btn-icon">📋</text>
+                        <text class="btn-icon iconfont icon-liushui"></text>
                         <text class="btn-text">流水</text>
                     </view>
                     <view class="action-btn primary" @tap="handleAddItem">
@@ -29,7 +29,7 @@
             <!-- 搜索框 -->
             <view class="search-section">
                 <view class="search-bar">
-                    <text class="search-icon">🔍</text>
+                    <text class="search-icon iconfont icon-sousuo"></text>
                     <input
                         class="search-input"
                         v-model="searchValue"
@@ -49,7 +49,7 @@
                         :class="{ active: currentCategory === category.value }"
                         @tap="handleCategoryChange(category.value)"
                     >
-                        <text class="tab-icon">{{ category.icon }}</text>
+                        <text class="tab-icon" :class="category.icon"></text>
                         <text class="tab-label">{{ category.label }}</text>
                     </view>
                 </scroll-view>
@@ -141,7 +141,7 @@
                         <!-- 过期信息 -->
                         <view v-if="item.expiryDate" class="expiry-info">
                             <view class="expiry-label">
-                                <text class="expiry-icon">⏰</text>
+                                <text class="expiry-icon iconfont icon-shijianchuo"></text>
                                 <text>过期时间</text>
                             </view>
                             <text
@@ -165,7 +165,7 @@
                             class="footer-action"
                             @tap.stop="handleEdit(item)"
                         >
-                            <text class="action-icon">✏️</text>
+                            <text class="action-icon iconfont icon-bianji"></text>
                             <text class="action-text">编辑</text>
                         </view>
                         <view
@@ -299,11 +299,11 @@ const sortText = computed(() => {
 
 // 分类数据
 const categories = ref([
-    { icon: '📋', label: '全部', value: 'all' },
-    { icon: '🧪', label: '试剂', value: '试剂' },
-    { icon: '📦', label: '耗材', value: '耗材' },
-    { icon: '⚙️', label: '仪器', value: '仪器' },
-    { icon: '📁', label: '其他', value: '其他' }
+    { icon: 'iconfont icon-dingdan', label: '全部', value: 'all' },
+    { icon: 'iconfont icon-shiji', label: '试剂', value: '试剂' },
+    { icon: 'iconfont icon-imagevector', label: '耗材', value: '耗材' },
+    { icon: 'iconfont icon-jianceqi', label: '仪器', value: '仪器' },
+    { icon: 'iconfont icon-qita', label: '其他', value: '其他' }
 ])
 
 // 统计数据

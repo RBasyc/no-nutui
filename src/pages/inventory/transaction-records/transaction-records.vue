@@ -174,12 +174,12 @@ const loading = ref(false)
 // 获取类型图标
 const getTypeIcon = (type) => {
     const iconMap = {
-        purchase_in: '📥',
-        return_in: '🔄',
-        consume_out: '📤',
-        use_out: '🔧'
+        purchase_in: 'iconfont icon-dingdan',
+        return_in: 'iconfont icon-paixu',
+        consume_out: 'iconfont icon-tubiaozhutu',
+        use_out: 'iconfont icon-guanli'
     }
-    return iconMap[type] || '📋'
+    return iconMap[type] || 'iconfont icon-wendang'
 }
 
 // 获取类型文本
