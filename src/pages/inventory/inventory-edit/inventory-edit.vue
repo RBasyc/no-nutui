@@ -25,7 +25,7 @@
                                 'input-focused': focused.name
                             }"
                         >
-                            <text class="input-icon">📦</text>
+                            <text class="input-icon iconfont icon-cangchucangku"></text>
                             <input
                                 v-model="formData.name"
                                 placeholder="请输入耗材名称"
@@ -51,7 +51,7 @@
                                 'input-focused': focused.code
                             }"
                         >
-                            <text class="input-icon">🏷️</text>
+                            <text class="input-icon iconfont icon-tiaoxingma"></text>
                             <input
                                 v-model="formData.code"
                                 placeholder="请输入或扫码录入耗材编号"
@@ -87,7 +87,7 @@
                                 }"
                                 @tap="formData.category = cat.value"
                             >
-                                <text class="option-icon">{{ cat.icon }}</text>
+                                <text class="option-icon iconfont" :class="cat.icon"></text>
                                 <text class="option-label">{{
                                     cat.label
                                 }}</text>
@@ -191,7 +191,7 @@
                             class="input-wrapper"
                             :class="{ 'input-focused': focused.maxQuantity }"
                         >
-                            <text class="input-icon">📊</text>
+                            <text class="input-icon iconfont icon-dingdan"></text>
                             <input
                                 v-model="formData.maxQuantity"
                                 type="number"
@@ -308,7 +308,7 @@
                                 class="picker-input"
                                 :class="{ 'input-focused': focused.expiryDate }"
                             >
-                                <text class="input-icon">⏰</text>
+                                <text class="input-icon iconfont icon-shiji"></text>
                                 <text
                                     class="picker-value"
                                     :class="{ placeholder: !formData.expiryDate }"
@@ -362,14 +362,15 @@ import { ref, computed, onMounted } from 'vue'
 import { Picker } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import inventoryApi from '../../../api/inventoryAPI'
+import { checkTokenExpired } from '../../../utils/authHelper'
 import './inventory-edit.scss'
 
 // 分类选项
 const categories = [
-    { icon: '🧪', label: '试剂', value: '试剂' },
-    { icon: '📦', label: '耗材', value: '耗材' },
-    { icon: '⚙️', label: '仪器', value: '仪器' },
-    { icon: '📁', label: '其他', value: '其他' }
+    { icon: 'icon-shiyanshi', label: '试剂', value: '试剂' },
+    { icon: 'icon-cangchucangku', label: '耗材', value: '耗材' },
+    { icon: 'icon-guanli', label: '仪器', value: '仪器' },
+    { icon: 'icon-qita', label: '其他', value: '其他' }
 ]
 
 // 是否为编辑模式
@@ -509,6 +510,11 @@ const loadItemDetail = async () => {
         })
 
         if (res.data.errCode && res.data.errCode !== '0') {
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data.errorInfo)) {
+                return
+            }
+
             Taro.showToast({
                 title: res.data.errorInfo || '加载失败',
                 icon: 'none'
@@ -592,6 +598,11 @@ const handleSubmit = async () => {
         }
 
         if (res.data.errCode && res.data.errCode !== '0') {
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data.errorInfo)) {
+                return
+            }
+
             Taro.showToast({
                 title:
                     res.data.errorInfo ||
@@ -644,6 +655,11 @@ const queryAndFillByCode = async (code) => {
         Taro.hideLoading()
 
         if (res.data.errCode && res.data.errCode !== '0') {
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data.errorInfo)) {
+                return
+            }
+
             Taro.showToast({
                 title: res.data.errorInfo || '查询失败',
                 icon: 'none'

@@ -58,7 +58,7 @@
             <!-- 统计摘要卡片 -->
             <view class="stats-summary">
                 <view class="summary-card">
-                    <text class="summary-icon">📦</text>
+                    <text class="iconfont icon-cangchucangku summary-icon"></text>
                     <view class="summary-info">
                         <text class="summary-value">{{
                             statsData.totalItems
@@ -67,7 +67,7 @@
                     </view>
                 </view>
                 <view class="summary-card warning">
-                    <text class="summary-icon">⚠️</text>
+                    <view class="warning-badge"></view>
                     <view class="summary-info">
                         <text class="summary-value">{{
                             statsData.expiring
@@ -76,7 +76,7 @@
                     </view>
                 </view>
                 <view class="summary-card danger">
-                    <text class="summary-icon">🔴</text>
+                    <view class="danger-badge"></view>
                     <view class="summary-info">
                         <text class="summary-value">{{
                             statsData.lowStock
@@ -172,14 +172,14 @@
                             class="footer-action"
                             @tap.stop="handleRecord(item)"
                         >
-                            <text class="action-icon">📝</text>
+                            <text class="action-icon iconfont icon-wendang"></text>
                             <text class="action-text">记录</text>
                         </view>
                         <view
                             class="footer-action"
                             @tap.stop="handleQRCode(item)"
                         >
-                            <text class="action-icon">📱</text>
+                            <text class="action-icon iconfont icon-erweima"></text>
                             <text class="action-text">二维码</text>
                         </view>
                     </view>
@@ -191,7 +191,7 @@
                 v-if="filteredItems.length === 0 && !loading"
                 class="empty-state"
             >
-                <text class="empty-icon">📦</text>
+                <text class="empty-icon iconfont icon-cangchucangku"></text>
                 <text class="empty-text">暂无库存数据</text>
                 <text class="empty-hint">点击"添加"按钮添加耗材</text>
             </view>
@@ -259,6 +259,7 @@ import {
     usePageScroll
 } from '@tarojs/taro'
 import drawQrcode from 'weapp-qrcode-canvas-2d'
+import { checkTokenExpired } from '../../utils/authHelper'
 import './inventory.scss'
 import inventoryApi from '../../api/inventoryAPI'
 
@@ -381,6 +382,11 @@ const loadInventoryList = async (refresh = false) => {
 
         // 检查业务错误码
         if (res.data.errCode && res.data.errCode !== '0') {
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data.errorInfo)) {
+                return
+            }
+
             Taro.showToast({
                 title: res.data.errorInfo || '加载失败',
                 icon: 'none'

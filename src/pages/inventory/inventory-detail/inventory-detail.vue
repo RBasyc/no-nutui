@@ -10,7 +10,7 @@
             <!-- 耗材主信息卡片 -->
             <view class="main-card">
                 <view class="card-header">
-                    <text class="item-icon">{{ itemData.icon || '📦' }}</text>
+                    <text class="item-icon iconfont" :class="itemData.icon"></text>
                     <view class="item-info">
                         <text class="item-name">{{ itemData.name }}</text>
                         <text class="item-code">{{ itemData.code }}</text>
@@ -24,7 +24,7 @@
             <!-- 库存信息 -->
             <view class="info-section">
                 <view class="section-title">
-                    <text class="title-icon">📊</text>
+                    <text class="title-icon iconfont icon-dingdan"></text>
                     <text class="title-text">库存信息</text>
                 </view>
                 <view class="info-grid">
@@ -54,7 +54,7 @@
             <!-- 基本信息 -->
             <view class="info-section">
                 <view class="section-title">
-                    <text class="title-icon">📋</text>
+                    <text class="title-icon iconfont icon-wendang"></text>
                     <text class="title-text">基本信息</text>
                 </view>
                 <view class="info-list">
@@ -90,7 +90,7 @@
             <!-- 时间信息 -->
             <view class="info-section">
                 <view class="section-title">
-                    <text class="title-icon">📅</text>
+                    <text class="title-icon iconfont icon-rili"></text>
                     <text class="title-text">时间信息</text>
                 </view>
                 <view class="info-list">
@@ -121,11 +121,11 @@
             <!-- 操作按钮 -->
             <view class="action-buttons">
                 <view class="btn-secondary" @tap="handleRecord">
-                    <text class="btn-icon">📝</text>
+                    <text class="btn-icon iconfont icon-wendang"></text>
                     <text class="btn-text">记录使用</text>
                 </view>
                 <view class="btn-secondary" @tap="handleQRCode">
-                    <text class="btn-icon">📱</text>
+                    <text class="btn-icon iconfont icon-erweima"></text>
                     <text class="btn-text">二维码</text>
                 </view>
             </view>
@@ -133,7 +133,7 @@
 
         <!-- 浮动编辑按钮 -->
         <view class="floating-edit-btn" @tap="handleEdit">
-            <text class="edit-icon">✏️</text>
+            <text class="edit-icon iconfont icon-bianji"></text>
         </view>
 
         <!-- 二维码弹窗 -->
@@ -179,6 +179,7 @@ import { ref, onMounted } from 'vue'
 import Taro from '@tarojs/taro'
 import { BACKEND_BASE_URL } from '../../../api/config'
 import drawQrcode from 'weapp-qrcode-canvas-2d'
+import { checkTokenExpired } from '../../../utils/authHelper'
 import './inventory-detail.scss'
 
 // 耗材数据
@@ -225,18 +226,23 @@ const loadItemDetail = async () => {
 
             // 设置图标
             const categoryIcons = {
-                试剂: '🧪',
-                耗材: '💊',
-                仪器: '⚙️',
-                其他: '📦'
+                试剂: 'icon-shiyanshi',
+                耗材: 'icon-cangchucangku',
+                仪器: 'icon-guanli',
+                其他: 'icon-qita'
             }
 
             itemData.value = {
                 ...data,
-                icon: categoryIcons[data.category] || '📦',
+                icon: categoryIcons[data.category] || 'icon-cangchucangku',
                 daysUntilExpiry
             }
         } else {
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data?.errorInfo)) {
+                return
+            }
+
             Taro.showToast({
                 title: res.data?.errorInfo || '加载失败',
                 icon: 'none'

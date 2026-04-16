@@ -193,6 +193,41 @@
             font-size: 36rpx;
         }
 
+        /* ✅ 替代 emoji 的 CSS 图标 */
+        .warning-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 36rpx;
+            height: 36rpx;
+            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 24rpx;
+            font-weight: bold;
+
+            &::before {
+                content: '!';
+            }
+        }
+
+        .danger-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 36rpx;
+            height: 36rpx;
+            background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 24rpx;
+            font-weight: bold;
+
+            &::before {
+                content: '!!';
+            }
+        }
+
         .summary-info {
             display: flex;
             flex-direction: column;

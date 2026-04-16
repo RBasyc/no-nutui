@@ -28,21 +28,21 @@
         <!-- 统计卡片 -->
         <view class="stats-cards">
             <view class="stat-card">
-                <text class="stat-icon">📥</text>
+                <text class="stat-icon iconfont icon-ruku"></text>
                 <view class="stat-info">
                     <text class="stat-value">{{ stats.inCount }}</text>
                     <text class="stat-label">入库次数</text>
                 </view>
             </view>
             <view class="stat-card">
-                <text class="stat-icon">📤</text>
+                <text class="stat-icon iconfont icon-chuku"></text>
                 <view class="stat-info">
                     <text class="stat-value">{{ stats.outCount }}</text>
                     <text class="stat-label">出库次数</text>
                 </view>
             </view>
             <view class="stat-card">
-                <text class="stat-icon">📊</text>
+                <text class="stat-icon iconfont icon-tubiaozhutu"></text>
                 <view class="stat-info">
                     <text class="stat-value">{{ stats.totalCount }}</text>
                     <text class="stat-label">总记录</text>
@@ -116,7 +116,7 @@
 
             <!-- 空状态 -->
             <view v-if="records.length === 0 && !loading" class="empty-state">
-                <text class="empty-icon">📋</text>
+                <text class="empty-icon iconfont icon-wendang"></text>
                 <text class="empty-text">暂无流水记录</text>
             </view>
 

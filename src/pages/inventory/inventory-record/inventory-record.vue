@@ -4,7 +4,7 @@
             <!-- 耗材信息卡片 -->
             <view v-if="itemData" class="item-card">
                 <view class="item-header">
-                    <text class="item-icon">{{ itemData.icon || '📦' }}</text>
+                    <text class="item-icon iconfont" :class="itemData.icon || 'icon-cangchucangku'"></text>
                     <view class="item-info">
                         <text class="item-name">{{ itemData.name }}</text>
                         <text class="item-meta">当前库存：{{ itemData.quantity }} {{ itemData.unit }}</text>
@@ -21,7 +21,7 @@
                         :class="{ active: operation === 'use' }"
                         @tap="operation = 'use'"
                     >
-                        <text class="tab-icon">📤</text>
+                        <text class="tab-icon iconfont icon-chuku"></text>
                         <text class="tab-label">使用</text>
                     </view>
                     <view
@@ -29,7 +29,7 @@
                         :class="{ active: operation === 'return' }"
                         @tap="operation = 'return'"
                     >
-                        <text class="tab-icon">📥</text>
+                        <text class="tab-icon iconfont icon-ruku"></text>
                         <text class="tab-label">归还</text>
                     </view>
                 </view>

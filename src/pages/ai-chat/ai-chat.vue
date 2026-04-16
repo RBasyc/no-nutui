@@ -23,7 +23,7 @@
             :scroll-anchoring="true"
         >
             <view v-if="messages.length === 0" class="welcome-section">
-                <view class="welcome-avatar">🤖</view>
+                <view class="welcome-avatar iconfont icon-jiqiren"></view>
                 <view class="welcome-card">
                     <text class="welcome-title">欢迎使用实验室AI助手！</text>
                     <text class="welcome-content">我可以帮助您：</text>
@@ -61,7 +61,8 @@
                     "
                     class="message-avatar"
                 >
-                    {{ message.avatar || '🤖' }}
+                    <text v-if="message.avatar" class="avatar-text" :class="message.avatar"></text>
+                    <text v-else class="avatar-text iconfont icon-jiqiren"></text>
                 </view>
                 <image
                     v-else-if="message.avatarUrl"
@@ -70,7 +71,8 @@
                     mode="aspectFill"
                 />
                 <view v-else class="message-avatar user">
-                    {{ message.avatar || '👤' }}
+                    <text v-if="message.avatar" class="avatar-text">{{ message.avatar }}</text>
+                    <text v-else class="avatar-text iconfont icon-yonghu"></text>
                 </view>
 
                 <view class="message-content">
@@ -88,9 +90,7 @@
                         class="plan-card"
                     >
                         <view class="plan-card-header">
-                            <text class="plan-card-icon">{{
-                                message.aiData.planCreated ? '✅' : '📋'
-                            }}</text>
+                            <text class="plan-card-icon iconfont" :class="message.aiData.planCreated ? 'icon-chenggong' : 'icon-wendang'"></text>
                             <text class="plan-card-title">{{
                                 message.aiData.planCreated
                                     ? '实验计划已创建'
@@ -136,7 +136,9 @@
             </view>
 
             <view v-if="isThinking" class="message-wrapper ai">
-                <view class="message-avatar">🤖</view>
+                <view class="message-avatar">
+                    <text class="avatar-text iconfont icon-jiqiren"></text>
+                </view>
                 <view class="message-content">
                     <view class="typing-indicator">
                         <view class="dot"></view>
@@ -174,9 +176,7 @@
                     :class="{ disabled: !inputValue.trim() || isThinking }"
                     @tap="handleSendMessage"
                 >
-                    <text class="send-icon">{{
-                        inputValue.trim() && !isThinking ? '➤' : '💬'
-                    }}</text>
+                    <text class="send-icon iconfont" :class="inputValue.trim() && !isThinking ? 'icon-fasong' : 'icon-xiaoxi'"></text>
                 </view>
             </view>
 
@@ -203,6 +203,7 @@ import { useDidShow } from '@tarojs/taro'
 import Taro from '@tarojs/taro'
 import './ai-chat.scss'
 import { BACKEND_BASE_URL } from '../../api/config'
+import { checkTokenExpired } from '../../utils/authHelper'
 
 // 声明微信插件类型
 declare const requirePlugin: (name: string) => any
@@ -429,21 +430,22 @@ const formatAIResponse = (aiData: any): string => {
     if (!aiData) return '抱歉，我无法理解您的请求。'
 
     switch (aiData.type) {
-        case 'experiment_plan':
+        case 'experiment_plan': {
             // 简化显示，详情在卡片中
-            let content = `✅ 已为您生成实验计划`
+            let content = `已为您生成实验计划`
             if (aiData.summary) {
                 content += `\n\n${aiData.summary}`
             }
-            content += `\n\n📋 包含 ${aiData.parsed_items?.length || 0} 项耗材`
+            content += `\n\n包含 ${aiData.parsed_items?.length || 0} 项耗材`
             return content
+        }
 
-        case 'inventory_analysis':
-            let invContent = `📊 库存状态分析\n\n`
+        case 'inventory_analysis': {
+            let invContent = `库存状态分析\n\n`
 
             if (aiData.alerts) {
                 if (aiData.alerts.expired?.length > 0) {
-                    invContent += `🔴 已过期（${aiData.alerts.expired.length}项）：\n`
+                    invContent += `已过期（${aiData.alerts.expired.length}项）：\n`
                     aiData.alerts.expired.forEach((item: any) => {
                         invContent += `  • ${item.name}：${item.quantity}${item.unit || ''}（${item.expiryDate}）\n`
                     })
@@ -451,7 +453,7 @@ const formatAIResponse = (aiData: any): string => {
                 }
 
                 if (aiData.alerts.expiring_soon?.length > 0) {
-                    invContent += `⚠️ 即将过期（${aiData.alerts.expiring_soon.length}项）：\n`
+                    invContent += `即将过期（${aiData.alerts.expiring_soon.length}项）：\n`
                     aiData.alerts.expiring_soon.forEach((item: any) => {
                         invContent += `  • ${item.name}：${item.quantity}${item.unit || ''}（${item.days_left}天后过期）\n`
                     })
@@ -459,7 +461,7 @@ const formatAIResponse = (aiData: any): string => {
                 }
 
                 if (aiData.alerts.low_stock?.length > 0) {
-                    invContent += `📉 库存不足（${aiData.alerts.low_stock.length}项）：\n`
+                    invContent += `库存不足（${aiData.alerts.low_stock.length}项）：\n`
                     aiData.alerts.low_stock.forEach((item: any) => {
                         invContent += `  • ${item.name}：当前${item.current}，最小${item.min}\n`
                     })
@@ -467,7 +469,7 @@ const formatAIResponse = (aiData: any): string => {
                 }
 
                 if (aiData.alerts.out_of_stock?.length > 0) {
-                    invContent += `❌ 缺货（${aiData.alerts.out_of_stock.length}项）：\n`
+                    invContent += `缺货（${aiData.alerts.out_of_stock.length}项）：\n`
                     aiData.alerts.out_of_stock.forEach((item: any) => {
                         invContent += `  • ${item.name}\n`
                     })
@@ -476,7 +478,7 @@ const formatAIResponse = (aiData: any): string => {
             }
 
             if (aiData.recommendations?.length > 0) {
-                invContent += `💡 建议：\n`
+                invContent += `建议：\n`
                 aiData.recommendations.forEach((rec: string) => {
                     invContent += `  • ${rec}\n`
                 })
@@ -487,17 +489,23 @@ const formatAIResponse = (aiData: any): string => {
             }
 
             return invContent || '当前库存状态正常'
+        }
 
-        case 'purchase_recommendation':
-            let purContent = `🛒 采购建议\n\n`
+        case 'purchase_recommendation': {
+            let purContent = `采购建议\n\n`
             if (aiData.summary) {
                 purContent += `${aiData.summary}\n\n`
             }
-            purContent += `📦 采购清单：\n`
+            purContent += `采购清单：\n`
             if (aiData.items && Array.isArray(aiData.items)) {
                 aiData.items.forEach((item: any) => {
-                    const priorityIcon = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '🟢'
-                    purContent += `${priorityIcon} ${item.name}\n`
+                    let priorityText = '[低]'
+                    if (item.priority === 'high') {
+                        priorityText = '[高]'
+                    } else if (item.priority === 'medium') {
+                        priorityText = '[中]'
+                    }
+                    purContent += `${priorityText} ${item.name}\n`
                     purContent += `   当前库存：${item.current_quantity}\n`
                     purContent += `   建议采购：${item.recommended_purchase}${item.unit || ''}\n`
                     purContent += `   原因：${item.reason}\n`
@@ -508,9 +516,10 @@ const formatAIResponse = (aiData: any): string => {
                 })
             }
             if (aiData.total_estimated_cost) {
-                purContent += `💰 总预估成本：¥${aiData.total_estimated_cost}\n`
+                purContent += `总预估成本：¥${aiData.total_estimated_cost}\n`
             }
             return purContent
+        }
 
         case 'text':
             return aiData.content || ''
@@ -540,7 +549,7 @@ const handleSendMessage = async () => {
         type: 'user',
         content: text,
         timestamp: getCurrentTime(),
-        avatar: userInfo.value.nickname?.charAt(0) || '👤',
+        avatar: userInfo.value.nickname?.charAt(0) || 'iconfont icon-yonghu',
         avatarUrl: userInfo.value.avatar || ''
     }
     messages.value.push(userMessage)
@@ -596,7 +605,7 @@ const processUserMessage = async (text: string) => {
                 type: 'ai',
                 content: '',
                 timestamp: getCurrentTime(),
-                avatar: '🤖',
+                avatar: 'iconfont icon-jiqiren',
                 avatarUrl: '',
                 isStreaming: true,
                 aiData: aiData // 保存原始 AI 响应数据
@@ -612,11 +621,21 @@ const processUserMessage = async (text: string) => {
             await simulateStreamResponse(messageIndex, formattedContent)
         } else {
             // API 调用失败
+            // 检查是否为token过期
+            if (checkTokenExpired(response.data.errorInfo)) {
+                throw new Error('Token expired')
+            }
+
             throw new Error(response.data.errorInfo || 'AI 服务暂时不可用')
         }
     } catch (error: any) {
         console.error('AI 聊天错误:', error)
         isThinking.value = false
+
+        // 如果是token过期错误，不再显示toast
+        if (error.message === 'Token expired') {
+            return
+        }
 
         // 显示错误消息
         Taro.showToast({
@@ -631,7 +650,7 @@ const processUserMessage = async (text: string) => {
             type: 'system',
             content: `抱歉，${error.message || 'AI 服务暂时不可用，请稍后重试'}\n\n如果问题持续存在，请检查：\n1. 网络连接是否正常\n2. 后端服务是否启动\n3. DeepSeek API Key 是否正确配置`,
             timestamp: getCurrentTime(),
-            avatar: '⚠️'
+            avatar: 'iconfont icon-warning'
         }
         messages.value.push(errorMessage)
 
@@ -744,7 +763,7 @@ const doStartRecording = () => {
         type: 'user',
         content: '正在录音...',
         timestamp: getCurrentTime(),
-        avatar: userInfo.value.nickname?.charAt(0) || '👤',
+        avatar: userInfo.value.nickname?.charAt(0) || 'iconfont icon-yonghu',
         avatarUrl: userInfo.value.avatar || '',
         isStreaming: true
     }

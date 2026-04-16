@@ -6,6 +6,69 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "6653572",
+      "name": "cuowutishi",
+      "font_class": "cuowutishi",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    },
+    {
+      "icon_id": "6945278",
+      "name": "tishi",
+      "font_class": "tishi",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "9668393",
+      "name": "xiaoxi",
+      "font_class": "xiaoxi",
+      "unicode": "e662",
+      "unicode_decimal": 58978
+    },
+    {
+      "icon_id": "9893441",
+      "name": "yonghu",
+      "font_class": "yonghu",
+      "unicode": "e66f",
+      "unicode_decimal": 58991
+    },
+    {
+      "icon_id": "11372648",
+      "name": "成功",
+      "font_class": "chenggong",
+      "unicode": "e8ad",
+      "unicode_decimal": 59565
+    },
+    {
+      "icon_id": "15838551",
+      "name": "warning",
+      "font_class": "warning",
+      "unicode": "e682",
+      "unicode_decimal": 59010
+    },
+    {
+      "icon_id": "25964418",
+      "name": "发送",
+      "font_class": "fasong",
+      "unicode": "e65f",
+      "unicode_decimal": 58975
+    },
+    {
+      "icon_id": "32804274",
+      "name": "chuku",
+      "font_class": "chuku",
+      "unicode": "e672",
+      "unicode_decimal": 58994
+    },
+    {
+      "icon_id": "32804611",
+      "name": "ruku",
+      "font_class": "ruku",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
       "icon_id": "964199",
       "name": "其他",
       "font_class": "qita",

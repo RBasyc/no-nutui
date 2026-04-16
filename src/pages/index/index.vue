@@ -71,7 +71,7 @@
                         :key="index"
                         class="ai-alert-item"
                     >
-                        <text class="alert-icon">{{ getAlertIcon(alert.type) }}</text>
+                        <text class="alert-icon iconfont" :class="getAlertIcon(alert.type)"></text>
                         <view class="alert-info">
                             <text class="alert-item-name">{{ alert.itemName }}</text>
                             <text class="alert-info-text">{{ alert.info }}</text>
@@ -131,7 +131,7 @@
                     class="list-item"
                     @tap="handleItemClick(item)"
                 >
-                    <text class="item-icon" :class="item.icon"></text>
+                    <text class="item-icon iconfont" :class="item.icon"></text>
                     <view class="item-info">
                         <text class="item-name">{{ item.name }}</text>
                         <view class="item-desc">
@@ -153,7 +153,7 @@
 
             <!-- 无数据时显示空状态 -->
             <view v-else class="empty-state">
-                <text class="empty-icon">✅</text>
+                <text class="empty-icon iconfont icon-chenggong"></text>
                 <text class="empty-text">暂无即将过期的耗材</text>
             </view>
         </view>
@@ -174,7 +174,7 @@
                     class="list-item purchase-item"
                     @tap="handleItemClick(item)"
                 >
-                    <text class="item-icon" :class="item.icon"></text>
+                    <text class="item-icon iconfont" :class="item.icon"></text>
                     <view class="item-info">
                         <text class="item-name">{{ item.name }}</text>
                         <view class="item-desc">
@@ -188,7 +188,7 @@
 
             <!-- 无数据时显示空状态 -->
             <view v-else class="empty-state">
-                <text class="empty-icon">✅</text>
+                <text class="empty-icon iconfont icon-chenggong"></text>
                 <text class="empty-text">暂无需要采购的耗材</text>
             </view>
         </view>
@@ -199,6 +199,7 @@
 import { ref, onMounted } from 'vue'
 import Taro, { useDidShow } from '@tarojs/taro'
 import inventoryApi from '../../api/inventoryAPI'
+import { checkTokenExpired } from '../../utils/authHelper'
 import './index.scss'
 
 // 用户信息
@@ -302,15 +303,15 @@ const loadAllData = async () => {
             })
 
             const categoryIcons = {
-                试剂: 'iconfont icon-shiji',
-                耗材: 'iconfont icon-imagevector',
-                仪器: 'iconfont icon-jianceqi',
-                其他: 'iconfont icon-qita'
+                试剂: 'icon-shiji',
+                耗材: 'icon-imagevector',
+                仪器: 'icon-jianceqi',
+                其他: 'icon-qita'
             }
 
             expiringItems.value = itemsWithDays.slice(0, 4).map((item) => {
                 return {
-                    icon: categoryIcons[item.category] || 'iconfont icon-qita',
+                    icon: categoryIcons[item.category] || 'icon-qita',
                     name: item.name,
                     code: item.code,
                     stock: item.quantity,
@@ -331,7 +332,7 @@ const loadAllData = async () => {
                 const suggestQty = Math.max(0, maxQty - item.quantity)
 
                 return {
-                    icon: categoryIcons[item.category] || 'iconfont icon-qita',
+                    icon: categoryIcons[item.category] || 'icon-qita',
                     name: item.name,
                     code: item.code,
                     suggestQty: suggestQty,
@@ -491,6 +492,10 @@ const loadAiAlert = async () => {
             }
         } else {
             console.error('AI预警接口返回错误:', res.data.errorInfo)
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data.errorInfo)) {
+                return
+            }
         }
     } catch (error) {
         console.error('加载AI预警失败:', error)
@@ -538,6 +543,10 @@ const handleRefreshAlert = async () => {
             console.log('✅ AI预警刷新成功')
         } else {
             console.error('刷新失败:', res.data.errorInfo)
+            // 检查是否为token过期
+            if (checkTokenExpired(res.data.errorInfo)) {
+                return
+            }
             Taro.showToast({
                 title: res.data.errorInfo || '刷新失败',
                 icon: 'none'
@@ -558,13 +567,13 @@ const handleRefreshAlert = async () => {
 // 获取预警类型对应的图标
 const getAlertIcon = (type) => {
     const iconMap = {
-        expired: '🔴',
-        expiring: '⚠️',
-        low_stock: '📉',
-        out_of_stock: '❌',
-        high_consumption: '📈'
+        expired: 'icon-warning',
+        expiring: 'icon-warning',
+        low_stock: 'icon-dingdan',
+        out_of_stock: 'icon-cuowutishi',
+        high_consumption: 'icon-tubiaozhutu'
     }
-    return iconMap[type] || '⚡'
+    return iconMap[type] || 'icon-tishi'
 }
 
 // 获取优先级对应的CSS类名
