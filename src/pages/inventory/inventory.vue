@@ -3,8 +3,6 @@
         <!-- 页面内容 -->
         <view class="inventory-page">
             <!-- 顶部区域 -->
-            <view class="page-header">
-                <view class="header-title">库存管理</view>
                 <view class="header-actions">
                     <view class="action-btn" @tap="handleSort">
                         <text class="btn-icon iconfont icon-paixu"></text>
@@ -24,7 +22,6 @@
                         <text class="btn-text">添加</text>
                     </view>
                 </view>
-            </view>
 
             <!-- 搜索框 -->
             <view class="search-section">

@@ -11,75 +11,66 @@
     padding-bottom: 40rpx;
 }
 
-/* 顶部区域 */
-.page-header {
+.header-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    gap: 16rpx;
     padding: 24rpx 32rpx;
-    background: linear-gradient(135deg, #0079c4 0%, #006485 100%);
-    position: relative;
-    overflow: hidden;
 
-    // 装饰圆点
-    &::before {
-        content: '';
-        position: absolute;
-        width: 120rpx;
-        height: 120rpx;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        top: -40rpx;
-        right: -20rpx;
-    }
-
-    .header-title {
-        font-size: 36rpx;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: 2rpx;
-        position: relative;
-        z-index: 1;
-    }
-
-    .header-actions {
+    /* 基础按钮样式 */
+    .action-btn {
+        flex: 1;
         display: flex;
-        gap: 16rpx;
-        position: relative;
-        z-index: 1;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8rpx;
+        padding: 20rpx 16rpx;
+        background: #6ecb56;
+        backdrop-filter: blur(20rpx);
+        border-radius: 16rpx;
+        border: 2rpx solid rgba(30, 144, 255, 0.25);
+        box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+        transition: all 0.15s ease;
 
-        .action-btn {
-            display: flex;
-            align-items: center;
-            padding: 12rpx 20rpx;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 24rpx;
-            border: 2rpx solid rgba(255, 255, 255, 0.3);
-            transition: all 0.15s ease;
+        &:active {
+            transform: scale(0.95);
+            box-shadow: 0 2rpx 8rpx rgba(30, 144, 255, 0.12);
+        }
 
-            &:active {
-                transform: scale(0.95);
-            }
+        .btn-icon {
+            font-size: 36rpx;
+            color: #ffffff;
+            line-height: 1;
+        }
 
-            .btn-icon {
-                font-size: 28rpx;
-                margin-right: 8rpx;
-            }
+        .btn-text {
+            font-size: 24rpx;
+            color: #ffffff;
+            font-weight: 500;
+            line-height: 1;
+        }
 
+        /* 主要按钮 - 蓝色渐变 */
+        &.primary {
+            background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+            border-color: transparent;
+
+            .btn-icon,
             .btn-text {
-                font-size: 24rpx;
                 color: #ffffff;
-                font-weight: 600;
             }
+        }
 
-            &.primary {
-                background: rgba(57, 255, 20, 0.2);
-                border-color: rgba(57, 255, 20, 0.4);
-            }
+        /* 警告按钮 - 橙色渐变 */
+        &.warning {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+            border-color: transparent;
 
-            &.warning {
-                background: rgba(255, 165, 0, 0.2);
-                border-color: rgba(255, 165, 0, 0.4);
+            .btn-icon,
+            .btn-text {
+                color: #ffffff;
             }
         }
     }
@@ -129,6 +120,7 @@
 
         /* 隐藏滚动条 */
         scrollbar-width: none;
+
         &::-webkit-scrollbar {
             display: none;
         }
@@ -628,5 +620,3 @@
     font-weight: 600;
     line-height: 1;
 }
-
-

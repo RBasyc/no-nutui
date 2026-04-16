@@ -1,2 +1,13 @@
 /* 引入 iconfont 图标库 */
 @import './assets/page_icon/iconfont.css';
+
+/* 全局页面背景色 - 覆盖微信小程序默认的白色背景 */
+page {
+    background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+}
+
+body {
+    background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+    margin: 0;
+    padding: 0;
+}
