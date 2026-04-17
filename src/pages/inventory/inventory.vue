@@ -4,7 +4,7 @@
         <view class="inventory-page">
             <!-- 顶部区域 -->
                 <view class="header-actions">
-                    <view class="action-btn" @tap="handleSort">
+                    <view class="action-btn default" @tap="handleSort">
                         <text class="btn-icon iconfont icon-paixu"></text>
                         <text class="btn-text">{{ sortText }}</text>
                     </view>

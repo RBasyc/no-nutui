@@ -63,6 +63,17 @@
             }
         }
 
+        /* 默认按钮 - 绿色渐变 */
+        &.default {
+            background: linear-gradient(135deg, #6ecb56 0%, #5fb846 100%);
+            border-color: transparent;
+
+            .btn-icon,
+            .btn-text {
+                color: #ffffff;
+            }
+        }
+
         /* 警告按钮 - 橙色渐变 */
         &.warning {
             background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);

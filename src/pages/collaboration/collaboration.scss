@@ -7,34 +7,6 @@
     position: relative;
 }
 
-/* 顶部标题 */
-.page-header {
-    padding: 24rpx 32rpx;
-    background: linear-gradient(135deg, #0079c4 0%, #006485 100%);
-    position: relative;
-    overflow: hidden;
-
-    // 装饰圆点
-    &::before {
-        content: '';
-        position: absolute;
-        width: 120rpx;
-        height: 120rpx;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        top: -40rpx;
-        right: -20rpx;
-    }
-
-    .header-title {
-        font-size: 36rpx;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: 2rpx;
-        position: relative;
-        z-index: 1;
-    }
-}
 
 /* ====== 上半部分：实验计划区域 ====== */
 .experiment-plan-section {
