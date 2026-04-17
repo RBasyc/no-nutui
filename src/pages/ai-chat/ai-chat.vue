@@ -565,18 +565,59 @@
                 return
             }
 
+            // 处理特定错误类型
+            let errorContent = `抱歉，AI 服务暂时不可用\n\n`
+
+            if (error.errMsg && error.errMsg.includes('request:fail')) {
+                errorContent += `错误类型：网络连接失败\n`
+                errorContent += `可能原因：\n`
+                errorContent += `1. 后端服务未启动\n`
+                errorContent += `2. 网络连接不稳定\n`
+                errorContent += `3. 服务器地址配置错误\n\n`
+                errorContent += `建议操作：\n`
+                errorContent += `• 检查后端服务是否在 http://localhost:3000 运行\n`
+                errorContent += `• 检查网络连接状态\n`
+                errorContent += `• 稍后重试`
+            } else if (error.message && error.message.includes('timeout')) {
+                errorContent += `错误类型：请求超时\n`
+                errorContent += `可能原因：\n`
+                errorContent += `1. AI 响应时间过长\n`
+                errorContent += `2. 服务器负载过高\n`
+                errorContent += `3. 网络延迟过高\n\n`
+                errorContent += `建议操作：\n`
+                errorContent += `• 稍后重试\n`
+                errorContent += `• 简化问题内容\n`
+                errorContent += `• 检查服务器状态`
+            } else if (error.message && error.message.includes('aborted')) {
+                errorContent += `错误类型：请求中断\n`
+                errorContent += `可能原因：\n`
+                errorContent += `1. 连接被意外断开\n`
+                errorContent += `2. 页面刷新或关闭\n`
+                errorContent += `3. 网络状态变化\n\n`
+                errorContent += `建议操作：\n`
+                errorContent += `• 重新发送问题\n`
+                errorContent += `• 检查网络稳定性`
+            } else {
+                errorContent += `错误信息：${error.message || '未知错误'}\n\n`
+                errorContent += `如果问题持续存在，请检查：\n`
+                errorContent += `1. 网络连接是否正常\n`
+                errorContent += `2. 后端服务是否启动\n`
+                errorContent += `3. DeepSeek API Key 是否正确配置\n`
+                errorContent += `4. MCP 服务是否正常运行`
+            }
+
             // 显示错误消息
             Taro.showToast({
-                title: error.message || 'AI 服务暂时不可用',
+                title: 'AI 服务暂时不可用',
                 icon: 'none',
-                duration: 3000
+                duration: 2000
             })
 
             // 添加系统错误消息
             const errorMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 type: 'system',
-                content: `抱歉，${error.message || 'AI 服务暂时不可用，请稍后重试'}\n\n如果问题持续存在，请检查：\n1. 网络连接是否正常\n2. 后端服务是否启动\n3. DeepSeek API Key 是否正确配置`,
+                content: errorContent,
                 timestamp: getCurrentTime(),
                 avatar: 'iconfont icon-warning'
             }
