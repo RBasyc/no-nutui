@@ -575,7 +575,7 @@
                 errorContent += `2. 网络连接不稳定\n`
                 errorContent += `3. 服务器地址配置错误\n\n`
                 errorContent += `建议操作：\n`
-                errorContent += `• 检查后端服务是否在 http://localhost:3000 运行\n`
+                errorContent += `• 检查后端服务是否在 ${BACKEND_BASE_URL} 运行\n`
                 errorContent += `• 检查网络连接状态\n`
                 errorContent += `• 稍后重试`
             } else if (error.message && error.message.includes('timeout')) {
