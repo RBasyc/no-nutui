@@ -30,7 +30,7 @@
                     <input
                         class="search-input"
                         v-model="searchValue"
-                        placeholder="搜索耗材名称、CAS号、货号..."
+                        placeholder="搜索耗材名称..."
                         placeholder-class="search-placeholder"
                     />
                 </view>
@@ -54,7 +54,11 @@
 
             <!-- 统计摘要卡片 -->
             <view class="stats-summary">
-                <view class="summary-card">
+                <view
+                    class="summary-card"
+                    :class="{ active: currentStatusFilter === 'all' }"
+                    @tap="handleStatusFilter('all')"
+                >
                     <text class="iconfont icon-cangchucangku summary-icon"></text>
                     <view class="summary-info">
                         <text class="summary-value">{{
@@ -63,7 +67,11 @@
                         <text class="summary-label">总数量</text>
                     </view>
                 </view>
-                <view class="summary-card warning">
+                <view
+                    class="summary-card warning"
+                    :class="{ active: currentStatusFilter === 'expiring' }"
+                    @tap="handleStatusFilter('expiring')"
+                >
                     <view class="warning-badge"></view>
                     <view class="summary-info">
                         <text class="summary-value">{{
@@ -72,7 +80,11 @@
                         <text class="summary-label">即将过期</text>
                     </view>
                 </view>
-                <view class="summary-card danger">
+                <view
+                    class="summary-card danger"
+                    :class="{ active: currentStatusFilter === 'lowStock' }"
+                    @tap="handleStatusFilter('lowStock')"
+                >
                     <view class="danger-badge"></view>
                     <view class="summary-info">
                         <text class="summary-value">{{
@@ -80,6 +92,16 @@
                         }}</text>
                         <text class="summary-label">库存不足</text>
                     </view>
+                </view>
+            </view>
+
+            <!-- 筛选状态提示 -->
+            <view v-if="currentStatusFilter !== 'all'" class="filter-status">
+                <text class="filter-status-text">
+                    {{ currentStatusFilter === 'expiring' ? '📅 筛选：即将过期' : '📉 筛选：库存不足' }}
+                </text>
+                <view class="filter-status-close" @tap="handleStatusFilter('all')">
+                    <text>✕</text>
                 </view>
             </view>
 
@@ -279,6 +301,9 @@ const searchValue = ref('')
 // 当前分类
 const currentCategory = ref('all')
 
+// 状态筛选
+const currentStatusFilter = ref('all')
+
 // 排序方式
 const currentSort = ref('default')
 const sortOptions = [
@@ -405,16 +430,50 @@ const loadInventoryList = async (refresh = false) => {
             return
         }
 
+        // 处理数据：计算每个物品的剩余天数和库存状态
+        const processedItems = data.items.map(item => {
+            let daysUntilExpiry = null
+            if (item.expiryDate) {
+                const now = new Date()
+                const expiryDate = new Date(item.expiryDate)
+                const diffTime = expiryDate.getTime() - now.getTime()
+                daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+            }
+
+            // 将后端的 status 映射为前端的 stockStatus
+            let stockStatus = 'normal'
+            switch (item.status) {
+                case 'low_stock':
+                    stockStatus = 'low'
+                    break
+                case 'out_of_stock':
+                    stockStatus = 'out'
+                    break
+                case 'expired':
+                case 'expiring_soon':
+                    stockStatus = 'low' // 过期相关的也标记为库存低
+                    break
+                default:
+                    stockStatus = 'normal'
+            }
+
+            return {
+                ...item,
+                daysUntilExpiry,
+                stockStatus
+            }
+        })
+
         if (refresh) {
-            inventoryItems.value = data.items
+            inventoryItems.value = processedItems
         } else {
-            inventoryItems.value = [...inventoryItems.value, ...data.items]
+            inventoryItems.value = [...inventoryItems.value, ...processedItems]
         }
 
         // 判断是否还有更多数据
         hasMore.value = inventoryItems.value.length < (data.total || 0)
 
-        // 加载统计数据
+        // 加载统计数据（包含准确的totalItems）
         loadStatsData()
     } catch (error) {
         console.error('加载列表失败:', error)
@@ -445,9 +504,11 @@ const loadStatsData = async () => {
         })
 
         if (res.statusCode === 200 && res.data.errCode === '0') {
-            const summary = res.data.data.summary
+            const data = res.data.data
+            const summary = data.summary
             statsData.value = {
-                totalItems: summary.expiring_soon + summary.expired + summary.low_stock + summary.out_of_stock,
+                // 使用后端返回的准确总数
+                totalItems: data.totalItems || 0,
                 expiring: summary.expiring_soon + summary.expired,
                 lowStock: summary.low_stock + summary.out_of_stock
             }
@@ -465,13 +526,43 @@ const filteredItems = computed(() => {
         ? [...inventoryItems.value]
         : []
 
+    // 状态筛选（在排序之前）
+    if (currentStatusFilter.value !== 'all') {
+        items = items.filter(item => {
+            const status = item.status || '';
+            if (currentStatusFilter.value === 'expiring') {
+                // 筛选即将过期和已过期的物品
+                return status === 'expiring_soon' || status === 'expired';
+            } else if (currentStatusFilter.value === 'lowStock') {
+                // 筛选库存不足和缺货的物品
+                return status === 'low_stock' || status === 'out_of_stock';
+            }
+            return true;
+        });
+    }
+
     // 排序
     switch (currentSort.value) {
         case 'expiry':
             items.sort((a, b) => {
-                if (!a || a.daysUntilExpiry === null) return 1
-                if (!b || b.daysUntilExpiry === null) return -1
-                return a.daysUntilExpiry - b.daysUntilExpiry
+                const aDays = a?.daysUntilExpiry;
+                const bDays = b?.daysUntilExpiry;
+
+                // 都有过期日期：按天数升序排列（负数表示已过期，越小的负数越久过期）
+                // 例如：-365 < -30 < 0 < 10 < 30
+                if (aDays !== null && bDays !== null) {
+                    return aDays - bDays;
+                }
+                // a 有过期日期，b 没有：a 排前面
+                if (aDays !== null) {
+                    return -1;
+                }
+                // a 没有过期日期，b 有：b 排前面
+                if (bDays !== null) {
+                    return 1;
+                }
+                // 都没有过期日期：保持原顺序
+                return 0;
             })
             break
         case 'quantity':
@@ -509,6 +600,19 @@ const handleCategoryChange = (category) => {
     loadInventoryList(true)
 }
 
+// 状态筛选切换
+const handleStatusFilter = (filter) => {
+    currentStatusFilter.value = filter
+    // 筛选是纯前端操作，不需要重新加载数据
+    if (filter !== 'all') {
+        Taro.showToast({
+            title: filter === 'expiring' ? '已筛选即将过期' : '已筛选库存不足',
+            icon: 'none',
+            duration: 1500
+        })
+    }
+}
+
 // 监听搜索值变化（防抖）
 let searchTimer = null
 watch(searchValue, () => {
@@ -526,7 +630,23 @@ const handleSort = () => {
         (opt) => opt.value === currentSort.value
     )
     const nextIndex = (currentIndex + 1) % sortOptions.length
-    currentSort.value = sortOptions[nextIndex].value
+    const nextSort = sortOptions[nextIndex].value
+    currentSort.value = nextSort
+
+    // 添加调试日志
+    console.log(`[排序] 切换至: ${nextSort}`)
+    console.log(`[排序] 当前物品数量: ${inventoryItems.value.length}`)
+
+    // 显示前3个物品的过期天数（用于调试）
+    if (inventoryItems.value.length > 0) {
+        const sample = inventoryItems.value.slice(0, 3).map(item => ({
+            name: item.name,
+            daysUntilExpiry: item.daysUntilExpiry,
+            expiryDate: item.expiryDate
+        }))
+        console.log(`[排序] 示例数据:`, sample)
+    }
+
     Taro.showToast({
         title: `已切换至${sortOptions[nextIndex].label}`,
         icon: 'none'

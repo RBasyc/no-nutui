@@ -211,17 +211,8 @@ const getUserInfo = () => {
 const loadStatsData = async () => {
     try {
         // 并行加载三个接口
-        const [inventoryRes, labsRes, plansRes] = await Promise.all([
-            // 1. 获取库存统计
-            Taro.request({
-                url: inventoryApi.alerts,
-                method: 'GET',
-                header: {
-                    Authorization: Taro.getStorageSync('token') || ''
-                }
-            }).catch(() => null),
-
-            // 2. 获取实验室数量
+        const [labsRes, plansRes] = await Promise.all([
+            // 1. 获取实验室数量
             Taro.request({
                 url: labMemberApi.myLabs,
                 method: 'GET',
@@ -230,7 +221,7 @@ const loadStatsData = async () => {
                 }
             }).catch(() => null),
 
-            // 3. 获取实验计划数量
+            // 2. 获取实验计划数量
             Taro.request({
                 url: experimentPlanApi.list,
                 method: 'GET',
@@ -240,10 +231,18 @@ const loadStatsData = async () => {
             }).catch(() => null)
         ])
 
-        // 处理库存数据
-        if (inventoryRes?.statusCode === 200 && inventoryRes.data.errCode === '0') {
-            const summary = inventoryRes.data.data.summary
-            statsData.value.totalItems = summary.expiring_soon + summary.expired + summary.low_stock + summary.out_of_stock
+        // 获取库存统计 - 使用 list 接口获取准确的总数量
+        const listRes = await Taro.request({
+            url: inventoryApi.list,
+            method: 'GET',
+            data: { page: 1, pageSize: 1 }, // 只需要获取 total，不需要实际数据
+            header: {
+                Authorization: Taro.getStorageSync('token') || ''
+            }
+        }).catch(() => null)
+
+        if (listRes?.statusCode === 200 && listRes.data.errCode === '0') {
+            statsData.value.totalItems = listRes.data.data.total || 0
         }
 
         // 处理实验室数量

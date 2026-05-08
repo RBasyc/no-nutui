@@ -1,0 +1,118 @@
+/* 成员操作日志页面 - 科技风格 */
+
+.member-logs-page {
+	min-height: 100vh;
+	background: linear-gradient(180deg, #F0F5FA 0%, #E8EEF5 50%, #D9E6F2 100%);
+	padding-bottom: 40rpx;
+
+	.logs-list {
+		height: 100vh;
+		padding: 32rpx;
+		box-sizing: border-box;
+
+		.log-item {
+			background: rgba(255, 255, 255, 0.85);
+			backdrop-filter: blur(20rpx);
+			border-radius: 20rpx;
+			padding: 24rpx;
+			margin-bottom: 20rpx;
+			border: 2rpx solid rgba(30, 144, 255, 0.25);
+			box-shadow: 0 4rpx 16rpx rgba(30, 144, 255, 0.08);
+			display: flex;
+			flex-direction: column;
+			gap: 16rpx;
+			box-sizing: border-box;
+			width: 100%;
+
+			.log-badge {
+				align-self: flex-start;
+				padding: 8rpx 16rpx;
+				border-radius: 8rpx;
+				font-size: 24rpx;
+				font-weight: 600;
+				color: white;
+
+				&.apply {
+					background: linear-gradient(135deg, #87CEEB 0%, #00BFFF 100%);
+				}
+
+				&.approve {
+					background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+				}
+
+				&.reject {
+					background: linear-gradient(135deg, #FFB6C1 0%, #FF6347 100%);
+				}
+
+				&.leave {
+					background: linear-gradient(135deg, #D3D3D3 0%, #A9A9A9 100%);
+				}
+
+				&.remove {
+					background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+				}
+
+				&.role-change {
+					background: linear-gradient(135deg, #DDA0DD 0%, #BA55D3 100%);
+				}
+			}
+
+			.log-content {
+				display: flex;
+				flex-direction: column;
+				gap: 8rpx;
+
+				.log-operator {
+					font-size: 28rpx;
+					font-weight: 600;
+					color: #1E90FF;
+				}
+
+				.log-action {
+					font-size: 26rpx;
+					color: #2F4F4F;
+					line-height: 1.5;
+				}
+
+				.log-remark {
+					font-size: 24rpx;
+					color: #666;
+					font-style: italic;
+				}
+			}
+
+			.log-time {
+				align-self: flex-end;
+				font-size: 24rpx;
+				color: #999;
+			}
+		}
+
+		.loading-state,
+		.no-more-state {
+			text-align: center;
+			padding: 32rpx;
+			color: #999;
+			font-size: 28rpx;
+		}
+
+		.empty-state {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 120rpx 32rpx;
+
+			.empty-icon {
+				font-size: 120rpx;
+				margin-bottom: 32rpx;
+				opacity: 0.5;
+			}
+
+			.empty-text {
+				font-size: 28rpx;
+				color: #999;
+			}
+		}
+	}
+}

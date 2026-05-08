@@ -1,10 +1,14 @@
 import { defineConfig, type UserConfigExport } from '@tarojs/cli'
+import { loadEnv } from 'vite'
 
 import devConfig from './dev'
 import prodConfig from './prod'
 
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 export default defineConfig<'vite'>(async (merge, { command, mode }) => {
+  // 加载环境变量
+  const env = loadEnv(mode, process.cwd())
+
   const baseConfig: UserConfigExport<'vite'> = {
     projectName: 'no-nutui',
     date: '2026-3-3',
@@ -22,8 +26,8 @@ export default defineConfig<'vite'>(async (merge, { command, mode }) => {
     ],
     defineConstants: {
       'process.env.TARO_APP_ID': JSON.stringify(process.env.TARO_APP_ID || 'wx069ba97219f66d99'),
-      'import.meta.env.VITE_BACKEND_BASE_URL': JSON.stringify(process.env.VITE_BACKEND_BASE_URL || 'http://localhost:3000/api'),
-      'import.meta.env.VITE_MCP_BASE_URL': JSON.stringify(process.env.VITE_MCP_BASE_URL || 'http://localhost:3001'),
+      'import.meta.env.VITE_BACKEND_BASE_URL': JSON.stringify(env.VITE_BACKEND_BASE_URL || 'http://localhost:3000/api'),
+      'import.meta.env.VITE_MCP_BASE_URL': JSON.stringify(env.VITE_MCP_BASE_URL || 'http://localhost:3001'),
     },
     copy: {
       patterns: [

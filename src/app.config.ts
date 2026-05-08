@@ -9,6 +9,7 @@ export default defineAppConfig({
     "pages/profile/laboratory/laboratory",
     "pages/profile/create-lab/create-lab",
     "pages/profile/member-management/member-management",
+    "pages/profile/member-logs/member-logs",
     "pages/inventory/inventory",
     "pages/inventory/inventory-detail/inventory-detail",
     "pages/inventory/inventory-edit/inventory-edit",
