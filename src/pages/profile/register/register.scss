@@ -61,85 +61,11 @@
     max-width: 560rpx;
     position: relative;
     z-index: 1;
-}
-
-/* 头部 */
-.register-header {
-    text-align: center;
-    margin-bottom: 40rpx;
-
-    .logo-wrapper {
-        width: 140rpx;
-        height: 140rpx;
-        margin: 0 auto 32rpx;
-        // 科技蓝圆形 - 实验室徽章
-        background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        // 全息发光效果
-        box-shadow:
-            0 8rpx 32rpx rgba(30, 144, 255, 0.4),
-            0 0 0 4rpx rgba(30, 144, 255, 0.1),
-            inset 0 0 20rpx rgba(255, 255, 255, 0.3);
-        border: 3rpx solid rgba(30, 144, 255, 0.3);
-        position: relative;
-        animation: hologram 3s ease-in-out infinite;
-
-        @keyframes hologram {
-
-            0%,
-            100% {
-                transform: translateY(0) scale(1);
-            }
-
-            50% {
-                transform: translateY(-6rpx) scale(1.02);
-            }
-        }
-
-        // 实验室图标
-        &::before {
-            content: '🧪';
-            font-size: 56rpx;
-        }
-    }
-
-    .logo-text {
-        font-size: 28rpx;
-        font-weight: 700;
-        // 科技蓝
-        color: #f8f8f8;
-        position: relative;
-        z-index: 1;
-        letter-spacing: 2rpx;
-    }
-
-    .app-name {
-        display: block;
-        font-size: 52rpx;
-        font-weight: 900;
-        // 科技蓝主色
-        color: #1E90FF;
-        margin-bottom: 16rpx;
-        letter-spacing: 4rpx;
-        text-transform: uppercase;
-        // 科技发光效果
-        text-shadow:
-            0 0 20rpx rgba(30, 144, 255, 0.4),
-            0 4rpx 8rpx rgba(30, 144, 255, 0.2);
-    }
-
-    .app-subtitle {
-        display: block;
-        font-size: 24rpx;
-        // 深空灰
-        color: #2F4F4F;
-        font-weight: 600;
-        letter-spacing: 3rpx;
-        text-transform: uppercase;
-    }
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 80rpx;
+    padding-bottom: 120rpx;
 }
 
 /* 表单 */
@@ -594,6 +520,79 @@
 }
 
 /* 底部链接 */
+
+// 隐私协议样式
+.privacy-agreement {
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+    margin-top: 24rpx;
+    padding: 20rpx;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10rpx);
+    border-radius: 12rpx;
+    border: 1rpx solid rgba(30, 144, 255, 0.15);
+
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+        cursor: pointer;
+
+        .checkbox {
+            width: 36rpx;
+            height: 36rpx;
+            border: 2rpx solid #ccc;
+            border-radius: 6rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: white;
+
+            &.checkbox-checked {
+                background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+                border-color: #1E90FF;
+
+                .checkbox-icon {
+                    color: white;
+                    font-size: 24rpx;
+                    font-weight: bold;
+                }
+            }
+        }
+
+        .privacy-text {
+            font-size: 26rpx;
+            color: #2F4F4F;
+        }
+    }
+
+    .privacy-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8rpx;
+        margin-left: 48rpx;
+
+        .privacy-link {
+            font-size: 26rpx;
+            color: #1E90FF;
+            text-decoration: underline;
+            transition: all 0.2s;
+            padding: 4rpx 0;
+
+            &:active {
+                opacity: 0.7;
+            }
+        }
+    }
+}
+
+.privacy-error {
+    margin-left: 48rpx;
+    font-size: 24rpx;
+}
+
 .form-footer {
     display: flex;
     align-items: center;

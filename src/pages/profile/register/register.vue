@@ -2,15 +2,6 @@
     <view class="register-page">
         <!-- 注册容器 -->
         <view class="register-container">
-            <!-- Logo 和标题 -->
-            <view class="register-header">
-                <view class="logo-wrapper">
-                    <text class="logo-text">Lab</text>
-                </view>
-                <text class="app-name">创建账号</text>
-                <text class="app-subtitle">加入 Lab 智管，开启智能管理</text>
-            </view>
-
             <!-- 注册表单 -->
             <view class="register-form">
                 <!-- 昵称输入 -->
@@ -156,6 +147,29 @@
                     >
                 </view>
 
+                <!-- 隐私协议勾选框 -->
+                <view class="privacy-agreement">
+                    <view
+                        class="checkbox-wrapper"
+                        @tap="togglePrivacyAgreement"
+                    >
+                        <view
+                            class="checkbox"
+                            :class="{ 'checkbox-checked': agreedToPrivacy }"
+                        >
+                            <text v-if="agreedToPrivacy" class="checkbox-icon">✓</text>
+                        </view>
+                        <text class="privacy-text">我已阅读并同意</text>
+                    </view>
+                    <view class="privacy-links">
+                        <text class="privacy-link" @tap="showUserAgreement">《用户服务协议》</text>
+                        <text class="privacy-link" @tap="showPrivacyPolicy">《隐私政策》</text>
+                    </view>
+                </view>
+                <text v-if="errors.privacy" class="error-text privacy-error">{{
+                    errors.privacy
+                }}</text>
+
                 <!-- 注册按钮 -->
                 <view
                     class="register-btn"
@@ -205,7 +219,8 @@ const errors = ref({
     nickname: '',
     phone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    privacy: ''
 })
 
 // 焦点状态
@@ -225,6 +240,7 @@ const checkingPhone = ref(false)
 const nicknameValid = ref(false)
 const phoneValid = ref(false)
 const loadingText = ref('注册')
+const agreedToPrivacy = ref(false) // 隐私协议同意状态
 
 // 昵称和手机号检查定时器
 let checkTimer = null
@@ -433,8 +449,10 @@ const isFormValid = computed(() => {
         !errors.value.phone &&
         !errors.value.password &&
         !errors.value.confirmPassword &&
+        !errors.value.privacy &&
         nicknameValid.value &&
-        phoneValid.value
+        phoneValid.value &&
+        agreedToPrivacy.value
     )
 })
 
@@ -466,6 +484,17 @@ const handleRegister = async () => {
     const isPhoneValid = handlePhoneBlur()
     const isPasswordValid = handlePasswordBlur()
     const isConfirmPasswordValid = handleConfirmPasswordBlur()
+
+    // 检查隐私协议
+    if (!agreedToPrivacy.value) {
+        errors.value.privacy = "请阅读并同意隐私协议"
+        Taro.showToast({
+            title: "请阅读并同意隐私协议",
+            icon: "none"
+        })
+        return
+    }
+
 
     console.log('验证结果:', {
         isNicknameValid,
@@ -582,6 +611,108 @@ const handleRegister = async () => {
 }
 
 // 返回登录
+// 切换隐私协议同意状态
+const togglePrivacyAgreement = () => {
+    agreedToPrivacy.value = !agreedToPrivacy.value
+    if (agreedToPrivacy.value) {
+        errors.value.privacy = ''
+    }
+}
+
+// 显示用户服务协议
+const showUserAgreement = () => {
+    Taro.showModal({
+        title: '用户服务协议',
+        content: `欢迎使用 Lab 智管！
+
+1. 服务说明
+本应用提供实验室库存管理、数据分析等智能管理服务。
+
+2. 用户信息收集
+我们仅在您授权的情况下收集以下信息：
+- 昵称：用于个性化展示
+- 手机号：用于账号注册和身份验证
+- 密码：加密存储用于身份验证
+
+3. 信息使用
+收集的信息仅用于：
+- 账号注册和身份验证
+- 提供个性化服务体验
+- 改进产品和服务质量
+
+4. 信息保护
+我们采取安全措施保护您的个人信息：
+- 密码加密存储
+- 数据传输加密
+- 严格的数据访问控制
+
+5. 信息共享
+未经您的同意，我们不会与第三方共享您的个人信息。
+
+6. 您的权利
+- 查询、更正、删除个人信息
+- 撤销同意
+- 注销账号
+
+7. 联系我们
+如有疑问，请通过应用内反馈功能联系我们。`,
+        showCancel: false,
+        confirmText: '我已阅读'
+    })
+}
+
+// 显示隐私政策
+const showPrivacyPolicy = () => {
+    Taro.showModal({
+        title: '隐私政策',
+        content: `Lab 智管隐私政策
+
+生效日期：2024年1月1日
+
+1. 信息收集
+我们收集您主动提供的信息：
+- 注册信息（昵称、手机号、密码）
+- 设备信息（设备型号、操作系统版本）
+- 使用数据（操作日志、功能使用情况）
+
+2. 信息使用
+收集的信息用于：
+- 提供核心功能服务
+- 账号安全验证
+- 产品优化和数据分析
+- 防止欺诈和滥用
+
+3. 信息存储
+您的个人信息存储在安全的服务器中，我们采取合理的技术措施保护数据安全。
+
+4. 信息共享
+我们不会出售、出租或以其他方式披露您的个人信息，除非：
+- 获得您的明确同意
+- 法律法规要求
+- 保护用户或公众的合法权益
+
+5. Cookie使用
+我们使用Cookie和类似技术来改善用户体验。
+
+6. 您的权利
+- 访问和修改个人信息
+- 删除账号和相关信息
+- 撤销授权
+- 举报投诉
+
+7. 未成年人保护
+我们的服务主要面向成年用户。如您未满18岁，请在监护人陪同下使用。
+
+8. 政策更新
+我们可能会不时更新本隐私政策。更新后会在应用内公示。
+
+9. 联系我们
+如有任何隐私相关问题，请联系我们。`,
+        showCancel: false,
+        confirmText: '我已阅读'
+    })
+}
+
 const handleLogin = () => {
     Taro.navigateTo({
         url: '/pages/profile/login/login'
